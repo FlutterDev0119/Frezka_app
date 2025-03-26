@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:nb_utils/nb_utils.dart';
-
 import 'colors.dart';
+import 'language/language_en.dart';
 import 'language/languages.dart';
 import 'modules/login/model/common_model.dart';
 
-
+Rx<BaseLanguage> locale = LanguageEn().obs;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
