@@ -1,319 +1,15 @@
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-// import 'package:get/get_core/src/get_main.dart';
-// import 'package:nb_utils/nb_utils.dart';
-// import '../../../colors.dart';
-// import '../../../common_base.dart';
-// import '../../../routes/app_pages.dart';
-// import '../controllers/login_controller.dart';
-//
-// class LoginScreen extends StatelessWidget {
-//   LoginScreen({super.key});
-//
-//   final LoginController loginController = Get.put(LoginController());
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: const Color(0xFFFBF8FF),
-//       body: Obx(
-//         () => SingleChildScrollView(
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.center,
-//             children: [
-//               Image.asset(
-//                 "assets/images/signin.png",
-//                 fit: BoxFit.contain,
-//                 errorBuilder: (context, error, stackTrace) =>
-//                     const Icon(Icons.g_mobiledata_rounded),
-//               ),
-//               // SizedBox(height: Get.height * 0.015),
-//               Text(
-//                 "Choose Your Role",
-//                 style: boldTextStyle(size: 22),
-//               ),
-//               8.height,
-//               Text(
-//                 'Welcome To Paiseleyy',
-//                 style: secondaryTextStyle(size: 14),
-//               ),
-//               SizedBox(height: Get.height * 0.02),
-//               Form(
-//                 key: loginController.signInformKey,
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   mainAxisAlignment: MainAxisAlignment.center,
-//                   children: [
-//                     AppTextField(
-//                       textStyle: primaryTextStyle(size: 12),
-//                       controller: loginController.emailCont,
-//                       focus: loginController.emailFocus,
-//                       nextFocus: loginController.passwordFocus,
-//                       textFieldType: TextFieldType.EMAIL_ENHANCED,
-//                       decoration: inputDecoration(
-//                         context,
-//                         fillColor: context.cardColor,
-//                         filled: true,
-//                         hintText: "Email",
-//                       ),
-//                       suffix: commonLeadingWid(
-//                               imgPath: "assets/icons/ic_mail.png",
-//                               color: secondaryTextColor,
-//                               size: 12)
-//                           .paddingAll(16),
-//                     ),
-//                     16.height,
-//                     AppTextField(
-//                       textStyle: primaryTextStyle(size: 12),
-//                       controller: loginController.passwordCont,
-//                       focus: loginController.passwordFocus,
-//                       // Optional
-//                       textFieldType: TextFieldType.PASSWORD,
-//                       decoration: inputDecoration(
-//                         context,
-//                         fillColor: context.cardColor,
-//                         filled: true,
-//                         hintText: "password",
-//                       ),
-//                       suffixPasswordVisibleWidget: commonLeadingWid(
-//                               imgPath: "assets/icons/ic_eye.png",
-//                               color: secondaryTextColor,
-//                               size: 12)
-//                           .paddingAll(14),
-//                       suffixPasswordInvisibleWidget: commonLeadingWid(
-//                               imgPath: "assets/icons/ic_eye_slash.png",
-//                               color: secondaryTextColor,
-//                               size: 12)
-//                           .paddingAll(14),
-//                     ),
-//                     16.height.visible(loginController.isSendOTP.isTrue),
-//                     AppTextField(
-//                       textStyle: primaryTextStyle(size: 12),
-//                       controller: loginController.otpCont,
-//                       focus: loginController.otpFocus,
-//                       // Optional
-//                       textFieldType: TextFieldType.NUMBER,
-//                       decoration: inputDecoration(
-//                         context,
-//                         fillColor: context.cardColor,
-//                         filled: true,
-//                         hintText: "OTP",
-//                       ),
-//                     ).visible(loginController.isSendOTP.isTrue),
-//                     8.height,
-//                     // Row(
-//                     //   mainAxisAlignment: MainAxisAlignment.end,
-//                     //   children: [
-//                     //     TextButton(
-//                     //       onPressed: () {
-//                     //         // Get.to(() => ForgetPassword());
-//                     //       },
-//                     //       child: Text(
-//                     //         "forgotPassword",
-//                     //         style: primaryTextStyle(
-//                     //           size: 12,
-//                     //           color: appColorPrimary,
-//                     //           decoration: TextDecoration.underline,
-//                     //           fontStyle: FontStyle.italic,
-//                     //           decorationColor: appColorPrimary,
-//                     //         ),
-//                     //       ),
-//                     //     ),
-//                     //   ],
-//                     // ),
-//                   ],
-//                 ),
-//               ).paddingSymmetric(horizontal: 16),
-//               SizedBox(height: Get.height * 0.03),
-//               Column(
-//                 children: [
-//                   Row(
-//                     children: [
-//                       AppButton(
-//                         elevation: 0,
-//                         text: loginController.isSendOTP.isTrue
-//                             ? "Verify"
-//                             : "Sign In",
-//                         color: appColorPrimary,
-//                         shapeBorder: RoundedRectangleBorder(
-//                             borderRadius: radius(defaultAppButtonRadius / 2)),
-//                         textStyle: appButtonTextStyleWhite,
-//                         onTap: () {
-//                           // Get.toNamed(Routes.HOME);
-//                           if (loginController.isSendOTP.isTrue) {
-//                             loginController.otpVerification();
-//                           } else {
-//                             if (loginController.signInformKey.currentState!
-//                                 .validate()) {
-//                               loginController.saveForm();
-//                               // Get.toNamed(Routes.HOME);
-//                             }
-//                           }
-//                         },
-//                       ).expand(),
-//                     ],
-//                   ),
-//                   8.height,
-//                   Row(
-//                     mainAxisSize: MainAxisSize.min,
-//                     children: [
-//                       Text("Not registered?", style: secondaryTextStyle()),
-//                       4.width,
-//                       TextButton(
-//                         style: TextButton.styleFrom(
-//                           padding: EdgeInsets.zero,
-//                         ),
-//                         onPressed: () {
-//                           Get.toNamed(Routes.REGISTER);
-//                         },
-//                         child: Text(
-//                           "Register Now",
-//                           style: primaryTextStyle(
-//                             size: 12,
-//                             color: appColorSecondary,
-//                             decoration: TextDecoration.underline,
-//                             decorationColor: appColorSecondary,
-//                           ),
-//                         ).paddingSymmetric(horizontal: 8),
-//                       ),
-//                     ],
-//                   ),
-//                   8.height,
-//                 ],
-//               ).paddingSymmetric(horizontal: 16),
-//               // commonLeadingWid(
-//               //     imgPath: "assets/images/google_logo.png",
-//               //     size: 50),
-//               SizedBox(height: Get.height * 0.03),
-//               Row(
-//                 children: [
-//                   Container(
-//                     margin: const EdgeInsets.only(left: 10.0),
-//                     child: const Divider(
-//                       color: borderColor,
-//                     ),
-//                   ).expand(),
-//                   Text("Or Sign In With",
-//                           style: TextStyle(
-//                               fontSize: 14,
-//                               fontWeight: FontWeight.bold,
-//                               color: Colors.grey.shade500))
-//                       .paddingSymmetric(horizontal: 10),
-//                   //primaryTextStyle(color: secondaryTextColor, size: 14)).paddingSymmetric(horizontal: 20),
-//                   Container(
-//                     margin: const EdgeInsets.only(right: 10.0),
-//                     child: const Divider(
-//                       color: borderColor,
-//                     ),
-//                   ).expand(),
-//                 ],
-//               ),
-//               AppButton(
-//                 elevation: 2,
-//                 width: Get.width,
-//                 color: context.cardColor,
-//                 text: "",
-//                 textStyle: appButtonFontColorText,
-//                 onTap: () {
-//                   loginController.loginWithGoogle();
-//                   // loginController.login();
-//                 },
-//                 child: Row(
-//                   mainAxisAlignment: MainAxisAlignment.center,
-//                   children: [
-//                     Image.asset(
-//                       "assets/images/google_logo.png",
-//                       height: 25,
-//                       width: 25,
-//                       fit: BoxFit.contain,
-//                       errorBuilder: (context, error, stackTrace) =>
-//                           const Icon(Icons.g_mobiledata_rounded),
-//                     ),
-//                     8.width,
-//                     const Text(
-//                       "Sign In With Google",
-//                       style: TextStyle(
-//                           fontSize: 14,
-//                           fontWeight: FontWeight.bold,
-//                           color: Colors.black),
-//                       textAlign: TextAlign.center,
-//                     ),
-//                   ],
-//                 ),
-//               ).paddingOnly(top: 8, left: 20, right: 20),
-//               SizedBox(height: Get.height * 0.03),
-//               Obx(
-//                 () => Row(
-//                   children: [
-//                     15.width,
-//                     Expanded(
-//                         child: ElevatedButton(
-//                       style: ElevatedButton.styleFrom(
-//                         backgroundColor: loginController.isRememberMe.value
-//                             ? appColorPrimary // Use appColorPrimary here
-//                             : Colors.white,
-//                         shape: RoundedRectangleBorder(
-//                           borderRadius: BorderRadius.circular(20),
-//                         ),
-//                         padding: const EdgeInsets.symmetric(
-//                             horizontal: 10, vertical: 15),
-//                       ),
-//                       child: Text(
-//                         'Admin',
-//                         style: TextStyle(
-//                             color: loginController.isRememberMe.value
-//                                 ? Colors.white
-//                                 : Colors.black), // Use whiteTextColor
-//                       ),
-//                       onPressed: () {
-//                         // Get.toNamed(Routes.BOTTOMSCREEEN);
-//                         loginController.toggleSwitch(); // Select Admin
-//                       },
-//                     )),
-//                     10.width,
-//                     Expanded(
-//                         child: ElevatedButton(
-//                       style: ElevatedButton.styleFrom(
-//                         backgroundColor: loginController.isRememberMe.value
-//                             ? Colors.white
-//                             : appColorPrimary,
-//                         shape: RoundedRectangleBorder(
-//                           borderRadius: BorderRadius.circular(20),
-//                         ),
-//                         padding: const EdgeInsets.symmetric(
-//                             horizontal: 10, vertical: 15),
-//                       ),
-//                       child: Text(
-//                         'User',
-//                         style: TextStyle(
-//                             color: loginController.isRememberMe.value
-//                                 ? Colors.black
-//                                 : Colors.white), // Use whiteTextColor
-//                       ),
-//                       onPressed: () {
-//                         loginController.toggleSwitch(); // Select Admin
-//                       },
-//                     )),
-//                     15.width,
-//                   ],
-//                 ),
-//               ),
-//             ],
-//           ).paddingOnly(bottom: 10),
-//         ),
-//       ),
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:nb_utils/nb_utils.dart';
+import '../../../language/languages.dart';
+import '../../../main.dart';
 
 class LoginScreen extends StatelessWidget {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final RxBool isPasswordVisible = false.obs;
-
+  // late BaseLanguage language;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -393,33 +89,84 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-
-                  // Google Sign-in Button
-                  GestureDetector(
-                    onTap: _signInWithGoogle,
-                    child: Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8),
+                  Column(
+                    children: [
+                      AppButton(
+                        shapeBorder: RoundedRectangleBorder(borderRadius: radius(defaultAppButtonRadius)),
+                        onTap: () {
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            GoogleLogoWidget(size: 14),Spacer(),
+                            Text("Sign in with Google", style: primaryTextStyle(), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          ],
+                        ).center(),
+                        elevation: 1,
+                        color: context.cardColor,
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.network(
-                            'https://upload.wikimedia.org/wikipedia/commons/4/4a/Google_2015_logo.svg',
-                            height: 20,
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            "Sign in with Google",
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                      // if (isIOS)
+                      //   AppButton(
+                      //     shapeBorder: RoundedRectangleBorder(borderRadius: radius(defaultAppButtonRadius)),
+                      //     onTap: () {
+                      //       // appleSignIn();
+                      //     },
+                      //     child: Row(
+                      //       mainAxisAlignment: MainAxisAlignment.center,
+                      //       crossAxisAlignment: CrossAxisAlignment.center,
+                      //       children: [
+                      //         Icon(Icons.apple, color: Colors.black, size: 22),
+                      //         6.width,
+                      //         Text("language.signInWithApple", style: primaryTextStyle(), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      //       ],
+                      //     ),
+                      //     elevation: 1,
+                      //     color: context.cardColor,
+                      //   ).paddingTop(16),
+                      // AppButton(
+                      //   shapeBorder: RoundedRectangleBorder(borderRadius: radius(defaultAppButtonRadius)),
+                      //   onTap: (){},
+                      //   child: Row(
+                      //     mainAxisAlignment: MainAxisAlignment.center,
+                      //     crossAxisAlignment: CrossAxisAlignment.center,
+                      //     children: [
+                      //       Icon(Icons.phone_in_talk, color: context.primaryColor, size: 22),
+                      //       6.width,
+                      //       Text(language.signInWithOtp, style: primaryTextStyle(), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      //     ],
+                      //   ),
+                      //   elevation: 1,
+                      //   color: context.cardColor,
+                      // ).paddingTop(16),
+                    ],
+                  ).paddingSymmetric(horizontal: 16, vertical: 16),
+                  // // Google Sign-in Button
+                  // GestureDetector(
+                  //   onTap: _signInWithGoogle,
+                  //   child: Container(
+                  //     width: double.infinity,
+                  //     padding: EdgeInsets.symmetric(vertical: 12),
+                  //     decoration: BoxDecoration(
+                  //       border: Border.all(color: Colors.grey),
+                  //       borderRadius: BorderRadius.circular(8),
+                  //     ),
+                  //     child: Row(
+                  //       mainAxisAlignment: MainAxisAlignment.center,
+                  //       children: [
+                  //         Image.network(
+                  //           'https://upload.wikimedia.org/wikipedia/commons/4/4a/Google_2015_logo.svg',
+                  //           height: 20,
+                  //         ),
+                  //         const SizedBox(width: 10),
+                  //         Text(
+                  //           "Sign in with Google",
+                  //           style: TextStyle(fontSize: 16),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),

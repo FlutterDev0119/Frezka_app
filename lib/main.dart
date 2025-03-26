@@ -7,9 +7,14 @@ import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import 'colors.dart';
+import 'language/languages.dart';
+import 'modules/login/model/common_model.dart';
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initialize(aLocaleLanguageList: languageList());
   // Fetch token during app initialization
   final token = await getValueFromLocal(SharedPreferenceConst.API_TOKEN)as String?;
   runApp(MyApp(token: token));
