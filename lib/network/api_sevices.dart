@@ -1,10 +1,5 @@
-import 'dart:io';
-import 'dart:ui';
 
-import 'package:http/http.dart' as http;
-import 'package:http/src/response.dart';
 import 'package:nb_utils/nb_utils.dart';
-import '../modules/login/model/google_social_login_model.dart';
 import '../modules/login/model/login_model.dart';
 import '../modules/login/model/otp_model.dart';
 import 'api_end_point.dart';

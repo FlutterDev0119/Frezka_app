@@ -3,7 +3,6 @@ import 'package:apps/utils/constants.dart';
 import 'package:apps/utils/local_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'colors.dart';
 import 'language/language_en.dart';

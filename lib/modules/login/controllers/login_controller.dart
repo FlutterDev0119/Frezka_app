@@ -299,7 +299,7 @@ class LoginController extends GetxController {
         await setValueToLocal("API_TOKEN", accessToken);
 
         Get.snackbar("Success", "Logged in as ${googleUser.displayName}");
-        Get.offAllNamed(Routes.HOME);
+        Get.offAllNamed(Routes.DASHBOARD);
       }
     } catch (error) {
       Get.snackbar("Error", "Login failed: $error");

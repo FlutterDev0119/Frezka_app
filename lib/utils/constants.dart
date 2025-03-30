@@ -1,5 +1,4 @@
 import '../modules/login/model/login_model.dart';
-import '../modules/login/model/user_response.dart';
 import 'library.dart';
 
 const appTitle = "Sale";

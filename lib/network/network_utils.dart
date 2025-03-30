@@ -6,12 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
-import '../utils/constants.dart';
-import 'package:get/get.dart' as gets;
 
-import '../utils/local_storage.dart';
 import 'api_end_point.dart';
-import 'api_sevices.dart';
 import 'config.dart';
 
 Map<String, String> buildHeaderTokens({
