@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../colors.dart';
+import '../../../generated/assets.dart';
 import '../../../routes/app_pages.dart';
 import '../../../utils/common.dart';
 import '../controllers/login_controller.dart';
@@ -83,13 +84,13 @@ class LoginScreen extends StatelessWidget {
                 ),
 
                 // Login Button
-                _buildButton("Login", AppColors.primary, () {
+                _buildButton("Login", 18,FontWeight.bold,AppColors.primary, AppColors.whiteColor,() {
                   Get.toNamed(Routes.DASHBOARD);
                 }),
                 const SizedBox(height: 10),
 
                 // Google Sign-In Button
-                _buildButton("Sign in with Google", Colors.red.shade700, () {
+                _buildButton("Sign in with Google", 16,FontWeight.w600,AppColors.whiteColor, AppColors.textColor,() {
                   loginController.loginWithGoogle();
                 }, icon: Icons.login),
                 const SizedBox(height: 20),
@@ -120,12 +121,21 @@ class LoginScreen extends StatelessWidget {
   }
 
   // Custom Button Widget
-  Widget _buildButton(String text, Color color, VoidCallback onPressed, {IconData? icon}) {
+  Widget _buildButton(String text, double fontSize,FontWeight fontWeight,Color color,Color textColor, VoidCallback onPressed, {IconData? icon}) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
-        icon: icon != null ? Icon(icon, color: Colors.white) : const SizedBox.shrink(),
-        label: Text(text, style: const TextStyle(fontSize: 16, color: Colors.white)),
+        icon: icon != null
+            ? SizedBox(
+          width: 24,
+          height: 24,
+          child: Image.asset(Assets.logosIcGoogle, fit: BoxFit.contain),
+        )
+            : const SizedBox.shrink(),
+        label: Text(
+          text,
+          style: TextStyle(fontSize: fontSize,fontWeight:  fontWeight,color:textColor),
+        ),
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
@@ -135,7 +145,8 @@ class LoginScreen extends StatelessWidget {
         ),
       ),
     );
-  }
+
+}
 
 
 }
