@@ -1,120 +1,8 @@
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-// import '../../../routes/app_pages.dart';
-// import '../controllers/login_controller.dart';
-//
-// class LoginScreen extends StatelessWidget {
-//   final LoginController loginController = Get.put(LoginController());
-//
-//    LoginScreen({super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: Colors.blue.shade700,
-//       body: Center(
-//         child: Padding(
-//           padding: const EdgeInsets.symmetric(horizontal: 20),
-//           child: Card(
-//             shape: RoundedRectangleBorder(
-//               borderRadius: BorderRadius.circular(12),
-//             ),
-//             elevation: 5,
-//             child: Padding(
-//               padding: const EdgeInsets.all(20),
-//               child: Column(
-//                 mainAxisSize: MainAxisSize.min,
-//                 children: [
-//                   Icon(Icons.groups, size: 50, color: Colors.blue),
-//                   const SizedBox(height: 20),
-//
-//                   // Username Field
-//                   TextField(
-//                     controller: loginController.emailCont,
-//                     decoration: InputDecoration(
-//                       labelText: "Username",
-//                       prefixIcon: Icon(Icons.person),
-//                       border: OutlineInputBorder(),
-//                     ),
-//                   ),
-//                   const SizedBox(height: 15),
-//
-//                   // Password Field
-//                   Obx(() => TextField(
-//                     controller: loginController.passwordCont,
-//                     obscureText: !loginController.isPasswordVisible.value,
-//                     decoration: InputDecoration(
-//                       labelText: "Enter your password",
-//                       prefixIcon: Icon(Icons.lock),
-//                       suffixIcon: IconButton(
-//                         icon: Icon(loginController.isPasswordVisible.value
-//                             ? Icons.visibility
-//                             : Icons.visibility_off),
-//                         onPressed: () {
-//                           loginController.isPasswordVisible.toggle();
-//                         },
-//                       ),
-//                       border: OutlineInputBorder(),
-//                     ),
-//                   )),
-//                   const SizedBox(height: 10),
-//
-//                   // Forgot Password
-//                   Align(
-//                     alignment: Alignment.centerLeft,
-//                     child: TextButton(
-//                       onPressed: () {},
-//                       child: Text(
-//                         "Forgot Password?",
-//                         style: TextStyle(color: Colors.blue),
-//                       ),
-//                     ),
-//                   ),
-//
-//                   // Login Button
-//                   SizedBox(
-//                     width: double.infinity,
-//                     child: ElevatedButton(
-//                       onPressed: () {
-//                         Get.toNamed(Routes.GENAICLINICAL);
-//                         // loginController.saveForm();
-//                       },
-//                       style: ElevatedButton.styleFrom(
-//                         backgroundColor: Colors.blue.shade700,
-//                         padding: EdgeInsets.symmetric(vertical: 12),
-//                       ),
-//                       child: Text("Login", style: TextStyle(fontSize: 16, color: Colors.white)),
-//                     ),
-//                   ),
-//                   const SizedBox(height: 10),
-//
-//                   // Google Sign-In Button
-//                   SizedBox(
-//                     width: double.infinity,
-//                     child: ElevatedButton.icon(
-//                       icon: Icon(Icons.login, color: Colors.white),
-//                       label: Text("Sign in with Google", style: TextStyle(color: Colors.white)),
-//                       onPressed: () {
-//                         loginController.loginWithGoogle();
-//                       },
-//                       style: ElevatedButton.styleFrom(
-//                         backgroundColor: Colors.red.shade700,
-//                         padding: EdgeInsets.symmetric(vertical: 12),
-//                       ),
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../colors.dart';
 import '../../../routes/app_pages.dart';
+import '../../../utils/common.dart';
 import '../controllers/login_controller.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -125,70 +13,58 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Center(
-          child: SingleChildScrollView(
+      backgroundColor: AppColors.appBackground,
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 25),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Icon(Icons.groups, size: 80, color: Colors.blue),
+                // Logo/Icon
+                CircleAvatar(
+                  radius: 50,
+                  backgroundColor: AppColors.cardColor,
+                  child: Icon(Icons.groups, size: 60, color: AppColors.primary),
+                ),
                 const SizedBox(height: 30),
 
-                // Username Label
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Username",
-                    style: TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
+                Text("Welcome Back!",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
                   ),
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 10),
+
+                Text("Login to continue",
+                  style: TextStyle(fontSize: 16, color: AppColors.textColor),
+                ),
+                const SizedBox(height: 30),
 
                 // Username Field
-                TextField(
+                buildTextField(
                   controller: loginController.emailCont,
-                  decoration: InputDecoration(
-                    hintText: "Username",
-                    suffixIcon: Icon(Icons.person, color: Colors.grey),
-                    border: OutlineInputBorder(),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
+                  hintText: "Username",
+                  icon: Icons.person,
                 ),
                 const SizedBox(height: 20),
 
-                // Password Label
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Password",
-                    style: TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const SizedBox(height: 5),
-
                 // Password Field
-                Obx(() => TextField(
+                Obx(() => buildTextField(
                   controller: loginController.passwordCont,
+                  hintText: "Password",
+                  icon: Icons.lock,
                   obscureText: !loginController.isPasswordVisible.value,
-                  decoration: InputDecoration(
-                    hintText: "Password",
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        loginController.isPasswordVisible.value
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                        color: Colors.grey,
-                      ),
-                      onPressed: () {
-                        loginController.isPasswordVisible.toggle();
-                      },
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      loginController.isPasswordVisible.value
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: AppColors.textColor,
                     ),
-                    border: OutlineInputBorder(),
-                    filled: true,
-                    fillColor: Colors.white,
+                    onPressed: () => loginController.isPasswordVisible.toggle(),
                   ),
                 )),
                 const SizedBox(height: 15),
@@ -198,44 +74,43 @@ class LoginScreen extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {},
-                    child: Text(
-                      "Forgot Password?",
-                      style: TextStyle(color: Colors.blue),
-                    ),
+                    child: Text("Forgot Password?",
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        )),
                   ),
                 ),
 
                 // Login Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Get.toNamed(Routes.DASHBOARD);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding: EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    child: Text("Login", style: TextStyle(fontSize: 16, color: Colors.white)),
-                  ),
-                ),
+                _buildButton("Login", AppColors.primary, () {
+                  Get.toNamed(Routes.DASHBOARD);
+                }),
                 const SizedBox(height: 10),
 
                 // Google Sign-In Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    icon: Icon(Icons.login, color: Colors.white),
-                    label: Text("Sign in with Google", style: TextStyle(color: Colors.white)),
-                    onPressed: () {
-                      loginController.loginWithGoogle();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red.shade700,
-                      padding: EdgeInsets.symmetric(vertical: 14),
-                    ),
-                  ),
-                ),
+                _buildButton("Sign in with Google", Colors.red.shade700, () {
+                  loginController.loginWithGoogle();
+                }, icon: Icons.login),
+                const SizedBox(height: 20),
+
+                // Sign-Up Link
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Don't have an account? ", style: TextStyle(color: AppColors.textColor)),
+                    GestureDetector(
+                      onTap: () {},
+                      child: Text(
+                        "Sign Up",
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    )
+                  ],
+                )
               ],
             ),
           ),
@@ -243,4 +118,24 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
+
+  // Custom Button Widget
+  Widget _buildButton(String text, Color color, VoidCallback onPressed, {IconData? icon}) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        icon: icon != null ? Icon(icon, color: Colors.white) : const SizedBox.shrink(),
+        label: Text(text, style: const TextStyle(fontSize: 16, color: Colors.white)),
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          elevation: 3,
+        ),
+      ),
+    );
+  }
+
+
 }
