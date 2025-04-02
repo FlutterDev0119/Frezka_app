@@ -6,7 +6,8 @@ abstract class Routes {
   static const LOGIN = _Paths.LOGIN;
   static const DASHBOARD = _Paths.DASHBOARD;
   static const GENAICLINICAL = _Paths.GENAICLINICAL;
-  static const MY_AGENT = _Paths.MYAGENT;
+  static const MYAGENT = _Paths.MYAGENT;
+  static const PROMPTADMIN = _Paths.PROMPTADMIN;
 }
 
 abstract class _Paths {
@@ -14,5 +15,6 @@ abstract class _Paths {
   static const DASHBOARD = '/dashboard';
   static const GENAICLINICAL = '/GenAI_Clinical';
   static const MYAGENT = '/my_agent';
+  static const PROMPTADMIN = '/prompt_admin';
 
 }

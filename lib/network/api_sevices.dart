@@ -1,9 +1,6 @@
-
 import 'package:nb_utils/nb_utils.dart';
-import '../modules/login/model/login_model.dart';
-import '../modules/login/model/otp_model.dart';
-import 'api_end_point.dart';
-import 'network_utils.dart';
+
+import 'package:apps/utils/library.dart';
 
 class AuthServiceApis {
   static Future<UserData> createUser({required Map request}) async {
@@ -36,5 +33,4 @@ class AuthServiceApis {
 
   // Clear  Data
   static Future<void> clearData({bool isFromDeleteAcc = false}) async {}
-
 }

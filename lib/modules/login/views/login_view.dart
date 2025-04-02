@@ -96,22 +96,22 @@ class LoginScreen extends StatelessWidget {
                 const SizedBox(height: 20),
 
                 // Sign-Up Link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Don't have an account? ", style: TextStyle(color: AppColors.textColor)),
-                    GestureDetector(
-                      onTap: () {},
-                      child: Text(
-                        "Sign Up",
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    )
-                  ],
-                )
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.center,
+                //   children: [
+                //     Text("Don't have an account? ", style: TextStyle(color: AppColors.textColor)),
+                //     GestureDetector(
+                //       onTap: () {},
+                //       child: Text(
+                //         "Sign Up",
+                //         style: TextStyle(
+                //           color: AppColors.primary,
+                //           fontWeight: FontWeight.bold,
+                //         ),
+                //       ),
+                //     )
+                //   ],
+                // )
               ],
             ),
           ),

@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:apps/utils/library.dart';
 import 'package:nb_utils/nb_utils.dart';
-
-import 'colors.dart';
 
 InputDecoration inputDecoration(
     BuildContext context, {

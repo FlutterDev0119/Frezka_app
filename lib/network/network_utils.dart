@@ -6,7 +6,6 @@ import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
-
 import 'api_end_point.dart';
 import 'config.dart';
 

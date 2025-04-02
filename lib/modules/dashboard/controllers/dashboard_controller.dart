@@ -8,7 +8,7 @@ class DashboardController extends GetxController {
       "description":
           "Intelligent AI-powered agents designed for Pharmacovigilance.",
       "icon": Icons.smart_toy_rounded,
-      "route": Routes.MY_AGENT
+      "route": Routes.MYAGENT
     },
     {
       "title": "Engage AI",
@@ -53,7 +53,7 @@ class DashboardController extends GetxController {
       "title": "Prompt Admin",
       "description": "Centralized prompt management with enforced guidelines.",
       "icon": Icons.admin_panel_settings_rounded,
-      "route": ""
+      "route":  Routes.PROMPTADMIN
     },
     {
       "title": "Translation Memory",

@@ -1,11 +1,5 @@
-import 'package:apps/modules/dashboard/bindings/dashboard_binding.dart';
-import 'package:apps/modules/dashboard/views/dashboard_view.dart';
-import 'package:apps/modules/my_agent/view/my_agent_view.dart';
-import '../modules/genAI_clinical/bindings/genAI_clinical_binding.dart';
-import '../modules/genAI_clinical/view/genAI_clinical_view.dart';
-import '../modules/login/bindings/login_binding.dart';
-import '../modules/login/views/login_view.dart';
-import '../modules/my_agent/bindings/my_agent_binding.dart';
+import '../modules/prompt_admin/bindings/prompt_admin_binding.dart';
+import '../modules/prompt_admin/views/prompt_admin_view.dart';
 import '../utils/library.dart';
 
 part 'app_routes.dart';
@@ -38,6 +32,12 @@ class AppPages {
       name: _Paths.MYAGENT,
       page: () => MyAgentScreen(),
       binding: MyAgentBinding(),
+      transition: Transition.downToUp,
+    ),
+    GetPage(
+      name: _Paths.PROMPTADMIN,
+      page: () => PromptAdminScreen(),
+      binding: PromptAdminBinding(),
       transition: Transition.downToUp,
     ),
   ];
