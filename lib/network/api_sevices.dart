@@ -3,12 +3,6 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:apps/utils/library.dart';
 
 class AuthServiceApis {
-  static Future<UserData> createUser({required Map request}) async {
-    return UserData.fromJson(await handleResponse(await buildHttpResponse(
-        APIEndPoints.register,
-        request: request,
-        method: HttpMethodType.POST)));
-  }
 
   static Future<UserData> loginUser({required Map request}) async {
     return UserData.fromJson(await handleResponse(await buildHttpResponse(
@@ -17,12 +11,8 @@ class AuthServiceApis {
         method: HttpMethodType.POST)));
   }
 
-  static Future<OtpResponse> sendOTP({required Map request}) async {
-    return OtpResponse.fromJson(await handleResponse(await buildHttpResponse(
-        APIEndPoints.sendOTP,
-        request: request,
-        method: HttpMethodType.POST)));
-  }
+
+
 
   // static Future<SocialLoginResponse> googleSocialLogin(
   //     {required Map request}) async {

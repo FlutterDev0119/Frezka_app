@@ -26,9 +26,9 @@ Map<String, String> buildHeaderTokens({
     'Accept': "application/json",
   };
 
-  if (endPoint == APIEndPoints.register) {
-    header.putIfAbsent(HttpHeaders.acceptHeader, () => 'application/json');
-  }
+  // if (endPoint == APIEndPoints.register) {
+  //   header.putIfAbsent(HttpHeaders.acceptHeader, () => 'application/json');
+  // }
   header.putIfAbsent(HttpHeaders.contentTypeHeader, () => 'application/json; charset=utf-8');
 
 

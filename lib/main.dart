@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "Frezka",
+      title: "MediObserve",
       initialRoute: (token == null || token == "")
           ? AppPages.initial
           : AppPages.initialHome,

@@ -1,2 +1,2 @@
-const DOMAIN_URL = 'https://aqua-mink-653974.hostingersite.com';
+const DOMAIN_URL = '';
 const BASE_URL = '$DOMAIN_URL/api/';
