@@ -10,22 +10,36 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  # UI & Theming
   cupertino_icons: ^1.0.8
-  flutter_lints: ^5.0.0
-  nb_utils: ^7.1.3
   google_fonts: ^6.2.1
-  path_provider: ^2.1.5
-  intl: ^0.20.2
-  image_picker: ^1.1.2
-  google_sign_in: ^6.3.0
-  firebase_core: ^3.12.1
   flutter_colorpicker: ^1.1.0
+  nb_utils: ^7.1.3
+
+  # File & Storage Management
+  path_provider: ^2.1.5
+  get_storage: ^2.1.1
+
+  # Date & Localization
+  intl: ^0.20.2
+
+  # Image & Media Handling
+  image_picker: ^1.1.2
+
+  # Firebase Services
+  firebase_core: ^3.12.1
   firebase_auth: ^5.5.1
+  google_sign_in: ^6.3.0
+
+  # Networking & API
   http_parser: ^4.1.2
+
+  # Permissions
   permission_handler: ^11.4.0
+
   # State Management
   get: ^4.7.2
-  get_storage: ^2.1.1
 
 dev_dependencies:
   flutter_test:
@@ -36,9 +50,5 @@ flutter:
   assets:
     - assets/icons/
     - assets/logos/
-#  fonts:
-#    - family: InterTight
-#      fonts:
-#        - asset: assets/font/InterTight-Regular.ttf
-  uses-material-design: true
 
+  uses-material-design: true
