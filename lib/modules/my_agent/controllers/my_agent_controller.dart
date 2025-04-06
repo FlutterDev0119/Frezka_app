@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 
-class MyAgentController extends GetxController {
+import '../../../utils/common/base_controller.dart';
+
+class MyAgentController extends BaseController {
   var selectedItems = <String>[].obs;
   var dropdownItems = <String>["Data 1", "Data 2", "Data 3"].obs;
   var agentItems = <String>["Metaphrase Lite", "GenAIpv", "Argus Intake", "HITL"].obs;

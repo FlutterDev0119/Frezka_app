@@ -6,26 +6,19 @@ Rx<BaseLanguage> locale = LanguageEn().obs;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initialize(aLocaleLanguageList: languageList());
-  // Fetch token during app initialization
-  final token =
-      await getValueFromLocal(SharedPreferenceConst.API_TOKEN) as String?;
-  runApp(MyApp(token: token));
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final String? token;
 
-  const MyApp({super.key, required this.token});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: "MediObserve",
-      initialRoute: (token == null || token == "")
-          ? AppPages.initial
-          : AppPages.initialHome,
-      // theme: ThemeData.light(useMaterial3: true),
+      initialRoute:AppPages.initial,
       theme: ThemeData(
         textTheme: TextTheme(
           displayLarge:
@@ -52,17 +45,6 @@ class MyApp extends StatelessWidget {
               GoogleFonts.roboto(fontSize: 12, fontWeight: FontWeight.normal),
         ),
       ),
-
-      // theme: ThemeData(
-      //   appBarTheme: AppBarTheme(
-      //     titleTextStyle: secondaryTextStyle(
-      //       color: white,
-      //       size: 18,
-      //       weight: FontWeight.w500,
-      //     ),
-      //     color: appColorPrimary,
-      //   ),
-      // ),
       getPages: AppPages.routes,
     );
   }

@@ -9,7 +9,11 @@ class AppColors {
   static const Color greyColor = Colors.grey;
   static const Color redColor = Colors.red;
   static const Color whiteColor = Colors.white;
+
 }
+const lightIconColor = Color(0xFFD8D9D9);
+const appPrimaryColor = Color(0xFF7093E6);
+const darkModePrimaryTextColor = Color(0xFFFFFFFF);
 
 const appColorPrimary = Color(0xFF4199FE);
 const appColorSecondary = Color(0xFF013771);
@@ -67,15 +71,6 @@ const greyTextColor = Color(0xff3F414D);
 //Text Colors
 const primaryTextColor = Color(0xFF11104A);
 const secondaryTextColor = Color(0xFF7C7E93);
-
-//status color
-const pendingStatusColor = Color(0xFFFD866E);
-const upcomingStatusColor = Color(0xFFFFCE70);
-const confirmedStatusColor = appColorPrimary;
-const completedStatusColor = Color(0xFF2CB562);
-const cancelStatusColor = Color(0xFFF04336);
-const defaultStatusColor = Color(0xFF11104A);
-const inprogressStatusColor = Color(0xFFE56F0F);
 
 const switchActiveTrackColor = appColorPrimary;
 const switchActiveColor = Colors.white;

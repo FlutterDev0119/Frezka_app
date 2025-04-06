@@ -14,7 +14,7 @@ class DashboardController extends GetxController {
       "title": "Engage AI",
       "description": "A chatbot for patient and investigator engagement.",
       "icon": Icons.health_and_safety_rounded,
-      "route": ""
+      "route": null
     },
     {
       "title": "Metaphrase PV",

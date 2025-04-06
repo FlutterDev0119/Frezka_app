@@ -1,6 +1,8 @@
 // Custom TextField Widget
-import '../colors.dart';
-import 'library.dart';
+import 'package:nb_utils/nb_utils.dart';
+
+import 'colors.dart';
+import '../library.dart';
 
 // Custom Text Field Widget
 Widget buildTextField({
@@ -23,3 +25,9 @@ Widget buildTextField({
     ),
   );
 }
+
+RxString selectedLanguageCode = DEFAULT_LANGUAGE.obs;
+Rx<UserDataResponseModel> loggedInUser = UserDataResponseModel().obs;
+RxBool isLoggedIn = false.obs;
+String apiToken = '';
+ListAnimationType commonListAnimationType = ListAnimationType.None;

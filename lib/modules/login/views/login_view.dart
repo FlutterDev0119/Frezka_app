@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../colors.dart';
+import '../../../utils/common/colors.dart';
 import '../../../generated/assets.dart';
 import '../../../routes/app_pages.dart';
-import '../../../utils/common.dart';
+import '../../../utils/common/common.dart';
 import '../controllers/login_controller.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -74,7 +74,10 @@ class LoginScreen extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Get.toNamed(
+                      Routes.FORGOTPASSWORD);
+                    },
                     child: Text("Forgot Password?",
                         style: TextStyle(
                           color: AppColors.primary,
@@ -85,7 +88,7 @@ class LoginScreen extends StatelessWidget {
 
                 // Login Button
                 _buildButton("Login", 18,FontWeight.bold,AppColors.primary, AppColors.whiteColor,() {
-                  Get.toNamed(Routes.DASHBOARD);
+                  loginController.loginUser();
                 }),
                 const SizedBox(height: 10),
 

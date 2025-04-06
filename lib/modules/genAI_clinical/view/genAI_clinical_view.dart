@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../utils/common/colors.dart';
+import '../../../utils/app_scaffold.dart';
 import '../controllers/genAI_clinical_controller.dart';
 
 class GeneralClinicController extends GetxController {
@@ -14,10 +16,14 @@ class GenAIClinicalScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Curate The Response'),
-      ),
+    return AppScaffold(
+        appBarBackgroundColor: AppColors.primary,
+        appBarTitleText: "GenAI Clinical",
+
+        appBarTitleTextStyle: TextStyle(
+        fontSize: 20,
+        color: AppColors.whiteColor,
+    ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
