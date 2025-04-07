@@ -24,9 +24,9 @@ class SplashScreen extends StatelessWidget {
         children: [
           // Center(child: Text("Splash"))
           Hero(
-            tag: Assets.appLogo,
+            tag: Assets.imagesAppLogo,
             child: CachedImageWidget(
-              url: Assets.appLogo,
+              url: Assets.imagesAppLogo,
               height: 200,
               width: 200,
             ),
