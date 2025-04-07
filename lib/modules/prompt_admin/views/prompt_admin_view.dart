@@ -431,7 +431,7 @@ class PromptAdminScreen extends StatelessWidget {
             const SizedBox(height: 10),
             TextField(
               controller: controller.inputController,
-              onEditingComplete: controller.userSubmittedData,
+              // onEditingComplete: controller.userSubmittedData,
               decoration: appInputDecoration(
                 context: context,
                 hintText: "Enter Prompt Name",
@@ -446,16 +446,31 @@ class PromptAdminScreen extends StatelessWidget {
               spacing: 2.0,
               runSpacing: 2.0,
               children: List.generate(
-                controller.userInput.length,
+                controller.adverseEventReportingList.length,
                     (index) => GestureDetector(
-                  onTap: () => controller.setTextFromList(index),
+                  onTap: () => controller.inputController.text = controller.adverseEventReportingList[index],
                   child: Chip(
-                    label: Text(controller.userInput[index]),
+                    label: Text(controller.adverseEventReportingList[index]),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                 ),
               ),
             )),
+
+            // Obx(() => Wrap(
+            //   spacing: 2.0,
+            //   runSpacing: 2.0,
+            //   children: List.generate(
+            //     controller.userInput.length,
+            //         (index) => GestureDetector(
+            //       onTap: () => controller.setTextFromList(index),
+            //       child: Chip(
+            //         label: Text(controller.userInput[index]),
+            //         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            //       ),
+            //     ),
+            //   ),
+            // )),
             const SizedBox(height: 10),
             Obx(() => Row(
               children: [

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nb_utils/nb_utils.dart';
 import '../../../utils/common/colors.dart';
+import '../../../utils/shared_prefences.dart';
 import '../controllers/dashboard_controller.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -23,7 +25,7 @@ class DashboardScreen extends StatelessWidget {
 
   AppBar buildAppBar() {
     return AppBar(
-      title: Text("Dashboard", style: GoogleFonts.roboto(color:  AppColors.whiteColor,fontWeight: FontWeight.bold,fontSize: 18)),
+      title: Text("Dashboard", style: GoogleFonts.roboto(color: AppColors.whiteColor, fontWeight: FontWeight.bold, fontSize: 18)),
       backgroundColor: AppColors.primary,
       elevation: 0,
       leading: IconButton(
@@ -33,9 +35,7 @@ class DashboardScreen extends StatelessWidget {
       actions: [
         CircleAvatar(
           backgroundColor: AppColors.cardColor,
-          child: Text("N",
-              style: GoogleFonts.roboto(
-                  color: AppColors.primary, fontWeight: FontWeight.bold)),
+          child: Text("N", style: GoogleFonts.roboto(color: AppColors.primary, fontWeight: FontWeight.bold)),
         ),
         const SizedBox(width: 15),
       ],
@@ -62,9 +62,7 @@ class DashboardScreen extends StatelessWidget {
             itemCount: itemsWithWelcome.length,
             itemBuilder: (context, index) {
               var item = itemsWithWelcome[index];
-              return item['type'] == "welcome"
-                  ? _buildWelcomeCard()
-                  : _buildCard(item);
+              return item['type'] == "welcome" ? _buildWelcomeCard() : _buildCard(item);
             },
           );
         },
@@ -85,39 +83,46 @@ class DashboardScreen extends StatelessWidget {
                 CircleAvatar(
                   radius: 30,
                   backgroundColor: AppColors.cardColor,
-                  child: Text("N",
-                      style: GoogleFonts.roboto(
-                          color: AppColors.primary,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold)),
+                  child: Text("N", style: GoogleFonts.roboto(color: AppColors.primary, fontSize: 24, fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(height: 10),
-                Text("Nilesh Sonar",
-                    style:
-                    GoogleFonts.roboto(color: AppColors.textColor, fontSize: 18)),
-                Text("nilesh@example.com",
-                    style: GoogleFonts.roboto(
-                        color: AppColors.textColor.withOpacity(0.7), fontSize: 14)),
+                Text("Nilesh Sonar", style: GoogleFonts.roboto(color: AppColors.textColor, fontSize: 18)),
+                Text("nilesh@example.com", style: GoogleFonts.roboto(color: AppColors.textColor.withOpacity(0.7), fontSize: 14)),
               ],
             ),
           ),
           _buildDrawerItem(Icons.smart_toy_rounded, "My Agent", '/my_agent'),
           _buildDrawerItem(Icons.local_hospital_rounded, "GenAI Clinical", '/GenAI_Clinical'),
           _buildDrawerItem(Icons.settings, "Settings", '/settings'),
-          _buildDrawerItem(Icons.logout, "Logout", '/login',
-              color: AppColors.primary, isLogout: true),
+          _buildDrawerItem(Icons.logout, "Logout", '/login', color: AppColors.primary, isLogout: true),
         ],
       ),
     );
   }
 
-  Widget _buildDrawerItem(IconData icon, String title, String route,
-      {Color color = AppColors.primary, bool isLogout = false}) {
+  Widget _buildDrawerItem(IconData icon, String title, String route, {Color color = AppColors.primary, bool isLogout = false}) {
     return ListTile(
       leading: Icon(icon, color: color),
       title: Text(title, style: GoogleFonts.roboto(color: AppColors.textColor)),
-      onTap: () => isLogout ? Get.offAllNamed(route) : Get.toNamed(route),
+      // onTap: () => isLogout ? Get.offAllNamed(route) : Get.toNamed(route),
+      onTap: () async {
+        if (isLogout) {
+          // Clear shared preferences or cached data
+          await clearUserData();
+
+          // Redirect to login and remove all previous routes
+          Get.offAllNamed(route);
+        } else {
+          Get.toNamed(route);
+        }
+      },
     );
+  }
+  Future<void> clearUserData() async {
+    await setBoolAsync(AppSharedPreferenceKeys.isUserLoggedIn, false);
+    await setStringAsync(AppSharedPreferenceKeys.apiToken, '');
+    await setStringAsync(AppSharedPreferenceKeys.currentUserData, '');
+    // You can also clear other keys if needed
   }
 
   Widget _buildWelcomeCard() {
@@ -134,28 +139,14 @@ class DashboardScreen extends StatelessWidget {
             CircleAvatar(
               radius: 30,
               backgroundColor: AppColors.primary,
-              child: Text("NS",
-                  style: GoogleFonts.roboto(
-                      color: AppColors.cardColor,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold)),
+              child: Text("NS", style: GoogleFonts.roboto(color: AppColors.cardColor, fontSize: 24, fontWeight: FontWeight.bold)),
             ),
             const SizedBox(height: 10),
-            Text("Welcome",
-                style: GoogleFonts.roboto(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textColor)),
-            Text("Nilesh Sonar",
-                style: GoogleFonts.roboto(
-                    fontSize: 16, color: AppColors.textColor)),
+            Text("Welcome", style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textColor)),
+            Text("John Deo", style: GoogleFonts.roboto(fontSize: 16, color: AppColors.textColor)),
             Center(
               child: Text("22/03/2025, 17:26:45",
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.roboto(
-                      fontSize: 14,
-                      color: AppColors.textColor.withOpacity(0.7))
-              ),
+                  textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 14, color: AppColors.textColor.withOpacity(0.7))),
             ),
           ],
         ),
@@ -179,19 +170,10 @@ class DashboardScreen extends StatelessWidget {
               const SizedBox(height: 10),
               Center(
                   child: Text(item['title'],
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.roboto(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textColor))
-              ),
+                      textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textColor))),
               const SizedBox(height: 5),
               Center(
-                  child: Text(item['description'],
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.roboto(
-                          fontSize: 14, color: AppColors.textColor))
-              ),
+                  child: Text(item['description'], textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 14, color: AppColors.textColor))),
             ],
           ),
         ),

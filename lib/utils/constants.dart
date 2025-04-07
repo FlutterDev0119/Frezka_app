@@ -117,6 +117,7 @@ class LabStatusTitle {
 
 class ConstantKeys {
   static const pageKey = 'page';
+  static const token = 'token';
   static const perPageKey = 'per_page';
   static const searchKey = 'search';
   static const isAuthenticatedKey = 'is_authenticated';

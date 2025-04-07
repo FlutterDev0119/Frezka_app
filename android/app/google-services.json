@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "286443589794",
+    "project_id": "mediobserve",
+    "storage_bucket": "mediobserve.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:286443589794:android:2a93179b302adc406787fb",
+        "android_client_info": {
+          "package_name": "com.example.apps"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "286443589794-2rtfl8dkdkskc0aoestqtg99n3lm23gr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.apps",
+            "certificate_hash": "318e869af364c6c9ccdf9cf5497fbb0055fc61dd"
+          }
+        },
+        {
+          "client_id": "286443589794-lmug7b8dhdvbv2l1oldj3ai5br31k8ep.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.apps",
+            "certificate_hash": "f2ede28bcd700ebea2983a864a11d4c59865c897"
+          }
+        },
+        {
+          "client_id": "286443589794-ru24806a91fb9lod0d6a6vo2s91j1981.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB55CjsZKBp-T9FSn856vKLbaAGxMPORWg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "286443589794-ru24806a91fb9lod0d6a6vo2s91j1981.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
