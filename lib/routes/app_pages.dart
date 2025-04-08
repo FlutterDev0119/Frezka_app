@@ -2,6 +2,8 @@ import 'package:apps/modules/splash/views/splash_screen.dart';
 
 import '../modules/forgot_password/bindings/forgot_password_binding.dart';
 import '../modules/forgot_password/views/forgot_password_view.dart';
+import '../modules/logout/bindings/logout_binding.dart';
+import '../modules/logout/views/logout_view.dart';
 import '../modules/prompt_admin/bindings/prompt_admin_binding.dart';
 import '../modules/prompt_admin/views/prompt_admin_view.dart';
 import '../modules/splash/bindings/splash_binding.dart';
@@ -26,6 +28,12 @@ class AppPages {
       name: _Paths.LOGIN,
       page: () => LoginScreen(),
       binding: LoginBinding(),
+      transition: Transition.downToUp,
+    ),
+    GetPage(
+      name: _Paths.LOGOUT,
+      page: () => LogoutScreen(),
+      binding: LogoutBinding(),
       transition: Transition.downToUp,
     ),
     GetPage(

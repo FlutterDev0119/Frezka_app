@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nb_utils/nb_utils.dart';
 
 import '../../../utils/common/colors.dart';
 import '../../../utils/app_scaffold.dart';
@@ -35,7 +36,7 @@ class GenAIClinicalScreen extends StatelessWidget {
                   onPressed: () {},
                   child: Text('Upload File'),
                 ),
-                SizedBox(width: 10),
+                10.width,
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     decoration: InputDecoration(
@@ -48,7 +49,7 @@ class GenAIClinicalScreen extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 20),
+            20.height,
             Text('Ready to Use Prompts',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             Wrap(
@@ -62,7 +63,7 @@ class GenAIClinicalScreen extends StatelessWidget {
                 _buildPromptChip('Follow-up Prompt'),
               ],
             ),
-            SizedBox(height: 20),
+            20.height,
             Text('Personalize The Prompt',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             TextField(

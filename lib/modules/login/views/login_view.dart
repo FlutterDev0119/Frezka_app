@@ -2,6 +2,7 @@ import 'package:apps/utils/app_scaffold.dart';
 import 'package:apps/utils/component/app_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nb_utils/nb_utils.dart';
 import '../../../utils/common/colors.dart';
 import '../../../generated/assets.dart';
 import '../../../routes/app_pages.dart';
@@ -16,116 +17,120 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBarBackgroundColor: AppColors.appBackground,
+      hideAppBar: true,
       isLoading: loginController.isLoading,
-      body: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Logo/Icon
-                CircleAvatar(
-                  radius: 50,
-                  backgroundColor: AppColors.cardColor,
-                  child: Icon(Icons.groups, size: 60, color: AppColors.primary),
-                ),
-                const SizedBox(height: 30),
-
-                Text(
-                  "Welcome Back!",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+      body: Container(
+        color: Colors.white,
+        child: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Center(
+                    child: Image.asset(
+                      Assets.imagesLogin,
+                      height: Get.height * .3,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
+                  8.height,
 
-                Text(
-                  "Login to continue",
-                  style: TextStyle(fontSize: 16, color: AppColors.textColor),
-                ),
-                const SizedBox(height: 30),
+                  Text(
+                    "Welcome Back!",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  10.height,
 
-                // Username Field
-                buildTextField(
-                  controller: loginController.emailCont,
-                  hintText: "Username",
-                  icon: Icons.person,
-                ),
-                const SizedBox(height: 20),
+                  Text(
+                    "Login to continue",
+                    style: TextStyle(fontSize: 16, color: AppColors.textColor),
+                  ),
+                  30.height,
+                  // Username Field
+                  buildTextField(
+                    controller: loginController.emailCont,
+                    hintText: "Username",
+                    icon: Icons.person,
+                  ),
+                  20.height,
 
-                // Password Field
-                Obx(() => buildTextField(
-                      controller: loginController.passwordCont,
-                      hintText: "Password",
-                      icon: Icons.lock,
-                      obscureText: !loginController.isPasswordVisible.value,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          loginController.isPasswordVisible.value ? Icons.visibility : Icons.visibility_off,
-                          color: AppColors.textColor,
+                  // Password Field
+                  Obx(() => buildTextField(
+                        controller: loginController.passwordCont,
+                        hintText: "Password",
+                        icon: Icons.lock,
+                        obscureText: !loginController.isPasswordVisible.value,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            loginController.isPasswordVisible.value ? Icons.visibility : Icons.visibility_off,
+                            color: AppColors.textColor,
+                          ),
+                          onPressed: () => loginController.isPasswordVisible.toggle(),
                         ),
-                        onPressed: () => loginController.isPasswordVisible.toggle(),
-                      ),
-                    )),
-                const SizedBox(height: 15),
+                      )),
+                  15.height,
 
-                // Forgot Password
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      Get.toNamed(Routes.FORGOTPASSWORD);
+                  // Forgot Password
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        Get.toNamed(Routes.FORGOTPASSWORD);
+                      },
+                      child: Text("Forgot Password?", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600, fontSize: 15)),
+                    ),
+                  ),
+
+                  // // Login Button
+                  AppButtonWidget(
+                    shapeBorder: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    buttonColor: AppColors.primary,
+                    text: "Login",
+                    textStyle: TextStyle(fontWeight: FontWeight.bold, color: AppColors.whiteColor, fontSize: 18),
+                    width: double.infinity,
+                    onTap: () {
+                      loginController.loginUser();
                     },
-                    child: Text("Forgot Password?", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600, fontSize: 15)),
                   ),
-                ),
+                  // _buildButton("Login", 18,FontWeight.bold,AppColors.primary, AppColors.whiteColor,() {
+                  //   loginController.loginUser();
+                  // }),
 
-                // // Login Button
-                AppButtonWidget(
-                  shapeBorder: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  buttonColor: AppColors.primary,
-                  text: "Login",
-                  textStyle: TextStyle(fontWeight: FontWeight.bold, color: AppColors.whiteColor, fontSize: 18),
-                  width: double.infinity,
-                  onTap: () {
-                    loginController.loginUser();
-                  },
-                ),
-                // _buildButton("Login", 18,FontWeight.bold,AppColors.primary, AppColors.whiteColor,() {
-                //   loginController.loginUser();
-                // }),
-                const SizedBox(height: 10),
+                  10.height,
 
-                // Google Sign-In Button
-                _buildButton("Sign in with Google", 16, FontWeight.w600, AppColors.whiteColor, AppColors.textColor, () {
-                  loginController.loginWithGoogle();
-                }, icon: Icons.login),
-                const SizedBox(height: 20),
+                  // Google Sign-In Button
+                  _buildButton("Sign in with Google", 16, FontWeight.w600, AppColors.whiteColor, AppColors.textColor, () {
+                    loginController.loginWithGoogle();
+                  }, icon: Icons.login),
 
-                // Sign-Up Link
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.center,
-                //   children: [
-                //     Text("Don't have an account? ", style: TextStyle(color: AppColors.textColor)),
-                //     GestureDetector(
-                //       onTap: () {},
-                //       child: Text(
-                //         "Sign Up",
-                //         style: TextStyle(
-                //           color: AppColors.primary,
-                //           fontWeight: FontWeight.bold,
-                //         ),
-                //       ),
-                //     )
-                //   ],
-                // )
-              ],
+                  20.height,
+
+                  // Sign-Up Link
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   children: [
+                  //     Text("Don't have an account? ", style: TextStyle(color: AppColors.textColor)),
+                  //     GestureDetector(
+                  //       onTap: () {},
+                  //       child: Text(
+                  //         "Sign Up",
+                  //         style: TextStyle(
+                  //           color: AppColors.primary,
+                  //           fontWeight: FontWeight.bold,
+                  //         ),
+                  //       ),
+                  //     )
+                  //   ],
+                  // )
+                ],
+              ),
             ),
           ),
         ),

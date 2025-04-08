@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
+import '../../../routes/app_pages.dart';
 import '../../../utils/common/colors.dart';
 import '../../../utils/shared_prefences.dart';
 import '../controllers/dashboard_controller.dart';
@@ -37,7 +38,7 @@ class DashboardScreen extends StatelessWidget {
           backgroundColor: AppColors.cardColor,
           child: Text("N", style: GoogleFonts.roboto(color: AppColors.primary, fontWeight: FontWeight.bold)),
         ),
-        const SizedBox(width: 15),
+        15.width,
       ],
     );
   }
@@ -62,7 +63,7 @@ class DashboardScreen extends StatelessWidget {
             itemCount: itemsWithWelcome.length,
             itemBuilder: (context, index) {
               var item = itemsWithWelcome[index];
-              return item['type'] == "welcome" ? _buildWelcomeCard() : _buildCard(item);
+              return item['type'] == "welcome" ? _buildWelcomeCard(context) : _buildCard(item);
             },
           );
         },
@@ -85,7 +86,7 @@ class DashboardScreen extends StatelessWidget {
                   backgroundColor: AppColors.cardColor,
                   child: Text("N", style: GoogleFonts.roboto(color: AppColors.primary, fontSize: 24, fontWeight: FontWeight.bold)),
                 ),
-                const SizedBox(height: 10),
+                10.height,
                 Text("Nilesh Sonar", style: GoogleFonts.roboto(color: AppColors.textColor, fontSize: 18)),
                 Text("nilesh@example.com", style: GoogleFonts.roboto(color: AppColors.textColor.withOpacity(0.7), fontSize: 14)),
               ],
@@ -118,6 +119,7 @@ class DashboardScreen extends StatelessWidget {
       },
     );
   }
+
   Future<void> clearUserData() async {
     await setBoolAsync(AppSharedPreferenceKeys.isUserLoggedIn, false);
     await setStringAsync(AppSharedPreferenceKeys.apiToken, '');
@@ -125,30 +127,89 @@ class DashboardScreen extends StatelessWidget {
     // You can also clear other keys if needed
   }
 
-  Widget _buildWelcomeCard() {
-    return Card(
-      color: AppColors.cardColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 30,
-              backgroundColor: AppColors.primary,
-              child: Text("NS", style: GoogleFonts.roboto(color: AppColors.cardColor, fontSize: 24, fontWeight: FontWeight.bold)),
-            ),
-            const SizedBox(height: 10),
-            Text("Welcome", style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textColor)),
-            Text("John Deo", style: GoogleFonts.roboto(fontSize: 16, color: AppColors.textColor)),
-            Center(
-              child: Text("22/03/2025, 17:26:45",
-                  textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 14, color: AppColors.textColor.withOpacity(0.7))),
-            ),
-          ],
+  Widget _buildWelcomeCard(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) {
+              return Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                backgroundColor: Colors.white,
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  width: 300,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Logout Confirmation',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      12.height,
+                      const Text(
+                        'Are you sure you want to log out?',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                      24.height,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          AppButton(
+                            textStyle: TextStyle(color: AppColors.background),
+                            onTap: () {
+                              Get.back();
+                            },
+                            child: Text('Cancel'),
+                          ),
+                          AppButton(
+                            color: AppColors.primary,
+                            onTap: () async {
+                              await clearUserData().then((value) {
+                                Get.offAllNamed(Routes.LOGIN);
+                              },);
+                            },
+                            child: Text('Confirm',style: TextStyle(color: white),),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              );
+            });
+      },
+      child: Card(
+        color: AppColors.cardColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        elevation: 3,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                radius: 30,
+                backgroundColor: AppColors.primary,
+                child: Text("NS", style: GoogleFonts.roboto(color: AppColors.cardColor, fontSize: 24, fontWeight: FontWeight.bold)),
+              ),
+              10.height,
+              Text("Welcome", style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textColor)),
+              Text("John Deo", style: GoogleFonts.roboto(fontSize: 16, color: AppColors.textColor)),
+              Center(
+                child: Text("22/03/2025, 17:26:45",
+                    textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 14, color: AppColors.textColor.withOpacity(0.7))),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -167,11 +228,11 @@ class DashboardScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(item['icon'], size: 40, color: AppColors.primary),
-              const SizedBox(height: 10),
+              10.height,
               Center(
                   child: Text(item['title'],
                       textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textColor))),
-              const SizedBox(height: 5),
+              5.height,
               Center(
                   child: Text(item['description'], textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 14, color: AppColors.textColor))),
             ],

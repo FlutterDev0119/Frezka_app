@@ -5,6 +5,7 @@ abstract class Routes {
 
   static const SPLASH = _Paths.SPLASH;
   static const LOGIN = _Paths.LOGIN;
+  static const LOGOUT = _Paths.LOGOUT;
   static const FORGOTPASSWORD = _Paths.FORGOTPASSWORD;
   static const DASHBOARD = _Paths.DASHBOARD;
   static const GENAICLINICAL = _Paths.GENAICLINICAL;
@@ -15,6 +16,7 @@ abstract class Routes {
 abstract class _Paths {
   static const SPLASH = '/splash';
   static const LOGIN = '/login';
+  static const LOGOUT = '/logout';
   static const FORGOTPASSWORD = '/forgot_password';
   static const DASHBOARD = '/dashboard';
   static const GENAICLINICAL = '/GenAI_Clinical';

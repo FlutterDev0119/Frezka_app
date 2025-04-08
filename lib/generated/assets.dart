@@ -6,6 +6,8 @@ class Assets {
   static const String iconsFilterDownArrow = 'assets/icons/filter_down_arrow.png';
   static const String iconsSend = 'assets/icons/send.png';
   static const String imagesAppLogo = 'assets/images/app_logo.png';
+  static const String imagesForgot = 'assets/images/forgot.jpg';
+  static const String imagesLogin = 'assets/images/login.jpg';
   static const String logosIcGoogle = 'assets/logos/ic_google.png';
   static const String lottiesAppLoaderLottie = 'assets/lotties/app_loader_lottie.json';
   static const String lottiesNoDataFound = 'assets/lotties/no_data_found.json';

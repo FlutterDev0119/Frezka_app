@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nb_utils/nb_utils.dart';
 import '../../../generated/assets.dart';
 import '../../../utils/app_scaffold.dart';
 import '../../../utils/common/common_base.dart';
@@ -41,7 +42,7 @@ class MyAgentScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            10.height,
 
             // Selected Items Container
             Container(
@@ -82,7 +83,7 @@ class MyAgentScreen extends StatelessWidget {
                                         color: AppColors.textColor,
                                       ),
                                     ),
-                                    const SizedBox(width: 4),
+                                    4.width,
                                     GestureDetector(
                                       onTap: () => controller.removeItem(item),
                                       child: const Icon(Icons.close,
@@ -122,8 +123,7 @@ class MyAgentScreen extends StatelessWidget {
                 ],
               ),
             ),
-
-            const SizedBox(height: 20),
+            20.height,
 
             // Expansion Tiles
             Expanded(

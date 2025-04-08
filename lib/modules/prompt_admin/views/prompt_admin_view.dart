@@ -398,6 +398,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../generated/assets.dart';
@@ -425,7 +426,7 @@ class PromptAdminScreen extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           children: [
             Text("Prompt Name", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary)),
-            const SizedBox(height: 10),
+            10.height,
             TextField(
               controller: controller.inputController,
               // onEditingComplete: controller.userSubmittedData,
@@ -438,7 +439,7 @@ class PromptAdminScreen extends StatelessWidget {
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
-            const SizedBox(height: 10),
+            10.height,
 
             /// Selected Tags View + Filter Icon on Right
             Obx(() => Row(
@@ -465,7 +466,7 @@ class PromptAdminScreen extends StatelessWidget {
                     ),
 
                     /// Spacer to push icon to right
-                    const SizedBox(width: 8),
+                    8.width,
 
                     /// Filter Icon (Dropdown)
                     GestureDetector(
@@ -558,7 +559,7 @@ class PromptAdminScreen extends StatelessWidget {
                   ],
                 )),
 
-            const SizedBox(height: 10),
+            10.height,
 
             /// Inherit Checkbox
             Obx(() => Row(
@@ -571,7 +572,7 @@ class PromptAdminScreen extends StatelessWidget {
                     ),
                   ],
                 )),
-            const SizedBox(height: 10),
+            10.height,
 
             /// Conditionally Show Chips If Inherit Checked
             Obx(() {
@@ -600,12 +601,12 @@ class PromptAdminScreen extends StatelessWidget {
                             ))
                         .toList(),
                   ),
-                  const SizedBox(height: 12),
+                  12.height,
                 ],
               );
             }),
 
-            const SizedBox(height: 10),
+            10.height,
             Container(
               height: size.height / 2,
               decoration: BoxDecoration(
@@ -614,7 +615,7 @@ class PromptAdminScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  const SizedBox(height: 10),
+                  10.height,
                   Wrap(
                     spacing: 6,
                     runSpacing: 8,
@@ -626,7 +627,7 @@ class PromptAdminScreen extends StatelessWidget {
                       _buildOption("Verify", Icons.verified, 4),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  10.height,
                   Obx(() {
                     int index = controller.currentIndex.value;
                     if (index == 0) {
@@ -685,7 +686,7 @@ class PromptAdminScreen extends StatelessWidget {
                         child: Center(
                           child: Column(
                             children: [
-                              const SizedBox(height: 20),
+                              20.height,
                               Text("Task", style: const TextStyle(fontSize: 20)),
                               ElevatedButton(
                                 onPressed: () => controller.taskText.value = "Updated Task",
@@ -700,7 +701,7 @@ class PromptAdminScreen extends StatelessWidget {
                         child: Center(
                           child: Column(
                             children: [
-                              const SizedBox(height: 20),
+                              20.height,
                               Text("Verify", style: const TextStyle(fontSize: 20)),
                               ElevatedButton(
                                 onPressed: () => controller.verifyText.value = "Verified",
@@ -756,7 +757,7 @@ class PromptAdminScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon, size: 20, color: isSelected ? AppColors.whiteColor : AppColors.primary),
-              const SizedBox(width: 6),
+              6.width,
               Text(
                 label,
                 style: TextStyle(
