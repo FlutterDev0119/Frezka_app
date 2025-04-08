@@ -400,6 +400,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../generated/assets.dart';
 import '../../../utils/common/colors.dart';
 import '../../../utils/app_scaffold.dart';
 import '../../../utils/common/common_base.dart';
@@ -418,16 +419,12 @@ class PromptAdminScreen extends StatelessWidget {
         fontSize: 20,
         color: AppColors.whiteColor,
       ),
-      body:
-    SafeArea(
+      isLoading: controller.isLoading,
+      body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(8.0),
           children: [
-            Text("Prompt Name",
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary)),
+            Text("Prompt Name", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary)),
             const SizedBox(height: 10),
             TextField(
               controller: controller.inputController,
@@ -442,48 +439,172 @@ class PromptAdminScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Obx(() => Wrap(
-              spacing: 2.0,
-              runSpacing: 2.0,
-              children: List.generate(
-                controller.adverseEventReportingList.length,
-                    (index) => GestureDetector(
-                  onTap: () => controller.inputController.text = controller.adverseEventReportingList[index],
-                  child: Chip(
-                    label: Text(controller.adverseEventReportingList[index]),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                ),
-              ),
-            )),
 
-            // Obx(() => Wrap(
-            //   spacing: 2.0,
-            //   runSpacing: 2.0,
-            //   children: List.generate(
-            //     controller.userInput.length,
-            //         (index) => GestureDetector(
-            //       onTap: () => controller.setTextFromList(index),
-            //       child: Chip(
-            //         label: Text(controller.userInput[index]),
-            //         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            //       ),
-            //     ),
-            //   ),
-            // )),
-            const SizedBox(height: 10),
+            /// Selected Tags View + Filter Icon on Right
             Obx(() => Row(
-              children: [
-                Text("Inherit", style: TextStyle(fontSize: 18, color: AppColors.primary)),
-                IconButton(
-                  color: AppColors.primary,
-                  icon: Icon(controller.isChecked.value
-                      ? Icons.check_box
-                      : Icons.check_box_outline_blank),
-                  onPressed: controller.toggleIcon,
-                ),
-              ],
-            )),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    /// Tags Section
+                    Expanded(
+                      child: Wrap(
+                        spacing: 2.0,
+                        runSpacing: 2.0,
+                        children: controller.selectedTags.map((tag) {
+                          final isActive = controller.selectedParentTag.value == tag;
+
+                          return GestureDetector(
+                            onTap: () => controller.selectParentTag(tag),
+                            child: Chip(
+                              label: Text("# $tag"),
+                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              backgroundColor: isActive ? AppColors.primary.withOpacity(0.4) : AppColors.primary.withOpacity(0.1),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+
+                    /// Spacer to push icon to right
+                    const SizedBox(width: 8),
+
+                    /// Filter Icon (Dropdown)
+                    GestureDetector(
+                      onTap: () {
+                        Get.dialog(
+                          Dialog(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            child: Container(
+                              constraints: const BoxConstraints(maxHeight: 500, minWidth: 300),
+                              decoration: BoxDecoration(
+                                color: AppColors.background,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  /// Title Row with background color
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary,
+                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          "Classification",
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.close, color: Colors.white),
+                                          onPressed: () => Get.back(),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  const Divider(height: 1, thickness: 1),
+
+                                  /// Chip List Section (Full Width)
+                                  Expanded(
+                                    child: Obx(() => SingleChildScrollView(
+                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: controller.classificationMap.entries.map((entry) {
+                                              final category = entry.key;
+                                              final isSelected = controller.selectedTags.contains(category);
+
+                                              return GestureDetector(
+                                                onTap: () => controller.addTag(category),
+                                                child: Chip(
+                                                  label: Text(
+                                                    category,
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.w500,
+                                                      color: isSelected ? AppColors.primary : Colors.black87,
+                                                    ),
+                                                  ),
+                                                  backgroundColor: isSelected ? AppColors.primary.withOpacity(0.2) : Colors.grey.shade200,
+                                                ),
+                                              );
+                                            }).toList(),
+                                          ),
+                                        )),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: Image.asset(
+                          Assets.iconsFilterDownArrow,
+                          width: 25,
+                          height: 25,
+                          color: AppColors.background,
+                        ),
+                      ),
+                    ),
+                  ],
+                )),
+
+            const SizedBox(height: 10),
+
+            /// Inherit Checkbox
+            Obx(() => Row(
+                  children: [
+                    Text("Inherit", style: TextStyle(fontSize: 18, color: AppColors.primary)),
+                    IconButton(
+                      color: AppColors.primary,
+                      icon: Icon(controller.isChecked.value ? Icons.check_box : Icons.check_box_outline_blank),
+                      onPressed: controller.toggleIcon,
+                    ),
+                  ],
+                )),
+            const SizedBox(height: 10),
+
+            /// Conditionally Show Chips If Inherit Checked
+            Obx(() {
+              if (!controller.isChecked.value || controller.selectedParentTag.value.isEmpty) {
+                return const SizedBox.shrink();
+              }
+
+              final tag = controller.selectedParentTag.value;
+              final items = controller.classificationMap[tag] ?? [];
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: -8,
+                    children: items
+                        .map((subTag) => GestureDetector(
+                              onTap: () {
+                                //controller.addTag(subTag);
+                              },
+                              child: Chip(
+                                label: Text(subTag),
+                                backgroundColor: controller.selectedTags.contains(subTag) ? AppColors.primary.withOpacity(0.2) : Colors.grey.shade200,
+                              ),
+                            ))
+                        .toList(),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              );
+            }),
+
             const SizedBox(height: 10),
             Container(
               height: size.height / 2,
@@ -516,12 +637,12 @@ class PromptAdminScreen extends StatelessWidget {
                             child: Obx(() => controller.roleImage.value != null
                                 ? Image.file(controller.roleImage.value!, height: size.height / 4)
                                 : Card(
-                              color: AppColors.cardColor,
-                              child: const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Text("Select a file", style: TextStyle(fontSize: 20)),
-                              ),
-                            )),
+                                    color: AppColors.cardColor,
+                                    child: const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text("Select a file", style: TextStyle(fontSize: 20)),
+                                    ),
+                                  )),
                           ),
                         ),
                       );
@@ -533,12 +654,12 @@ class PromptAdminScreen extends StatelessWidget {
                             child: Obx(() => controller.roleImage.value != null
                                 ? Image.file(controller.roleImage.value!, height: size.height / 4)
                                 : Card(
-                              color: AppColors.cardColor,
-                              child: const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Text("Choose Image from Gallery", style: TextStyle(fontSize: 20)),
-                              ),
-                            )),
+                                    color: AppColors.cardColor,
+                                    child: const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text("Choose Image from Gallery", style: TextStyle(fontSize: 20)),
+                                    ),
+                                  )),
                           ),
                         ),
                       );
@@ -550,12 +671,12 @@ class PromptAdminScreen extends StatelessWidget {
                             child: Obx(() => controller.sourceImage.value != null
                                 ? Image.file(controller.sourceImage.value!, height: size.height / 4)
                                 : Card(
-                              color: AppColors.cardColor,
-                              child: const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Text("Click A Photo", style: TextStyle(fontSize: 20)),
-                              ),
-                            )),
+                                    color: AppColors.cardColor,
+                                    child: const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text("Click A Photo", style: TextStyle(fontSize: 20)),
+                                    ),
+                                  )),
                           ),
                         ),
                       );

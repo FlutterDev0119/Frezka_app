@@ -33,14 +33,14 @@ class LoginController extends BaseController {
       );
 
       if (refreshToken != null) {
-        Get.snackbar("Success", "Logged in successfully!");
+        toast("Logged in successfully!");
         Get.offAllNamed(Routes.DASHBOARD);
       } else {
-        Get.snackbar("Error", "Login failed");
+        toast("Login failed");
       }
     } catch (e) {
       setLoading(false);
-      Get.snackbar("Error", "Login failed: ${e.toString()}");
+      toast("Login failed: ${e.toString()}");
     } finally {
       setLoading(false);
     }
@@ -68,14 +68,14 @@ class LoginController extends BaseController {
         ).then(
           (value) async {
             await setValue(AppSharedPreferenceKeys.apiToken, accessToken);
-            Get.snackbar("Success", "Logged in as ${googleUser.displayName}");
+            toast("Logged in as ${googleUser.displayName}");
             Get.offAllNamed(Routes.DASHBOARD);
           },
         );
       }
     } catch (error) {
       setLoading(false);
-      Get.snackbar("Error", "Login failed: $error");
+      toast("Login failed: $error");
     }
   }
 }

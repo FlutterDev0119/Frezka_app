@@ -54,7 +54,6 @@ class AuthServiceApis {
 }
 
 class PromptAdminServiceApis {
-
   static Future<PromptInherit?> getPromptInherit() async {
     List<String> params = [];
 
@@ -68,6 +67,7 @@ class PromptAdminServiceApis {
 
       return PromptInherit.fromJson(response);
     } catch (e) {
+      toast(e.toString());
       print("Error fetching prompt inherit: $e");
       return null;
     }

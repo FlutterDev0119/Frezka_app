@@ -1,3 +1,5 @@
+import 'package:apps/utils/app_scaffold.dart';
+import 'package:apps/utils/component/app_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../utils/common/colors.dart';
@@ -13,8 +15,9 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.appBackground,
+    return AppScaffold(
+      appBarBackgroundColor: AppColors.appBackground,
+      isLoading: loginController.isLoading,
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
@@ -30,7 +33,8 @@ class LoginScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 30),
 
-                Text("Welcome Back!",
+                Text(
+                  "Welcome Back!",
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -39,7 +43,8 @@ class LoginScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
 
-                Text("Login to continue",
+                Text(
+                  "Login to continue",
                   style: TextStyle(fontSize: 16, color: AppColors.textColor),
                 ),
                 const SizedBox(height: 30),
@@ -54,20 +59,18 @@ class LoginScreen extends StatelessWidget {
 
                 // Password Field
                 Obx(() => buildTextField(
-                  controller: loginController.passwordCont,
-                  hintText: "Password",
-                  icon: Icons.lock,
-                  obscureText: !loginController.isPasswordVisible.value,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      loginController.isPasswordVisible.value
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      color: AppColors.textColor,
-                    ),
-                    onPressed: () => loginController.isPasswordVisible.toggle(),
-                  ),
-                )),
+                      controller: loginController.passwordCont,
+                      hintText: "Password",
+                      icon: Icons.lock,
+                      obscureText: !loginController.isPasswordVisible.value,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          loginController.isPasswordVisible.value ? Icons.visibility : Icons.visibility_off,
+                          color: AppColors.textColor,
+                        ),
+                        onPressed: () => loginController.isPasswordVisible.toggle(),
+                      ),
+                    )),
                 const SizedBox(height: 15),
 
                 // Forgot Password
@@ -75,25 +78,32 @@ class LoginScreen extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
-                      Get.toNamed(
-                      Routes.FORGOTPASSWORD);
+                      Get.toNamed(Routes.FORGOTPASSWORD);
                     },
-                    child: Text("Forgot Password?",
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w600,
-                        )),
+                    child: Text("Forgot Password?", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600, fontSize: 15)),
                   ),
                 ),
 
-                // Login Button
-                _buildButton("Login", 18,FontWeight.bold,AppColors.primary, AppColors.whiteColor,() {
-                  loginController.loginUser();
-                }),
+                // // Login Button
+                AppButtonWidget(
+                  shapeBorder: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  buttonColor: AppColors.primary,
+                  text: "Login",
+                  textStyle: TextStyle(fontWeight: FontWeight.bold, color: AppColors.whiteColor, fontSize: 18),
+                  width: double.infinity,
+                  onTap: () {
+                    loginController.loginUser();
+                  },
+                ),
+                // _buildButton("Login", 18,FontWeight.bold,AppColors.primary, AppColors.whiteColor,() {
+                //   loginController.loginUser();
+                // }),
                 const SizedBox(height: 10),
 
                 // Google Sign-In Button
-                _buildButton("Sign in with Google", 16,FontWeight.w600,AppColors.whiteColor, AppColors.textColor,() {
+                _buildButton("Sign in with Google", 16, FontWeight.w600, AppColors.whiteColor, AppColors.textColor, () {
                   loginController.loginWithGoogle();
                 }, icon: Icons.login),
                 const SizedBox(height: 20),
@@ -124,20 +134,20 @@ class LoginScreen extends StatelessWidget {
   }
 
   // Custom Button Widget
-  Widget _buildButton(String text, double fontSize,FontWeight fontWeight,Color color,Color textColor, VoidCallback onPressed, {IconData? icon}) {
+  Widget _buildButton(String text, double fontSize, FontWeight fontWeight, Color color, Color textColor, VoidCallback onPressed, {IconData? icon}) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
         icon: icon != null
             ? SizedBox(
-          width: 24,
-          height: 24,
-          child: Image.asset(Assets.logosIcGoogle, fit: BoxFit.contain),
-        )
+                width: 24,
+                height: 24,
+                child: Image.asset(Assets.logosIcGoogle, fit: BoxFit.contain),
+              )
             : const SizedBox.shrink(),
         label: Text(
           text,
-          style: TextStyle(fontSize: fontSize,fontWeight:  fontWeight,color:textColor),
+          style: TextStyle(fontSize: fontSize, fontWeight: fontWeight, color: textColor),
         ),
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
@@ -148,8 +158,5 @@ class LoginScreen extends StatelessWidget {
         ),
       ),
     );
-
-}
-
-
+  }
 }

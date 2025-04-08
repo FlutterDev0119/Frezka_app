@@ -1,140 +1,9 @@
-// import 'dart:io';
-// import 'package:apps/utils/common/base_controller.dart';
-// import 'package:flutter/services.dart';
-// import 'package:image_picker/image_picker.dart';
-// import 'package:permission_handler/permission_handler.dart';
-// import '../../../utils/library.dart';
-// import '../model/inherit_fetch_doc_model.dart';
-//
-// class PromptAdminController extends BaseController {
-//   // Toggle States
-//   var isChecked = false.obs;
-//   var isSuffixVisible = false.obs;
-//
-//   // Index Management
-//   var currentIndex = 0.obs;
-//
-//   // Text Editing
-//   TextEditingController inputController = TextEditingController();
-//
-//   // Images
-//   final Rx<File?> roleImage = Rx<File?>(null); // Gallery
-//   final Rx<File?> sourceImage = Rx<File?>(null); // Camera
-//
-//   // Dropdown / Selection
-//   final RxString selectedRole = "Select Role".obs;
-//
-//   // Headings
-//   final RxString taskText = "Task".obs;
-//   final RxString verifyText = "Verify".obs;
-//
-//   // User input tags
-//   var adverseEventReportingList = <String>[].obs;
-//
-//   var userInput = [
-//     "# Adverse Event Reporting",
-//     "# Sampling",
-//     "# Aggregate Reporting",
-//     "# PV Agreements",
-//     "# Risk Management",
-//   ].obs;
-//
-//   /// =====================
-//   /// IMAGE PICKING METHODS
-//   /// =====================
-//   Future<void> getInheritDoc() async {
-//     if (isLoading.value) return;
-//     setLoading(true);
-//
-//     try {
-//       final PromptInherit? promptData = await PromptAdminServiceApis.getPromptInherit();
-//
-//       if (promptData != null) {
-//         adverseEventReportingList.assignAll(promptData.adverseEventReporting);
-//         Get.snackbar("Success", "Data fetched successfully!");
-//       } else {
-//         Get.snackbar("Error", "Failed to fetch data");
-//       }
-//     } catch (e) {
-//       Get.snackbar("Error", "Error fetching data: ${e.toString()}");
-//     } finally {
-//       setLoading(false);
-//     }
-//   }
-//
-//   Future<void> pickRoleImage() async {
-//     try {
-//       await Permission.photos.request();
-//       if (await Permission.photos.isPermanentlyDenied) {
-//         openAppSettings();
-//         return;
-//       }
-//       final pickedImage =
-//           await ImagePicker().pickImage(source: ImageSource.gallery);
-//       if (pickedImage != null) {
-//         roleImage.value = File(pickedImage.path);
-//       }
-//     } catch (e) {
-//       print("Error picking role image: $e");
-//     }
-//   }
-//
-//   Future<void> pickSourceImage() async {
-//     try {
-//       await Permission.camera.request();
-//       if (await Permission.camera.isPermanentlyDenied) {
-//         openAppSettings();
-//         return;
-//       }
-//       final pickedImage =
-//           await ImagePicker().pickImage(source: ImageSource.camera);
-//       if (pickedImage != null) {
-//         sourceImage.value = File(pickedImage.path);
-//       }
-//     } catch (e) {
-//       print("Error picking source image: $e");
-//     }
-//   }
-//
-//   /// =====================
-//   /// TEXT & ROLE MANAGEMENT
-//   /// =====================
-//
-//   void setRole(String role) => selectedRole.value = role;
-//
-//   void updateTask(String newTitle) => taskText.value = newTitle;
-//
-//   void updateVerifyText(String newText) => verifyText.value = newText;
-//
-//   /// =====================
-//   /// ICON TOGGLE & INPUT
-//   /// =====================
-//
-//   void toggleIcon() => isChecked.toggle();
-//
-//   void changeByUser() =>
-//       isSuffixVisible.value = inputController.text.isNotEmpty;
-//
-//   void userSubmittedData() {
-//     final input = inputController.text.trim();
-//     if (input.isNotEmpty && !userInput.contains("#$input")) {
-//       userInput.add("#$input");
-//       inputController.clear();
-//     }
-//   }
-//
-//   void setTextFromList(int index) {
-//     if (index >= 0 && index < userInput.length) {
-//       inputController.text = userInput[index];
-//     }
-//   }
-//
-
-// }
+import 'dart:developer';
 import 'dart:io';
 import 'package:apps/utils/common/base_controller.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../utils/library.dart';
 import '../model/inherit_fetch_doc_model.dart';
@@ -152,20 +21,24 @@ class PromptAdminController extends BaseController {
 
   // Text Input
   final TextEditingController inputController = TextEditingController();
-  final RxList<String> adverseEventReportingList = <String>[].obs;
-
-  // Local Static Tags
-  // final RxList<String> userInput = [
-  //   "# Adverse Event Reporting",
-  //   "# Sampling",
-  //   "# Aggregate Reporting",
-  //   "# PV Agreements",
-  //   "# Risk Management",
-  // ].obs;
 
   // Images
   final Rx<File?> roleImage = Rx<File?>(null);
   final Rx<File?> sourceImage = Rx<File?>(null);
+
+  final selectedTags = <String>[].obs;
+  final classificationMap = <String, List<String>>{}.obs;
+  final RxString selectedParentTag = ''.obs;
+
+  void toggleIcon() => isChecked.toggle();
+
+  void selectParentTag(String tag) {
+    if (selectedParentTag.value == tag) {
+      selectedParentTag.value = ''; // deselect if tapped again
+    } else {
+      selectedParentTag.value = tag;
+    }
+  }
 
   @override
   void onInit() {
@@ -173,33 +46,34 @@ class PromptAdminController extends BaseController {
     getInheritDoc();
   }
 
-  /// ================
   /// Fetch API Data
-  /// ================
+
   Future<void> getInheritDoc() async {
     if (isLoading.value) return;
     setLoading(true);
 
     try {
-      final PromptInherit? promptData =
-      await PromptAdminServiceApis.getPromptInherit();
+      final PromptInherit? promptData = await PromptAdminServiceApis.getPromptInherit();
 
       if (promptData != null) {
-        adverseEventReportingList.assignAll(promptData.adverseEventReporting);
-        Get.snackbar("Success", "Data fetched successfully!");
-      } else {
-        Get.snackbar("Error", "Failed to fetch data");
+        classificationMap.assignAll(promptData.output);
       }
     } catch (e) {
-      Get.snackbar("Error", "Error fetching data: ${e.toString()}");
+      toast(e.toString());
+      log(e.toString());
     } finally {
       setLoading(false);
     }
   }
 
-  /// ================
+  void addTag(String tag) {
+    if (!selectedTags.contains(tag)) {
+      selectedTags.add(tag);
+    }
+  }
+
   /// Image Pickers
-  /// ================
+
   Future<void> pickRoleImage() async {
     await _handlePermissionAndPick(
       permission: Permission.photos,
@@ -237,19 +111,16 @@ class PromptAdminController extends BaseController {
     }
   }
 
-  /// ================
   /// Text Management
-  /// ================
+
   void setRole(String role) => selectedRole.value = role;
 
   void updateTask(String newTitle) => taskText.value = newTitle;
 
   void updateVerifyText(String newText) => verifyText.value = newText;
 
-  void toggleIcon() => isChecked.toggle();
+  void changeByUser() => isSuffixVisible.value = inputController.text.isNotEmpty;
 
-  void changeByUser() =>
-      isSuffixVisible.value = inputController.text.isNotEmpty;
   //
   // void userSubmittedData() {
   //   final input = inputController.text.trim();
@@ -270,8 +141,7 @@ class PromptAdminController extends BaseController {
       if (await Permission.photos.isPermanentlyDenied) {
         openAppSettings();
       }
-      final pickedImage =
-          await ImagePicker().pickImage(source: ImageSource.gallery);
+      final pickedImage = await ImagePicker().pickImage(source: ImageSource.gallery);
       if (pickedImage != null) {
         roleImage.value = File(pickedImage.path);
       }
@@ -286,8 +156,7 @@ class PromptAdminController extends BaseController {
       if (await Permission.camera.isPermanentlyDenied) {
         openAppSettings();
       }
-      final pickedImage =
-          await ImagePicker().pickImage(source: ImageSource.camera);
+      final pickedImage = await ImagePicker().pickImage(source: ImageSource.camera);
       if (pickedImage != null) {
         sourceImage.value = File(pickedImage.path);
       }
