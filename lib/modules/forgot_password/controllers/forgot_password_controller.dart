@@ -24,7 +24,7 @@ class ForgotPasswordController extends BaseController {
 
     await AuthServiceApis.forgotPassword(request: request).whenComplete(() => setLoading(false)).then((response) {
       toast(response.message);
-      Get.back(result: true);
+      // Get.back(result: true);
     }).catchError((e) {
       toast(e.toString(), print: true);
     });

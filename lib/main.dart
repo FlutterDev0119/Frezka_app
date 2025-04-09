@@ -1,10 +1,16 @@
 import 'package:apps/utils/library.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
 Rx<BaseLanguage> locale = LanguageEn().obs;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Lock to portrait mode
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   await initialize(aLocaleLanguageList: languageList());
   runApp(MyApp());
 }

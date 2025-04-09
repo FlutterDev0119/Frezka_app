@@ -34,15 +34,38 @@ class AuthServiceApis {
     return userDataResponse.refresh;
   }
 
+  // static Future<BaseResponseModel> forgotPassword({required Map<String, dynamic> request}) async {
+  //   return await BaseResponseModel.fromJson(
+  //     await buildHttpResponse(
+  //       endPoint: APIEndPoints.forgotPassword,
+  //       request: request,
+  //       method: MethodType.post,
+  //     ),
+  //   );
+  // }
   static Future<BaseResponseModel> forgotPassword({required Map<String, dynamic> request}) async {
-    return await BaseResponseModel.fromJson(
-      await buildHttpResponse(
+    try {
+      final responseJson = await buildHttpResponse(
         endPoint: APIEndPoints.forgotPassword,
         request: request,
         method: MethodType.post,
-      ),
-    );
+      );
+
+      if (responseJson == null || responseJson is! Map<String, dynamic>) {
+        throw Exception("Unexpected response from server");
+      }
+
+      return BaseResponseModel.fromJson(responseJson);
+    } catch (e) {
+      // You can customize this error model or throw the error if needed
+      return BaseResponseModel(
+        message: e.toString(),
+        statusCode: 500,
+        data: null,
+      );
+    }
   }
+
 
   static Future<SocialLoginResponse> googleSocialLogin({required Map request}) async {
     return SocialLoginResponse.fromJson(
