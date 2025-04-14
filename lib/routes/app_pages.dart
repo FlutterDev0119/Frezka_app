@@ -4,6 +4,8 @@ import '../modules/forgot_password/bindings/forgot_password_binding.dart';
 import '../modules/forgot_password/views/forgot_password_view.dart';
 import '../modules/logout/bindings/logout_binding.dart';
 import '../modules/logout/views/logout_view.dart';
+import '../modules/meta_phrase_pv/bindings/meta_phrase_pv_binding.dart';
+import '../modules/meta_phrase_pv/view/meta_phrase_pv_view.dart';
 import '../modules/prompt_admin/bindings/prompt_admin_binding.dart';
 import '../modules/prompt_admin/views/prompt_admin_view.dart';
 import '../modules/splash/bindings/splash_binding.dart';
@@ -66,5 +68,12 @@ class AppPages {
       binding: PromptAdminBinding(),
       transition: Transition.downToUp,
     ),
+    GetPage(
+      name: _Paths.META_PHRASE_PV,
+      page: () => MetaPhraseScreen(),
+      binding: MetaPhraseBinding(), // if you have it
+      transition: Transition.downToUp,
+    ),
+
   ];
 }

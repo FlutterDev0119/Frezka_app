@@ -20,7 +20,7 @@ class DashboardController extends GetxController {
       "title": "Metaphrase PV",
       "description": "An Intuitive Platform for Translation Needs.",
       "icon": Icons.translate_rounded,
-      "route": ""
+      "route": Routes.META_PHRASE_PV
     },
     {
       "title": "GenAI PV",

@@ -11,6 +11,7 @@ abstract class Routes {
   static const GENAICLINICAL = _Paths.GENAICLINICAL;
   static const MYAGENT = _Paths.MYAGENT;
   static const PROMPTADMIN = _Paths.PROMPTADMIN;
+  static const META_PHRASE_PV = _Paths.META_PHRASE_PV;
 }
 
 abstract class _Paths {
@@ -22,5 +23,5 @@ abstract class _Paths {
   static const GENAICLINICAL = '/GenAI_Clinical';
   static const MYAGENT = '/my_agent';
   static const PROMPTADMIN = '/prompt_admin';
-
+  static const META_PHRASE_PV = '/meta-phrase-pv';
 }

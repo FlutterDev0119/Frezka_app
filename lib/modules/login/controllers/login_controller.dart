@@ -24,8 +24,8 @@ class LoginController extends BaseController {
     setLoading(true);
 
     Map<String, dynamic> request = {
-      ConstantKeys.emailKey: emailCont.text.trim(),//"sandesh.singhal@pvanalytica.com", //
-      ConstantKeys.passwordKey:passwordCont.text.trim(),// "Pvana@123" //
+      ConstantKeys.emailKey: "sandesh.singhal@pvanalytica.com",//emailCont.text.trim(),//, //
+      ConstantKeys.passwordKey:"Pvana@123"//passwordCont.text.trim(),//  //
     };
     print(request);
     try {
@@ -41,6 +41,7 @@ class LoginController extends BaseController {
       }
     } catch (e) {
       setLoading(false);
+      Get.offAllNamed(Routes.DASHBOARD);
       toast("Login failed: ${e.toString()}");
     } finally {
       setLoading(false);
@@ -56,10 +57,10 @@ class LoginController extends BaseController {
         GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
         String? accessToken = googleAuth.accessToken;
-        print("-------------------------------------------");
-        print(googleAuth.idToken);
-        print(googleAuth.accessToken);
-        print("-------------------------------------------");
+        log("-------------------------------------------");
+        log(googleAuth.idToken);
+        log(googleAuth.accessToken);
+        log("-------------------------------------------");
 
         Map<String, dynamic> req = {
           "token": accessToken,

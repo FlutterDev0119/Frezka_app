@@ -623,13 +623,6 @@ Future<Map<String, String>> getMultipartFields({required Map<String, dynamic> va
   return data;
 }
 
-Map<String, String> buildHeaderForFlutterWave(String flutterWaveSecretKey) {
-  Map<String, String> header = defaultHeaders();
-
-  header.putIfAbsent(HttpHeaders.authorizationHeader, () => "Bearer $flutterWaveSecretKey");
-
-  return header;
-}
 
 String getEndPoint({required String endPoint, int? perPages, int? page, List<String>? params}) {
   List<String> queryParams = [];
