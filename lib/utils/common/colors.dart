@@ -15,6 +15,7 @@ const Color appBackGroundColor = Color(0xFF4682b4);
 const Color appButtonColor = Color(0xFF0e6a90);
 const Color appWhiteColor = Colors.white;
 const Color appTextFieldHintColor = Color(0xFFD1D5DB);
+const Color appDashBoardCardColor = Color(0xFFEAF1FB);
 const Color textColor = Colors.black87;
 
 

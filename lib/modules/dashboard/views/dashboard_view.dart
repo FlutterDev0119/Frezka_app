@@ -19,7 +19,7 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         key: _scaffoldKey,
-        backgroundColor: AppColors.whiteColor,
+        backgroundColor: appBackGroundColor,
         appBar: buildAppBar(),
         drawer: buildDrawer(),
         body: Obx(
@@ -72,7 +72,7 @@ class DashboardScreen extends StatelessWidget {
           return GridView.builder(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
-              mainAxisExtent: 280,
+              mainAxisExtent: 210,
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
             ),
@@ -294,22 +294,22 @@ class DashboardScreen extends StatelessWidget {
             //   ),
             // )
 
-            Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          // elevation: 10,
-          shadowColor: AppColors.primary.withOpacity(0.3),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.background.withOpacity(0.2), appBackGroundColor.withOpacity(0.8)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: appBackGroundColor.withOpacity(0.2),
-                width: 1.5,
-              ),
+          //   Card(
+          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          // // elevation: 10,
+          // shadowColor: AppColors.primary.withOpacity(0.3),
+          // child: Container(
+          //   decoration: BoxDecoration(
+          //     gradient: LinearGradient(
+          //       colors: [AppColors.background.withOpacity(0.2), appBackGroundColor.withOpacity(0.8)],
+          //       begin: Alignment.topLeft,
+          //       end: Alignment.bottomRight,
+          //     ),
+          //     borderRadius: BorderRadius.circular(20),
+          //     border: Border.all(
+          //       color: appBackGroundColor.withOpacity(0.2),
+          //       width: 1.5,
+          //     ),
               // boxShadow: [
               //   BoxShadow(
               //     color: AppColors.primary.withOpacity(0.3),
@@ -318,73 +318,73 @@ class DashboardScreen extends StatelessWidget {
               //     offset: Offset(0, 6),
               //   ),
               // ],
-            ),
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [appBackGroundColor.withOpacity(0.3), appButtonColor.withOpacity(0.9)],
-                      center: Alignment.center,
-                      radius: 0.8,
-                    ),
-                  ),
-                  padding: const EdgeInsets.all(14),
-                  child: Icon(
-                    item['icon'],
-                    size: 42,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  item['title'],
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.roboto(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 0.8,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  item['description'],
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.roboto(
-                    fontSize: 15,
-                    color: Colors.white.withOpacity(0.85),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        )
-
-        // Card(
-        //   color: AppColors.cardColor,
-        //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        //   elevation: 3,
-        //   child: Padding(
-        //     padding: const EdgeInsets.all(10.0),
+            // ),
+        //     padding: const EdgeInsets.all(20),
         //     child: Column(
         //       mainAxisAlignment: MainAxisAlignment.center,
         //       children: [
-        //         Icon(item['icon'], size: 40, color: AppColors.primary),
-        //         10.height,
-        //         Center(
-        //             child: Text(item['title'],
-        //                 textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textColor))),
-        //         5.height,
-        //         Center(
-        //             child: Text(item['description'], textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 14, color: AppColors.textColor))),
+        //         Container(
+        //           decoration: BoxDecoration(
+        //             shape: BoxShape.circle,
+        //             gradient: RadialGradient(
+        //               colors: [appBackGroundColor.withOpacity(0.3), appButtonColor.withOpacity(0.9)],
+        //               center: Alignment.center,
+        //               radius: 0.8,
+        //             ),
+        //           ),
+        //           padding: const EdgeInsets.all(14),
+        //           child: Icon(
+        //             item['icon'],
+        //             size: 42,
+        //             color: Colors.white,
+        //           ),
+        //         ),
+        //         const SizedBox(height: 16),
+        //         Text(
+        //           item['title'],
+        //           textAlign: TextAlign.center,
+        //           style: GoogleFonts.roboto(
+        //             fontSize: 22,
+        //             fontWeight: FontWeight.bold,
+        //             color: Colors.white,
+        //             letterSpacing: 0.8,
+        //           ),
+        //         ),
+        //         const SizedBox(height: 8),
+        //         Text(
+        //           item['description'],
+        //           textAlign: TextAlign.center,
+        //           style: GoogleFonts.roboto(
+        //             fontSize: 15,
+        //             color: Colors.white.withOpacity(0.85),
+        //           ),
+        //         ),
         //       ],
         //     ),
         //   ),
-        // ),
+        // )
+
+        Card(
+          color: appDashBoardCardColor,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          elevation: 3,
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(item['icon'], size: 40, color: AppColors.primary),
+                10.height,
+                Center(
+                    child: Text(item['title'],
+                        textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textColor))),
+                5.height,
+                Center(
+                    child: Text(item['description'], textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 14, color: AppColors.textColor))),
+              ],
+            ),
+          ),
+        ),
         );
   }
 }
