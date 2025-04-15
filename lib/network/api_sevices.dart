@@ -24,11 +24,16 @@ class AuthServiceApis {
     isLoggedIn(true);
     loggedInUser(userDataResponse);
     apiToken = userDataResponse.access!;
-    setValue(AppSharedPreferenceKeys.isUserLoggedIn, true);
-    setValue(AppSharedPreferenceKeys.currentUserData, loggedInUser.value.toJson());
-    setValue(AppSharedPreferenceKeys.apiToken, loggedInUser.value.access);
-    setValue(AppSharedPreferenceKeys.userEmail, userDataResponse.userModel?.email);
-    setValue(AppSharedPreferenceKeys.userPassword, request[ConstantKeys.passwordKey]);
+    setValueToLocal(AppSharedPreferenceKeys.isUserLoggedIn, true);
+    setValueToLocal(AppSharedPreferenceKeys.currentUserData, loggedInUser.value.toJson());
+    setValueToLocal(AppSharedPreferenceKeys.apiToken, loggedInUser.value.access);
+    setValueToLocal(AppSharedPreferenceKeys.userEmail, "sandesh.singhal@pvanalytica.com");//userDataResponse.userModel?.email
+    setValueToLocal(AppSharedPreferenceKeys.userPassword, request[ConstantKeys.passwordKey]);
+    // setValue(AppSharedPreferenceKeys.isUserLoggedIn, true);
+    // setValue(AppSharedPreferenceKeys.currentUserData, loggedInUser.value.toJson());
+    // setValue(AppSharedPreferenceKeys.apiToken, loggedInUser.value.access);
+    // setValue(AppSharedPreferenceKeys.userEmail, userDataResponse.userModel?.email);
+    // setValue(AppSharedPreferenceKeys.userPassword, request[ConstantKeys.passwordKey]);
     // cachedDashboardData = null;
     // if (!isSocialLogin) SocialLoginService.loginWithEmailPassword();
     return userDataResponse.refresh;

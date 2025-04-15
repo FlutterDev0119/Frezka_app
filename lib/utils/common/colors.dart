@@ -1,7 +1,7 @@
 import 'package:apps/utils/library.dart';
 
 class AppColors {
-  static const Color primary = Color(0xFF2A5D84); // Dark Blue
+  static const Color primary = Color(0xFF3b82f6); // Dark Blue
   static const Color background = Color(0xFF7AA2C4); // Light Blue
   static const Color appBackground = Color(0xFFcfe2f3); // Light Blue
   static const Color cardColor = Color(0xFFE3F2FD); // Lightest Blue
@@ -9,8 +9,15 @@ class AppColors {
   static const Color greyColor = Colors.grey;
   static const Color redColor = Colors.red;
   static const Color whiteColor = Colors.white;
-
 }
+
+const Color appBackGroundColor = Color(0xFF4682b4);
+const Color appButtonColor = Color(0xFF0e6a90);
+const Color appWhiteColor = Colors.white;
+const Color appTextFieldHintColor = Color(0xFFD1D5DB);
+const Color textColor = Colors.black87;
+
+
 const lightIconColor = Color(0xFFD8D9D9);
 const appPrimaryColor = Color(0xFF7093E6);
 const darkModePrimaryTextColor = Color(0xFFFFFFFF);

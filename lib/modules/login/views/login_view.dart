@@ -219,7 +219,7 @@ class LoginScreen extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
+                            color: appBackGroundColor,
                           ),
                         ),
                         10.height,
@@ -263,7 +263,7 @@ class LoginScreen extends StatelessWidget {
                             child: Text(
                               "Forgot Password?",
                               style: TextStyle(
-                                color: AppColors.primary,
+                                color: appBackGroundColor,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 15,
                               ),
@@ -275,7 +275,7 @@ class LoginScreen extends StatelessWidget {
                           shapeBorder: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          buttonColor: AppColors.primary,
+                          buttonColor: appBackGroundColor,
                           text: "Login",
                           textStyle: TextStyle(
                             fontWeight: FontWeight.bold,

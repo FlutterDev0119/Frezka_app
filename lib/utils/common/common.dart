@@ -15,15 +15,39 @@ Widget buildTextField({
   return TextField(
     controller: controller,
     obscureText: obscureText,
+    cursorColor: appBackGroundColor,
+    cursorWidth: 1,
     decoration: InputDecoration(
       hintText: hintText,
-      prefixIcon: Icon(icon, color: AppColors.primary),
+      hintStyle: TextStyle(color: appTextFieldHintColor),
+      prefixIcon: Icon(icon, color: appBackGroundColor),
       suffixIcon: suffixIcon,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       filled: true,
-      fillColor: AppColors.cardColor,
+      fillColor: appWhiteColor,
+      // All border styles unified
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: appTextFieldHintColor), // Default border
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: appTextFieldHintColor),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: appBackGroundColor, width: 1), // Highlight when focused
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.red),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.red, width: 1),
+      ),
     ),
   );
+
 }
 
 RxString selectedLanguageCode = DEFAULT_LANGUAGE.obs;
