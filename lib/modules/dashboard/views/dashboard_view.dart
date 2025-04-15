@@ -34,21 +34,21 @@ class DashboardScreen extends StatelessWidget {
 
   AppBar buildAppBar() {
     return AppBar(
-      title: Text("Dashboard", style: GoogleFonts.roboto(color: AppColors.whiteColor, fontWeight: FontWeight.bold, fontSize: 18)),
+      title: Text("Dashboard", style: GoogleFonts.roboto(color: appWhiteColor, fontWeight: FontWeight.bold, fontSize: 18)),
       backgroundColor: appBackGroundColor,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.menu, color: AppColors.whiteColor),
+        icon: const Icon(Icons.menu, color: appWhiteColor),
         onPressed: () => _scaffoldKey.currentState?.openDrawer(),
       ),
       actions: [
         Obx(() {
           return CircleAvatar(
-            backgroundColor: AppColors.cardColor,
+            backgroundColor: appWhiteColor,
             child: Text(
               controller.firstLetter.value,
               style: GoogleFonts.roboto(
-                color: AppColors.primary,
+                color: appBackGroundColor,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -99,13 +99,13 @@ class DashboardScreen extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundColor: AppColors.cardColor,
+                  backgroundColor: appDashBoardCardColor,
                   child: Text(controller.firstLetter.value,
-                      style: GoogleFonts.roboto(color: AppColors.primary, fontSize: 24, fontWeight: FontWeight.bold)),
+                      style: GoogleFonts.roboto(color: appBackGroundColor, fontSize: 24, fontWeight: FontWeight.bold)),
                 ),
                 10.height,
-                Text(controller.fullName.value, style: GoogleFonts.roboto(color: AppColors.whiteColor, fontSize: 18)),
-                Text(controller.email.value, style: GoogleFonts.roboto(color: AppColors.whiteColor.withOpacity(0.7), fontSize: 14)),
+                Text(controller.fullName.value, style: GoogleFonts.roboto(color: appWhiteColor, fontSize: 18)),
+                Text(controller.email.value, style: GoogleFonts.roboto(color: appWhiteColor.withOpacity(0.7), fontSize: 14)),
               ],
             ),
           ),
@@ -121,7 +121,7 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildDrawerItem(IconData icon, String title, String route, {Color color = appBackGroundColor, bool isLogout = false}) {
     return ListTile(
       leading: Icon(icon, color: color),
-      title: Text(title, style: GoogleFonts.roboto(color: AppColors.textColor)),
+      title: Text(title, style: GoogleFonts.roboto(color: appTextColor)),
       // onTap: () => isLogout ? Get.offAllNamed(route) : Get.toNamed(route),
       onTap: () async {
         if (isLogout) {
@@ -155,7 +155,7 @@ class DashboardScreen extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: Colors.white,
+                backgroundColor: appWhiteColor,
                 child: Container(
                   padding: const EdgeInsets.all(24),
                   width: 300,
@@ -165,7 +165,7 @@ class DashboardScreen extends StatelessWidget {
                       const Text(
                         'Logout Confirmation',
                         style: TextStyle(
-                          color: AppColors.primary,
+                          color: appBackGroundColor,
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
                         ),
@@ -180,14 +180,14 @@ class DashboardScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           AppButton(
-                            textStyle: TextStyle(color: AppColors.background),
+                            textStyle: TextStyle(color: appBackGroundColor),
                             onTap: () {
                               Get.back();
                             },
                             child: Text('Cancel'),
                           ),
                           AppButton(
-                            color: AppColors.primary,
+                            color: appBackGroundColor,
                             onTap: () async {
                               await clearUserData().then(
                                 (value) {
@@ -209,7 +209,7 @@ class DashboardScreen extends StatelessWidget {
             });
       },
       child: Card(
-        color: AppColors.cardColor,
+        color: appDashBoardCardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         elevation: 3,
         child: Padding(
@@ -220,15 +220,15 @@ class DashboardScreen extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 30,
-                backgroundColor: AppColors.primary,
-                child: Text("NS", style: GoogleFonts.roboto(color: AppColors.cardColor, fontSize: 24, fontWeight: FontWeight.bold)),
+                backgroundColor: appBackGroundColor,
+                child: Text(controller.firstLetter.value, style: GoogleFonts.roboto(color: appWhiteColor, fontSize: 24, fontWeight: FontWeight.bold)),
               ),
               10.height,
-              Text("Welcome", style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textColor)),
-              Text("John Deo", style: GoogleFonts.roboto(fontSize: 16, color: AppColors.textColor)),
+              Text("Welcome", style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold, color: appTextColor)),
+              Marquee(child: Text(controller.fullName.value, style: GoogleFonts.roboto(fontSize: 16, color: appTextColor))),
               Center(
                 child: Text("22/03/2025, 17:26:45",
-                    textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 14, color: AppColors.textColor.withOpacity(0.7))),
+                    textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 14, color: appTextColor.withOpacity(0.7))),
               ),
             ],
           ),
@@ -297,7 +297,7 @@ class DashboardScreen extends StatelessWidget {
           //   Card(
           // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           // // elevation: 10,
-          // shadowColor: AppColors.primary.withOpacity(0.3),
+          // shadowColor: appBackGroundColor.withOpacity(0.3),
           // child: Container(
           //   decoration: BoxDecoration(
           //     gradient: LinearGradient(
@@ -312,7 +312,7 @@ class DashboardScreen extends StatelessWidget {
           //     ),
               // boxShadow: [
               //   BoxShadow(
-              //     color: AppColors.primary.withOpacity(0.3),
+              //     color: appBackGroundColor.withOpacity(0.3),
               //     blurRadius: 12,
               //     spreadRadius: 2,
               //     offset: Offset(0, 6),
@@ -373,14 +373,14 @@ class DashboardScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(item['icon'], size: 40, color: AppColors.primary),
+                Icon(item['icon'], size: 40, color: appBackGroundColor),
                 10.height,
                 Center(
                     child: Text(item['title'],
-                        textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textColor))),
+                        textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold, color: appTextColor))),
                 5.height,
                 Center(
-                    child: Text(item['description'], textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 14, color: AppColors.textColor))),
+                    child: Text(item['description'], textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 14, color: appTextColor))),
               ],
             ),
           ),

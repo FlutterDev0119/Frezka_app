@@ -3,6 +3,8 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:apps/utils/library.dart';
 
 import '../modules/login/model/google_social_login_model.dart';
+import '../modules/meta_phrase_pv/model/open_worklist_model.dart';
+import '../modules/meta_phrase_pv/model/transalted_model.dart';
 import '../modules/prompt_admin/model/inherit_fetch_doc_model.dart';
 import '../utils/common/base_response_model.dart';
 import '../utils/common/common.dart';
@@ -27,7 +29,7 @@ class AuthServiceApis {
     setValueToLocal(AppSharedPreferenceKeys.isUserLoggedIn, true);
     setValueToLocal(AppSharedPreferenceKeys.currentUserData, loggedInUser.value.toJson());
     setValueToLocal(AppSharedPreferenceKeys.apiToken, loggedInUser.value.access);
-    setValueToLocal(AppSharedPreferenceKeys.userEmail, "sandesh.singhal@pvanalytica.com");//userDataResponse.userModel?.email
+    setValueToLocal(AppSharedPreferenceKeys.userEmail, "sandesh.singhal@pvanalytica.com"); //userDataResponse.userModel?.email
     setValueToLocal(AppSharedPreferenceKeys.userPassword, request[ConstantKeys.passwordKey]);
     // setValue(AppSharedPreferenceKeys.isUserLoggedIn, true);
     // setValue(AppSharedPreferenceKeys.currentUserData, loggedInUser.value.toJson());
@@ -71,7 +73,6 @@ class AuthServiceApis {
     }
   }
 
-
   static Future<SocialLoginResponse> googleSocialLogin({required Map request}) async {
     return SocialLoginResponse.fromJson(
         await handleResponse(await buildHttpResponse(endPoint: APIEndPoints.socialLogin, request: request, method: MethodType.post)));
@@ -81,6 +82,7 @@ class AuthServiceApis {
   static Future<void> clearData({bool isFromDeleteAcc = false}) async {}
 }
 
+/// PROMPT ADMIN
 class PromptAdminServiceApis {
   static Future<PromptInherit?> getPromptInherit() async {
     List<String> params = [];
@@ -100,4 +102,46 @@ class PromptAdminServiceApis {
       return null;
     }
   }
+}
+
+/// META PHRASE PV
+class MetaPhrasePVServiceApis {
+  static Future<List<TranslationWork>> fetchMetaPhraseList() async {
+      final response = await buildHttpResponse(
+        endPoint: APIEndPoints.openWorklist,
+        method: MethodType.get,
+      );
+
+      // Ensure response is a List and map it properly
+      if (response is List) {
+        return response.map((e) => TranslationWork.fromMap(e)).toList();
+      } else {
+        throw Exception('Unexpected response format: ${response.runtimeType}');
+      }
+    }
+
+  static Future<List<TranslationReport>> fetchMetaPhraseListById(String id) async {
+    try {
+      // Make the API call
+      final response = await buildHttpResponse(
+        endPoint: "${APIEndPoints.openWorklist}?id=$id",
+        method: MethodType.get,
+      );
+
+      // Check if the response is a list
+      if (response is List) {
+        // If response is a List, map it to a List of TranslationReport objects
+        return response.map((e) => TranslationReport.fromJson(e)).toList();
+      } else {
+        // If the response is not a List, throw an exception
+        throw FormatException('Expected a List, but got ${response.runtimeType}');
+      }
+    } catch (e) {
+      // Catch and rethrow any error that occurs during the API call or response parsing
+      throw Exception('Failed to fetch translation report for id $id: $e');
+    }
+  }
+
+
+
 }

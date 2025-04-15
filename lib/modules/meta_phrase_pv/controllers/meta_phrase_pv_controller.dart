@@ -1,150 +1,67 @@
 import 'package:apps/utils/library.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
-//
-// class MetaPhraseController extends GetxController {
-//   final worklist = <TranslationFile>[].obs;
-//   final filteredList = <TranslationFile>[].obs;
-//   final selectedLanguage = RxnString();
-//   final languages = <String>[].obs;
-//
-//   @override
-//   void onInit() {
-//     super.onInit();
-//     worklist.assignAll([
-//       TranslationFile(id: '20.docx', language: 'Spanish (es)', originalCount: 152, translatedCount: 135, score: 53),
-//       TranslationFile(id: '18.docx', language: 'German (de)', originalCount: 171, translatedCount: 197, score: 66),
-//       TranslationFile(id: '17.docx', language: 'Japanese (ja)', originalCount: 29, translatedCount: 75, score: 55),
-//       TranslationFile(id: '12.docx', language: 'Spanish (es)', originalCount: 1432, translatedCount: 1419, score: 68),
-//       TranslationFile(id: '10.docx', language: 'Japanese (ja)', originalCount: 299, translatedCount: 878, score: 46),
-//     ]);
-//     filteredList.assignAll(worklist);
-//     languages.assignAll(worklist.map((e) => e.language).toSet());
-//   }
-//
-//   void filterByLanguage(String? lang) {
-//     selectedLanguage.value = lang;
-//     if (lang == null || lang.isEmpty) {
-//       filteredList.assignAll(worklist);
-//     } else {
-//       filteredList.assignAll(worklist.where((e) => e.language == lang));
-//     }
-//   }
-//
-//   void sortByScore() {
-//     filteredList.sort((a, b) => b.score.compareTo(a.score));
-//   }
-// }
-// class TranslationFile {
-//   final String id;
-//   final String language;
-//   final int originalCount;
-//   final int translatedCount;
-//   final int score;
-//
-//   TranslationFile({
-//     required this.id,
-//     required this.language,
-//     required this.originalCount,
-//     required this.translatedCount,
-//     required this.score,
-//   });
-// // }
-// class MetaPhraseController extends GetxController {
-//   final allFiles = <TranslationFile>[].obs;
-//   final filteredFiles = <TranslationFile>[].obs;
-//
-//   // Filters
-//   var identifierFilter = ''.obs;
-//   var languageFilter = ''.obs;
-//   var originalCountFilter = ''.obs;
-//   var translatedCountFilter = ''.obs;
-//   var scoreFilter = ''.obs;
-//
-//   @override
-//   void onInit() {
-//     super.onInit();
-//     allFiles.assignAll([
-//       TranslationFile(id: '20.docx', language: 'Spanish (es)', originalCount: 152, translatedCount: 135, score: 53),
-//       TranslationFile(id: '18.docx', language: 'German (de)', originalCount: 171, translatedCount: 197, score: 66),
-//       TranslationFile(id: '17.docx', language: 'Japanese (ja)', originalCount: 29, translatedCount: 75, score: 55),
-//       TranslationFile(id: '12.docx', language: 'Spanish (es)', originalCount: 1432, translatedCount: 1419, score: 68),
-//       TranslationFile(id: '10.docx', language: 'Japanese (ja)', originalCount: 299, translatedCount: 878, score: 46),
-//     ]);
-//     applyFilters();
-//   }
-//
-//   void applyFilters() {
-//     filteredFiles.assignAll(allFiles.where((file) {
-//       return file.id.toLowerCase().contains(identifierFilter.value.toLowerCase()) &&
-//           file.language.toLowerCase().contains(languageFilter.value.toLowerCase()) &&
-//           file.originalCount.toString().contains(originalCountFilter.value) &&
-//           file.translatedCount.toString().contains(translatedCountFilter.value) &&
-//           file.score.toString().contains(scoreFilter.value);
-//     }).toList());
-//   }
-//
-//   void updateFilter({
-//     String? id,
-//     String? lang,
-//     String? original,
-//     String? translated,
-//     String? score,
-//   }) {
-//     if (id != null) identifierFilter.value = id;
-//     if (lang != null) languageFilter.value = lang;
-//     if (original != null) originalCountFilter.value = original;
-//     if (translated != null) translatedCountFilter.value = translated;
-//     if (score != null) scoreFilter.value = score;
-//     applyFilters();
-//   }
-// }
-class TranslationFile {
-  final String id;
-  final String language;
-  final int originalCount;
-  final int translatedCount;
-  final int score;
+import 'package:get/get.dart'; // Ensure you're importing GetX base
+import '../model/open_worklist_model.dart';
+import '../model/transalted_model.dart';
 
-  TranslationFile({
-    required this.id,
-    required this.language,
-    required this.originalCount,
-    required this.translatedCount,
-    required this.score,
-  });
+enum SortColumn {
+  id,
+  sourceLanguage,
+  originalCount,
+  translatedCount,
+  score,
 }
-enum SortColumn { id, language, originalCount, translatedCount, score }
 
 class MetaPhraseController extends GetxController {
-  final allFiles = <TranslationFile>[].obs;
-  final filteredFiles = <TranslationFile>[].obs;
+  final allFiles = <TranslationWork>[].obs;
+  final filteredFiles = <TranslationWork>[].obs;
+  var selectedFile = Rxn<TranslationReport>();
 
   var sortColumn = SortColumn.id.obs;
   var isAscending = true.obs;
 
+  // Optional: for filtering by language
+  var selectedLanguage = ''.obs;
+
   @override
   void onInit() {
     super.onInit();
-    allFiles.assignAll([
-      TranslationFile(id: '20.docx', language: 'Spanish (es)', originalCount: 152, translatedCount: 135, score: 53),
-      TranslationFile(id: '18.docx', language: 'German (de)', originalCount: 171, translatedCount: 197, score: 66),
-      TranslationFile(id: '17.docx', language: 'Japanese (ja)', originalCount: 29, translatedCount: 75, score: 55),
-      TranslationFile(id: '12.docx', language: 'Spanish (es)', originalCount: 1432, translatedCount: 1419, score: 68),
-      TranslationFile(id: '10.docx', language: 'Japanese (ja)', originalCount: 299, translatedCount: 878, score: 46),
-    ]);
-    sortList(); // Initial sort
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    try {
+      final result = await MetaPhrasePVServiceApis.fetchMetaPhraseList();
+      allFiles.assignAll(result);
+      sortList(); // Sort initially
+    } catch (e) {
+      print('Error fetching MetaPhrase list: $e');
+    }
+  }
+  Future<void> fetchMetaDataById(String id) async {
+    try {
+      final result = await MetaPhrasePVServiceApis.fetchMetaPhraseListById(id);
+      if (result.isNotEmpty) {
+        // Set the first item from the result list to the selectedFile
+        selectedFile.value = result.first;
+      } else {
+        // Handle case where no data is returned for the provided id
+        print('No data found for the provided id');
+      }
+    } catch (e) {
+      print('Error fetching MetaPhrase list for id $id: $e');
+    }
   }
 
   void sortList() {
-    List<TranslationFile> sorted = [...allFiles];
+    List<TranslationWork> sorted = [...allFiles];
     sorted.sort((a, b) {
       int compare;
       switch (sortColumn.value) {
         case SortColumn.id:
           compare = a.id.compareTo(b.id);
           break;
-        case SortColumn.language:
-          compare = a.language.compareTo(b.language);
+        case SortColumn.sourceLanguage:
+          compare = a.sourceLanguage.toLowerCase().compareTo(b.sourceLanguage.toLowerCase());
           break;
         case SortColumn.originalCount:
           compare = a.originalCount.compareTo(b.originalCount);
@@ -164,11 +81,23 @@ class MetaPhraseController extends GetxController {
 
   void toggleSort(SortColumn column) {
     if (sortColumn.value == column) {
-      isAscending.toggle(); // toggle direction
+      isAscending.toggle();
     } else {
       sortColumn.value = column;
-      isAscending.value = true; // default to ascending on new column
+      isAscending.value = true;
     }
     sortList();
+  }
+
+  // Optional: Filter by source language
+  void filterByLanguage(String language) {
+    selectedLanguage.value = language;
+    if (language.isEmpty) {
+      filteredFiles.assignAll(allFiles);
+    } else {
+      filteredFiles.assignAll(
+        allFiles.where((file) => file.sourceLanguage == language).toList(),
+      );
+    }
   }
 }

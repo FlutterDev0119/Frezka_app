@@ -18,12 +18,12 @@ class GenAIClinicalScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-        appBarBackgroundColor: AppColors.primary,
+        appBarBackgroundColor: appBackGroundColor,
         appBarTitleText: "GenAI Clinical",
 
         appBarTitleTextStyle: TextStyle(
         fontSize: 20,
-        color: AppColors.whiteColor,
+        color: appWhiteColor,
     ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

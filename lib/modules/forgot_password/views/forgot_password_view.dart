@@ -108,11 +108,11 @@ class ForgotPasswordScreen extends StatelessWidget {
       isLoading: controller.isLoading,
       hasLeadingWidget: true,
       resizeToAvoidBottomPadding: true,
-      appBarBackgroundColor: AppColors.primary,
+      appBarBackgroundColor: appBackGroundColor,
       appBarTitleText: "Forgot Password",
       appBarTitleTextStyle: TextStyle(
         fontSize: 20,
-        color: AppColors.whiteColor,
+        color: appWhiteColor,
       ),
       body: Container(
         color: Colors.white,
@@ -148,15 +148,16 @@ class ForgotPasswordScreen extends StatelessWidget {
                           errorThisFieldRequired: "Email Required",
                           errorInvalidEmail: "Invalid email",
                           decoration: appInputDecoration(
+                            fillColor: appWhiteColor,
                             context: context,
-                            prefixIcon: AppIconWidget(icon: Icons.email_outlined),
+                            prefixIcon: AppIconWidget(icon: Icons.email_outlined,color: appBackGroundColor),
                             hintText: "Enter email address",
                           ),
                         ),
                       ),
                       24.height,
                       AppButtonWidget(
-                        buttonColor: AppColors.primary,
+                        buttonColor: appBackGroundColor,
                         text: "Request reset link",
                         width: double.infinity,
                         onTap: () {

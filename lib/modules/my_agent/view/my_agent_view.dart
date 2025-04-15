@@ -17,11 +17,11 @@ class MyAgentScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppScaffold(
       isLoading: controller.isLoading,
-      appBarBackgroundColor: AppColors.primary,
+      appBarBackgroundColor: appBackGroundColor,
       appBarTitleText: "My Agent",
       appBarTitleTextStyle: TextStyle(
         fontSize: 20,
-        color: AppColors.whiteColor,
+        color: appWhiteColor,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -34,7 +34,7 @@ class MyAgentScreen extends StatelessWidget {
                 context: context,
                 labelText: "Enter Agent Name",
                 labelStyle: TextStyle(
-                  color: AppColors.textColor,
+                  color: appTextColor,
                   fontSize: 16,
                 ),
                 border: OutlineInputBorder(
@@ -50,7 +50,7 @@ class MyAgentScreen extends StatelessWidget {
               width: double.infinity,
               height: 200,
               decoration: BoxDecoration(
-                color: AppColors.cardColor,
+                color: appDashBoardCardColor,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Stack(
@@ -67,10 +67,10 @@ class MyAgentScreen extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: AppColors.appBackground,
+                                  color: appBackGroundColor,
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                      color: AppColors.primary, width: 1),
+                                      color: appBackGroundColor, width: 1),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -80,14 +80,14 @@ class MyAgentScreen extends StatelessWidget {
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
-                                        color: AppColors.textColor,
+                                        color: appTextColor,
                                       ),
                                     ),
                                     4.width,
                                     GestureDetector(
                                       onTap: () => controller.removeItem(item),
                                       child: const Icon(Icons.close,
-                                          color: AppColors.redColor, size: 18),
+                                          color: appRedColor, size: 18),
                                     ),
                                   ],
                                 ),
@@ -114,8 +114,8 @@ class MyAgentScreen extends StatelessWidget {
                           width: 25,
                           height: 25,
                           color: controller.selectedItems.isNotEmpty
-                              ? AppColors.textColor
-                              : AppColors.greyColor,
+                              ? appTextColor
+                              : appGreyColor,
                         ),
                       ),
                     ),

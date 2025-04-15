@@ -19,9 +19,8 @@ class DashboardController extends GetxController {
   // Fetch email from shared preferences and process it
   void _getEmail() async {
     String? storedEmail = getValueFromLocal(AppSharedPreferenceKeys.userEmail);
-    email.value = 'sandesh.singhal@pvanalytica.com' ?? 'sandesh.singhal@pvanalytica.com';
+    email.value = storedEmail ?? '';
      print("-------------------- ${email.value}");
-    _formatNameFromEmail(email.value);
     if (storedEmail != null && storedEmail.isNotEmpty) {
       _formatNameFromEmail(storedEmail);
     }
