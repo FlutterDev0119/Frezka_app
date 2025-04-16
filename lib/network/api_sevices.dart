@@ -124,23 +124,29 @@ class MetaPhrasePVServiceApis {
     try {
       // Make the API call
       final response = await buildHttpResponse(
-        endPoint: "${APIEndPoints.openWorklist}?id=$id",
+        endPoint: "${APIEndPoints.openWorklist}?Id=$id",
         method: MethodType.get,
       );
 
-      // Check if the response is a list
+      // Check if the response is a List of TranslationReport objects
       if (response is List) {
-        // If response is a List, map it to a List of TranslationReport objects
-        return response.map((e) => TranslationReport.fromJson(e)).toList();
+        // If the response is already a list, map it directly to TranslationReport
+        return response
+            .map((e) => TranslationReport.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } else if (response is Map<String, dynamic>) {
+        // If the response is a Map, handle it accordingly
+        return [TranslationReport.fromJson(response)];
       } else {
-        // If the response is not a List, throw an exception
-        throw FormatException('Expected a List, but got ${response.runtimeType}');
+        throw FormatException('Unexpected response type: ${response.runtimeType}');
       }
     } catch (e) {
-      // Catch and rethrow any error that occurs during the API call or response parsing
+      print('Error fetching translation report for id $id: $e');
       throw Exception('Failed to fetch translation report for id $id: $e');
     }
   }
+
+
 
 
 

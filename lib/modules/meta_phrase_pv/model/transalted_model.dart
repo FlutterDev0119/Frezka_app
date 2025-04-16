@@ -4,16 +4,21 @@ class SentenceScore {
 
   SentenceScore({required this.sentence, required this.score});
 
+  // Factory method to create a SentenceScore from JSON
   factory SentenceScore.fromJson(List<dynamic> json) {
+    // Ensure the json is a list of length 2, one for sentence and one for score
     return SentenceScore(
-      sentence: json[0] as String,
-      score: json[1] as int,
+      sentence: json[0] as String? ?? '', // Default to empty string if null
+      score: json[1] as int? ?? 0, // Default to 0 if null
     );
   }
 
-  List<dynamic> toJson() => [sentence, score];
+  // Method to convert SentenceScore to JSON
+  Map<String, dynamic> toJson() => {
+    'sentence': sentence,
+    'score': score,
+  };
 }
-
 class TranslationReport {
   final String id;
   final String translatedFile;
@@ -37,25 +42,27 @@ class TranslationReport {
     required this.sentenceScore,
   });
 
+  // Factory method to create a TranslationReport from JSON
   factory TranslationReport.fromJson(Map<String, dynamic> json) {
     return TranslationReport(
-      id: json['_id'] as String,
-      translatedFile: json['translated_file'] as String,
-      originalFile: json['original_file'] as String,
-      sourceLanguage: json['source_language'] as String,
-      translatedCount: json['translated_count'] as int,
-      originalCount: json['original_count'] as int,
-      score: json['score'] as int,
-      fileName: json['file_name'] as String,
-      sentenceScore: (json['sentence_score'] as List)
-          .map((item) => SentenceScore.fromJson(item))
-          .toList(),
+      id: json['id'] as String? ?? '',
+      translatedFile: json['translated_file'] as String? ?? '',
+      originalFile: json['original_file'] as String? ?? '',
+      sourceLanguage: json['source_language'] as String? ?? '',
+      translatedCount: json['translated_count'] as int? ?? 0,
+      originalCount: json['original_count'] as int? ?? 0,
+      score: json['score'] as int? ?? 0,
+      fileName: json['file_name'] as String? ?? '',
+      sentenceScore: (json['sentence_score'] as List<dynamic>?)
+          ?.map((item) => SentenceScore.fromJson(item as List<dynamic>))
+          .toList() ?? [],
     );
   }
 
+  // Method to convert TranslationReport to JSON
   Map<String, dynamic> toJson() {
     return {
-      '_id': id,
+      'id': id,
       'translated_file': translatedFile,
       'original_file': originalFile,
       'source_language': sourceLanguage,

@@ -1,22 +1,25 @@
-import 'package:apps/modules/meta_phrase_pv/model/transalted_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nb_utils/nb_utils.dart';
 import '../../../utils/app_scaffold.dart';
 import '../../../utils/common/colors.dart';
 import '../controllers/meta_phrase_pv_controller.dart';
+import '../model/open_worklist_model.dart';
+import '../model/transalted_model.dart';
 
 class MetaPhraseScreen extends StatelessWidget {
   final MetaPhraseController controller = Get.put(MetaPhraseController());
 
-  Icon _sortIcon(SortColumn col, SortColumn currentCol, bool ascending) {
-    if (col != currentCol) return Icon(Icons.unfold_more, size: 16);
-    return ascending ? Icon(Icons.arrow_upward, size: 16) : Icon(Icons.arrow_downward, size: 16);
-  }
+  // Store the selected file locally
+  var isCardSelected = false.obs; // This will handle the toggle
+  var selectedTranslationReport = Rx<TranslationWork?>(null);
 
   Widget _headerButton(String title, SortColumn column) {
     return Obx(() {
       final isSelected = controller.sortColumn.value == column;
-      final icon = isSelected ? (controller.isAscending.value ? Icons.arrow_upward : Icons.arrow_downward) : Icons.unfold_more;
+      final icon = isSelected
+          ? (controller.isAscending.value ? Icons.arrow_upward : Icons.arrow_downward)
+          : Icons.unfold_more;
 
       return InkWell(
         onTap: () => controller.toggleSort(column),
@@ -72,226 +75,130 @@ class MetaPhraseScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildSelectedCard(TranslationReport? selectedTranslationReport) {
+   String id = getStringAsync("setid");
+   String fileName = getStringAsync("setfileName");
+   String sourceLanguage = getStringAsync("setsourceLanguage");
+   String score = getStringAsync("setscore");
+   String originalCount = getStringAsync("setoriginalCount");
+   String translatedCount = getStringAsync("settranslatedCount");
+   log("id------------------------------$id");
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          /// Selected card is displayed
+          Card(
+            color: appDashBoardCardColor,
+            margin: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            elevation: 2,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: ListTile(
+              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              title: Text(fileName, style: TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Language: $sourceLanguage"),
+                  Text("Original: $originalCount → Translated: $translatedCount"),
+                ],
+              ),
+              trailing: Text("Score\n$score", textAlign: TextAlign.center),
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Icon(Icons.arrow_circle_up_rounded),
+          ),
+          Card(
+            color: appDashBoardCardColor,
+            elevation: 2,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Column(
+              children: [
+                ListTile(
+                  title: Text("Original File", style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text(selectedTranslationReport!.originalFile),
+                ),
+                ListTile(
+                  title: Text("Translated File", style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text(selectedTranslationReport.translatedFile ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFileList() {
+    return Expanded(
+      child: ListView.builder(
+        itemCount: controller.filteredFiles.length,
+        itemBuilder: (_, index) {
+          final item = controller.filteredFiles[index];
+          return GestureDetector(
+            onTap: () {
+              controller.fetchMetaDataById(item.id);
+              // Set the selected translation report and toggle visibility
+              selectedTranslationReport.value = item;
+              isCardSelected.value = true;
+              setValue("setid", item.id.toString());
+              setValue("setfileName", item.fileName.toString());
+              setValue("setsourceLanguage", item.sourceLanguage.toString());
+              setValue("setscore", item.score.toString());
+              setValue("setoriginalCount", item.originalCount.toString());
+              setValue("settranslatedCount", item.translatedCount.toString());
+            },
+            child: Card(
+              color: appDashBoardCardColor,
+              margin: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              elevation: 2,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: ListTile(
+                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                title: Text(item.id, style: TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Language: ${item.sourceLanguage}"),
+                    Text("Original: ${item.originalCount} → Translated: ${item.translatedCount}"),
+                  ],
+                ),
+                trailing: Text("Score\n${item.score}", textAlign: TextAlign.center),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
-  // Widget build(BuildContext context) {
-  //   return AppScaffold(
-  //     appBarBackgroundColor: appBackGroundColor,
-  //     appBarTitleText: "MetaPhrase Pv",
-  //     appBarTitleTextStyle: TextStyle(
-  //       fontSize: 20,
-  //       color: appWhiteColor),
-  //     body: Obx(() {
-  //       return Container(
-  //         color: appBackGroundColor,
-  //         child: Column(
-  //           children: [
-  //             _buildHeaderRow(),
-  //             // List View
-  //             Expanded(
-  //               child: ListView.builder(
-  //                 itemCount: controller.filteredFiles.length,
-  //                 itemBuilder: (_, index) {
-  //                   final item = controller.filteredFiles[index];
-  //                     return GestureDetector(
-  //                        onTap: () {
-  //                          controller.selectedFile.value = item;
-  //                          controller.fetchMetaDataById(item.id);
-  //
-  //                        },
-  //                       child: Card(
-  //                         color: appDashBoardCardColor,
-  //                         margin: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-  //                         elevation: 2,
-  //                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-  //                         child: ListTile(
-  //                           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-  //                           title: Text(item.id, style: TextStyle(fontWeight: FontWeight.bold)),
-  //                           subtitle: Column(
-  //                             crossAxisAlignment: CrossAxisAlignment.start,
-  //                             children: [
-  //                               Text("Language: ${item.sourceLanguage}"),
-  //                               Text("Original: ${item.originalCount} → Translated: ${item.translatedCount}"),
-  //                             ],
-  //                           ),
-  //                           trailing: Text("Score\n${item.score}", textAlign: TextAlign.center),
-  //                           onTap: () {}, //   => Get.to(() => DetailScreen(file: item)),
-  //                         ),
-  //                       ),
-  //                     );
-  //                 },
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     }),
-  //   );
-  // }
   Widget build(BuildContext context) {
     return AppScaffold(
       appBarBackgroundColor: appBackGroundColor,
       appBarTitleText: "MetaPhrase Pv",
       appBarTitleTextStyle: TextStyle(fontSize: 20, color: appWhiteColor),
       body: Obx(() {
-        final selectedFile = controller.selectedFile.value;
-        if (selectedFile != null) {
-          // If a file is selected, show the selected card with its details
-          return Container(
-            color: appBackGroundColor,
-            child: Column(
-              children: [
-                Card(
-                  color: appDashBoardCardColor,
-                  margin: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Selected File: ${selectedFile.id}",
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                        ),
-                        SizedBox(height: 10),
-                        Text("Language: ${selectedFile.sourceLanguage}"),
-                        SizedBox(height: 5),
-                        Text("Original Count: ${selectedFile.originalCount}"),
-                        SizedBox(height: 5),
-                        Text("Translated Count: ${selectedFile.translatedCount}"),
-                        SizedBox(height: 10),
-                        Text("Score: ${selectedFile.score}"),
-                        SizedBox(height: 20),
-                        // Show original text and translated text
-                        Card(
-                          margin: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          child: Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Original Text:",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                SizedBox(height: 10),
-                                Text(selectedFile.toString()), // Display original text
-                                SizedBox(height: 20),
-                                Text(
-                                  "Translated Text:",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                SizedBox(height: 10),
-                                Text(selectedFile.sourceLanguage), // Display translated text
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        } else {
-          // If no file is selected, show the list of files
-          return Container(
-            color: appBackGroundColor,
-            child: Column(
-              children: [
+        return Container(
+          color: appBackGroundColor,
+          child: Column(
+            children: [
+              // Show header row and file list only when no card is selected
+              if (!isCardSelected.value) ...[
                 _buildHeaderRow(),
-                // List View
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: controller.filteredFiles.length,
-                    itemBuilder: (_, index) {
-                      final item = controller.filteredFiles[index];
-
-                      return GestureDetector(
-                        onTap: () {
-                          // controller.selectedFile.value = item;
-                          controller.fetchMetaDataById(item.id);
-                        },
-                        child: Card(
-                          color: appDashBoardCardColor,
-                          margin: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          child: ListTile(
-                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            title: Text(item.id, style: TextStyle(fontWeight: FontWeight.bold)),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Language: ${item.sourceLanguage}"),
-                                Text("Original: ${item.originalCount} → Translated: ${item.translatedCount}"),
-                              ],
-                            ),
-                            trailing: Text("Score\n${item.score}", textAlign: TextAlign.center),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Obx(() {
-                  // Check if selected file is not null
-                  if (controller.selectedFile.value != null) {
-                    final selectedItem = controller.selectedFile.value;
-
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Card(
-                        color: appDashBoardCardColor,
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        child: Column(
-                          children: [
-                            // Display details of the selected file
-                            ListTile(
-                              title: Text("Original File", style: TextStyle(fontWeight: FontWeight.bold)),
-                              subtitle: Text(selectedItem!.originalFile),
-                            ),
-                            ListTile(
-                              title: Text("Translated File", style: TextStyle(fontWeight: FontWeight.bold)),
-                              subtitle: Text(selectedItem.translatedFile),
-                            ),
-                            // Display score and language information
-                            ListTile(
-                              title: Text("Source Language", style: TextStyle(fontWeight: FontWeight.bold)),
-                              subtitle: Text(selectedItem.sourceLanguage),
-                            ),
-                            ListTile(
-                              title: Text("Score", style: TextStyle(fontWeight: FontWeight.bold)),
-                              subtitle: Text(selectedItem.score.toString()),
-                            ),
-                            // Show sentence score details (if available)
-                            if (selectedItem.sentenceScore != null)
-                              ...selectedItem.sentenceScore.map((sentenceScore) {
-                                return ListTile(
-                                  title: Text("Sentence: ${sentenceScore.sentence}"),
-                                  subtitle: Text("Score: ${sentenceScore.score}"),
-                                );
-                              }).toList(),
-                          ],
-                        ),
-                      ),
-                    );
-                  } else {
-                    return SizedBox.shrink(); // No file selected, so return empty widget
-                  }
-                }),
-
+                _buildFileList(),
               ],
-            ),
-          );
-        }
+              if (isCardSelected.value && controller.selectedTranslationReport.value != null) ...[
+
+                _buildSelectedCard(controller.selectedTranslationReport.value),
+              ],
+            ],
+          ),
+        );
       }),
     );
   }
-
 }

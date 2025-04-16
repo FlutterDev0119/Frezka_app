@@ -1,5 +1,6 @@
 import 'package:apps/utils/library.dart';
-import 'package:get/get.dart'; // Ensure you're importing GetX base
+import 'package:get/get.dart';
+import 'package:nb_utils/nb_utils.dart';
 import '../model/open_worklist_model.dart';
 import '../model/transalted_model.dart';
 
@@ -14,47 +15,72 @@ enum SortColumn {
 class MetaPhraseController extends GetxController {
   final allFiles = <TranslationWork>[].obs;
   final filteredFiles = <TranslationWork>[].obs;
-  var selectedFile = Rxn<TranslationReport>();
+  final selectedTranslationReport = Rxn<TranslationReport>();
 
-  var sortColumn = SortColumn.id.obs;
-  var isAscending = true.obs;
-
-  // Optional: for filtering by language
-  var selectedLanguage = ''.obs;
+  final sortColumn = SortColumn.id.obs;
+  final isAscending = true.obs;
+  final selectedLanguage = ''.obs;
+  final RxString errorMessage = ''.obs;
+  final RxBool isLoading = false.obs;
 
   @override
   void onInit() {
     super.onInit();
     fetchData();
   }
-
+  List<Map<String, dynamic>>? getListFromStorage() {
+    List<Map<String, dynamic>>? storedItems = getStringListAsync("setid_list")
+        ?.map((item) => Map<String, dynamic>.from(item as Map))
+        .toList();
+    return storedItems;
+  }
+  /// Fetch all MetaPhrase work list
   Future<void> fetchData() async {
     try {
       final result = await MetaPhrasePVServiceApis.fetchMetaPhraseList();
       allFiles.assignAll(result);
-      sortList(); // Sort initially
+      _applySortAndFilter();
     } catch (e) {
       print('Error fetching MetaPhrase list: $e');
     }
   }
-  Future<void> fetchMetaDataById(String id) async {
+
+  /// Fetch details by ID and set selected translation report
+  void fetchMetaDataById(String id) async {
     try {
+      isLoading.value = true;
+      errorMessage.value = '';
+
       final result = await MetaPhrasePVServiceApis.fetchMetaPhraseListById(id);
-      if (result.isNotEmpty) {
-        // Set the first item from the result list to the selectedFile
-        selectedFile.value = result.first;
+
+      if (result != null && result.isNotEmpty) {
+        var fileData = result.first;
+
+        selectedTranslationReport.value = fileData;
       } else {
-        // Handle case where no data is returned for the provided id
-        print('No data found for the provided id');
+        errorMessage.value = 'No data found for this file.';
       }
     } catch (e) {
-      print('Error fetching MetaPhrase list for id $id: $e');
+      errorMessage.value = 'Something went wrong. Please try again.';
+      print('Fetch error: $e');
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  void sortList() {
-    List<TranslationWork> sorted = [...allFiles];
-    sorted.sort((a, b) {
+  /// Sort and filter list together
+  void _applySortAndFilter() {
+    List<TranslationWork> tempList = [...allFiles];
+
+    // Apply filter if any
+    if (selectedLanguage.isNotEmpty) {
+      tempList = tempList
+          .where((file) => file.sourceLanguage == selectedLanguage.value)
+          .toList();
+    }
+
+    // Apply sort
+    tempList.sort((a, b) {
       int compare;
       switch (sortColumn.value) {
         case SortColumn.id:
@@ -76,9 +102,10 @@ class MetaPhraseController extends GetxController {
       return isAscending.value ? compare : -compare;
     });
 
-    filteredFiles.assignAll(sorted);
+    filteredFiles.assignAll(tempList);
   }
 
+  /// Trigger sorting by a column
   void toggleSort(SortColumn column) {
     if (sortColumn.value == column) {
       isAscending.toggle();
@@ -86,18 +113,12 @@ class MetaPhraseController extends GetxController {
       sortColumn.value = column;
       isAscending.value = true;
     }
-    sortList();
+    _applySortAndFilter();
   }
 
-  // Optional: Filter by source language
+  /// Filter list by source language
   void filterByLanguage(String language) {
     selectedLanguage.value = language;
-    if (language.isEmpty) {
-      filteredFiles.assignAll(allFiles);
-    } else {
-      filteredFiles.assignAll(
-        allFiles.where((file) => file.sourceLanguage == language).toList(),
-      );
-    }
+    _applySortAndFilter();
   }
 }
