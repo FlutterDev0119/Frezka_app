@@ -1,3 +1,4 @@
+import 'package:apps/utils/common/base_controller.dart';
 import 'package:apps/utils/library.dart';
 import 'package:get/get.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -12,7 +13,7 @@ enum SortColumn {
   score,
 }
 
-class MetaPhraseController extends GetxController {
+class MetaPhraseController extends BaseController {
   final allFiles = <TranslationWork>[].obs;
   final filteredFiles = <TranslationWork>[].obs;
   final selectedTranslationReport = Rxn<TranslationReport>();
@@ -22,7 +23,11 @@ class MetaPhraseController extends GetxController {
   final selectedLanguage = ''.obs;
   final RxString errorMessage = ''.obs;
   final RxBool isLoading = false.obs;
-
+  var selectedMode = 'Review'.obs;
+  final List<String> modes = ['Review', 'Edit', 'Peer Review', 'Certify'];
+  void updateSelectedMode(String mode) {
+    selectedMode.value = mode;
+  }
   @override
   void onInit() {
     super.onInit();
@@ -36,17 +41,23 @@ class MetaPhraseController extends GetxController {
   }
   /// Fetch all MetaPhrase work list
   Future<void> fetchData() async {
+    if (isLoading.value) return;
+    setLoading(true);
     try {
       final result = await MetaPhrasePVServiceApis.fetchMetaPhraseList();
       allFiles.assignAll(result);
       _applySortAndFilter();
     } catch (e) {
       print('Error fetching MetaPhrase list: $e');
+    }finally{
+      setLoading(false);
     }
   }
 
   /// Fetch details by ID and set selected translation report
   void fetchMetaDataById(String id) async {
+    if (isLoading.value) return;
+    setLoading(true);
     try {
       isLoading.value = true;
       errorMessage.value = '';
@@ -64,6 +75,7 @@ class MetaPhraseController extends GetxController {
       errorMessage.value = 'Something went wrong. Please try again.';
       print('Fetch error: $e');
     } finally {
+      setLoading(false);
       isLoading.value = false;
     }
   }

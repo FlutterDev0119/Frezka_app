@@ -5,6 +5,7 @@ import 'package:nb_utils/nb_utils.dart';
 import '../../../routes/app_pages.dart';
 import '../../../utils/common/colors.dart';
 import '../../../utils/component/loader_widget.dart';
+import '../../../utils/component/no_data_component.dart';
 import '../../../utils/local_storage.dart';
 import '../../../utils/shared_prefences.dart';
 import '../controllers/dashboard_controller.dart';
@@ -64,6 +65,13 @@ class DashboardScreen extends StatelessWidget {
       padding: const EdgeInsets.all(10.0),
       child: LayoutBuilder(
         builder: (context, constraints) {
+          if (controller.items.isEmpty) {
+            return NoDataComponent(
+              title: 'No TestCases found to filter',
+              onRetry: () {
+              },
+            );
+          }
           int crossAxisCount = constraints.maxWidth > 600 ? 3 : 2;
           List<Map<String, dynamic>> itemsWithWelcome = [
             {"type": "welcome"},
