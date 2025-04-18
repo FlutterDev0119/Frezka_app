@@ -20,7 +20,8 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         key: _scaffoldKey,
-        backgroundColor: appBackGroundColor,
+        backgroundColor: AppColors.appBackground,
+        //appBackGroundColor,
         appBar: buildAppBar(),
         drawer: buildDrawer(),
         body: Obx(
@@ -68,8 +69,7 @@ class DashboardScreen extends StatelessWidget {
           if (controller.items.isEmpty) {
             return NoDataComponent(
               title: 'No TestCases found to filter',
-              onRetry: () {
-              },
+              onRetry: () {},
             );
           }
           int crossAxisCount = constraints.maxWidth > 600 ? 3 : 2;
@@ -80,7 +80,7 @@ class DashboardScreen extends StatelessWidget {
           return GridView.builder(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
-              mainAxisExtent: 210,
+              mainAxisExtent: 285,
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
             ),
@@ -217,7 +217,7 @@ class DashboardScreen extends StatelessWidget {
             });
       },
       child: Card(
-        color: appDashBoardCardColor,
+        color: AppColors.appBackground1,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         elevation: 3,
         child: Padding(
@@ -228,7 +228,7 @@ class DashboardScreen extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 30,
-                backgroundColor: appBackGroundColor,
+                backgroundColor: AppColors.primary,
                 child: Text(controller.firstLetter.value, style: GoogleFonts.roboto(color: appWhiteColor, fontSize: 24, fontWeight: FontWeight.bold)),
               ),
               10.height,
@@ -248,151 +248,102 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildCard(Map<String, dynamic> item) {
     return GestureDetector(
         onTap: () => Get.toNamed(item['route']),
-        child:
-            // Card(
-            //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            //   elevation: 6,
-            //   shadowColor: Colors.black26,
-            //   child: Container(
-            //     decoration: BoxDecoration(
-            //       gradient: LinearGradient(
-            //         colors: [Color(0xFF0e6a90), Color(0xFF4682b4)],
-            //         begin: Alignment.topLeft,
-            //         end: Alignment.bottomRight,
-            //       ),
-            //       borderRadius: BorderRadius.circular(20),
-            //     ),
-            //     padding: const EdgeInsets.all(20),
-            //     child: Column(
-            //       mainAxisAlignment: MainAxisAlignment.center,
-            //       children: [
-            //         Container(
-            //           decoration: BoxDecoration(
-            //             shape: BoxShape.circle,
-            //             color: Colors.white.withOpacity(0.15),
-            //           ),
-            //           padding: const EdgeInsets.all(14),
-            //           child: Icon(
-            //             item['icon'],
-            //             size: 40,
-            //             color: Colors.white,
-            //           ),
-            //         ),
-            //         const SizedBox(height: 16),
-            //         Text(
-            //           item['title'],
-            //           textAlign: TextAlign.center,
-            //           style: GoogleFonts.roboto(
-            //             fontSize: 20,
-            //             fontWeight: FontWeight.bold,
-            //             color: Colors.white,
-            //           ),
-            //         ),
-            //         const SizedBox(height: 8),
-            //         Text(
-            //           item['description'],
-            //           textAlign: TextAlign.center,
-            //           style: GoogleFonts.roboto(
-            //             fontSize: 14,
-            //             color: Colors.white.withOpacity(0.9),
-            //           ),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // )
-
-          //   Card(
-          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          // // elevation: 10,
-          // shadowColor: appBackGroundColor.withOpacity(0.3),
-          // child: Container(
-          //   decoration: BoxDecoration(
-          //     gradient: LinearGradient(
-          //       colors: [AppColors.background.withOpacity(0.2), appBackGroundColor.withOpacity(0.8)],
-          //       begin: Alignment.topLeft,
-          //       end: Alignment.bottomRight,
-          //     ),
-          //     borderRadius: BorderRadius.circular(20),
-          //     border: Border.all(
-          //       color: appBackGroundColor.withOpacity(0.2),
-          //       width: 1.5,
-          //     ),
+        child: Card(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          // elevation: 10,
+          shadowColor: AppColors.primary.withOpacity(0.3),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.appBackground1, AppColors.appBackground1],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: appBackGroundColor.withOpacity(0.2),
+                width: 1.5,
+              ),
               // boxShadow: [
               //   BoxShadow(
-              //     color: appBackGroundColor.withOpacity(0.3),
+              //     color: AppColors.primary.withOpacity(0.3),
               //     blurRadius: 12,
               //     spreadRadius: 2,
               //     offset: Offset(0, 6),
               //   ),
               // ],
-            // ),
-        //     padding: const EdgeInsets.all(20),
-        //     child: Column(
-        //       mainAxisAlignment: MainAxisAlignment.center,
-        //       children: [
-        //         Container(
-        //           decoration: BoxDecoration(
-        //             shape: BoxShape.circle,
-        //             gradient: RadialGradient(
-        //               colors: [appBackGroundColor.withOpacity(0.3), appButtonColor.withOpacity(0.9)],
-        //               center: Alignment.center,
-        //               radius: 0.8,
-        //             ),
-        //           ),
-        //           padding: const EdgeInsets.all(14),
-        //           child: Icon(
-        //             item['icon'],
-        //             size: 42,
-        //             color: Colors.white,
-        //           ),
-        //         ),
-        //         const SizedBox(height: 16),
-        //         Text(
-        //           item['title'],
-        //           textAlign: TextAlign.center,
-        //           style: GoogleFonts.roboto(
-        //             fontSize: 22,
-        //             fontWeight: FontWeight.bold,
-        //             color: Colors.white,
-        //             letterSpacing: 0.8,
-        //           ),
-        //         ),
-        //         const SizedBox(height: 8),
-        //         Text(
-        //           item['description'],
-        //           textAlign: TextAlign.center,
-        //           style: GoogleFonts.roboto(
-        //             fontSize: 15,
-        //             color: Colors.white.withOpacity(0.85),
-        //           ),
-        //         ),
-        //       ],
-        //     ),
-        //   ),
-        // )
-
-        Card(
-          color: appDashBoardCardColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          elevation: 3,
-          child: Padding(
-            padding: const EdgeInsets.all(10.0),
+            ),
+            padding: const EdgeInsets.all(18),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(item['icon'], size: 40, color: appBackGroundColor),
-                10.height,
-                Center(
-                    child: Text(item['title'],
-                        textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold, color: appTextColor))),
-                5.height,
-                Center(
-                    child: Text(item['description'], textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 14, color: appTextColor))),
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [AppColors.appBackground3, AppColors.appBackground3],
+                      center: Alignment.center,
+                      radius: 0.8,
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(14),
+                  child: Icon(
+                    item['icon'],
+                    size: 42,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  item['title'],
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.roboto(
+                    fontSize: 21,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textColor,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  item['description'],
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.roboto(
+                    fontSize: 15,
+                    color: AppColors.textColor,
+                  ),
+                ),
               ],
             ),
           ),
-        ),
+        )
+
+        //         Card(
+//           color: appDashBoardCardColor,
+//           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+//           elevation: 3,
+//           child: Padding(
+//             padding: const EdgeInsets.all(10.0),
+//             child: Column(
+//               mainAxisAlignment: MainAxisAlignment.center,
+//               children: [
+//                 Icon(item['icon'], size: 40, color: appBackGroundColor),
+//                 10.height,
+//                 Center(
+//                     child: Text(item['title'],
+//                         textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold, color: appTextColor))),
+//                 5.height,
+//                 Center(
+//                     child: Text(item['description'], textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 14, color: appTextColor))),
+//               ],
+//             ),
+//           ),
+//         ),
+//         );
+//   }
+// }
         );
   }
 }

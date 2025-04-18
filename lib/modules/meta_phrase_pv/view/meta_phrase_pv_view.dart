@@ -1,3 +1,4 @@
+import 'package:apps/utils/library.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -149,12 +150,12 @@ class MetaPhraseScreen extends StatelessWidget {
                       }
                     }
 
+                    List<String> displayModes = mode == 'Review' ? ['Review'] : controller.modes;
                     return Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: controller.modes.map((label) {
+                        children: displayModes.map((label) {
                           return Expanded(
                             child: Container(
-                              // margin: const EdgeInsets.symmetric(horizontal: 4),
                               child: Card(
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                                 color: getColor(label),
@@ -220,7 +221,6 @@ class MetaPhraseScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      Divider(),
 
                       // Translated File Card with Scrollable content
                       Card(
@@ -232,94 +232,140 @@ class MetaPhraseScreen extends StatelessWidget {
                             // Title Row with Fullscreen Icon
                             Row(
                               children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Text(
-                                    "Translated File",
-                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    child: Text(
+                                      "Translated File",
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                    ),
                                   ),
                                 ),
-                                Spacer(),
-                                IconButton(
-                                  icon: Icon(Icons.fullscreen),
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) {
-                                        return Dialog(
-                                          insetPadding: EdgeInsets.zero,
-                                          backgroundColor: Colors.white,
-                                          child: Scaffold(
-                                            appBar: AppBar(
-                                              title: Text("Translation Details"),
-                                              actions: [
-                                                IconButton(
-                                                  icon: Icon(Icons.close),
-                                                  onPressed: () => Navigator.of(context).pop(),
-                                                )
-                                              ],
-                                            ),
-                                            body: Padding(
-                                              padding: const EdgeInsets.all(16),
-                                              child: Scrollbar(
-                                                thumbVisibility: true,
-                                                child: SingleChildScrollView(
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      // Original File
-                                                      Text(
-                                                        "Original File",
-                                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    controller.selectedMode.value == "Edit"
+                                        ? IconButton(
+                                            iconSize: 20,
+                                            visualDensity: VisualDensity.compact,
+                                            padding: EdgeInsets.zero,
+                                            icon: Icon(Icons.document_scanner),
+                                            onPressed: () {},
+                                          )
+                                        : SizedBox(),
+                                    controller.selectedMode.value == "Edit"
+                                        ? IconButton(
+                                            iconSize: 20,
+                                            visualDensity: VisualDensity.compact,
+                                            padding: EdgeInsets.zero,
+                                            icon: Icon(Icons.score_outlined),
+                                            onPressed: () {},
+                                          )
+                                        : SizedBox(),
+                                    controller.selectedMode.value == "Edit"
+                                        ? IconButton(
+                                            iconSize: 20,
+                                            visualDensity: VisualDensity.compact,
+                                            padding: EdgeInsets.zero,
+                                            icon: Icon(Icons.screenshot_monitor_sharp),
+                                            onPressed: () {},
+                                          )
+                                        : SizedBox(),
+                                    (controller.selectedMode.value == "Review" || controller.selectedMode.value == "Edit")
+                                        ? IconButton(
+                                            iconSize: 20,
+                                            visualDensity: VisualDensity.compact,
+                                            padding: EdgeInsets.zero,
+                                            icon: Icon(Icons.compare_arrows),
+                                            onPressed: () async {
+                                              final text = controller.selectedTranslationReport.value?.translatedFile ?? '';
+                                              await controller.fetchReverseTranslation(text);
+                                              // _buildSelectedCard(context, controller.selectedTranslationReport.value,true);
+                                            },
+                                          )
+                                        : SizedBox(),
+                                    (controller.selectedMode.value == "Review" || controller.selectedMode.value == "Edit")
+                                        ? IconButton(
+                                            iconSize: 20,
+                                            visualDensity: VisualDensity.compact,
+                                            padding: EdgeInsets.zero,
+                                            icon: Icon(Icons.fullscreen),
+                                            onPressed: () {
+                                              showDialog(
+                                                context: context,
+                                                builder: (context) {
+                                                  return Dialog(
+                                                    insetPadding: EdgeInsets.zero,
+                                                    backgroundColor: Colors.white,
+                                                    child: Scaffold(
+                                                      appBar: AppBar(
+                                                        title: Text("Translation Details"),
+                                                        actions: [
+                                                          IconButton(
+                                                            icon: Icon(Icons.close),
+                                                            onPressed: () => Navigator.of(context).pop(),
+                                                          )
+                                                        ],
                                                       ),
-                                                      const SizedBox(height: 8),
-                                                      Container(
-                                                        padding: const EdgeInsets.all(12),
-                                                        decoration: BoxDecoration(
-                                                          color: Colors.grey.shade100,
-                                                          borderRadius: BorderRadius.circular(8),
-                                                          border: Border.all(color: Colors.grey.shade300),
-                                                        ),
-                                                        child: Text(
-                                                          selectedTranslationReport.originalFile,
-                                                          style: TextStyle(fontSize: 16),
+                                                      body: Padding(
+                                                        padding: const EdgeInsets.all(16),
+                                                        child: Scrollbar(
+                                                          thumbVisibility: true,
+                                                          child: SingleChildScrollView(
+                                                            child: Column(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: [
+                                                                Text(
+                                                                  "Original File",
+                                                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                                                ),
+                                                                const SizedBox(height: 8),
+                                                                Container(
+                                                                  padding: const EdgeInsets.all(12),
+                                                                  decoration: BoxDecoration(
+                                                                    color: Colors.grey.shade100,
+                                                                    borderRadius: BorderRadius.circular(8),
+                                                                    border: Border.all(color: Colors.grey.shade300),
+                                                                  ),
+                                                                  child: Text(
+                                                                    selectedTranslationReport.originalFile,
+                                                                    style: TextStyle(fontSize: 16),
+                                                                  ),
+                                                                ),
+                                                                const SizedBox(height: 24),
+                                                                Text(
+                                                                  "Translated File",
+                                                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                                                ),
+                                                                const SizedBox(height: 8),
+                                                                Container(
+                                                                  padding: const EdgeInsets.all(12),
+                                                                  decoration: BoxDecoration(
+                                                                    color: Colors.grey.shade100,
+                                                                    borderRadius: BorderRadius.circular(8),
+                                                                    border: Border.all(color: Colors.grey.shade300),
+                                                                  ),
+                                                                  child: Text(
+                                                                    selectedTranslationReport.translatedFile,
+                                                                    style: TextStyle(fontSize: 16),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
                                                         ),
                                                       ),
-
-                                                      const SizedBox(height: 24),
-
-                                                      // Translated File
-                                                      Text(
-                                                        "Translated File",
-                                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                                                      ),
-                                                      const SizedBox(height: 8),
-                                                      Container(
-                                                        padding: const EdgeInsets.all(12),
-                                                        decoration: BoxDecoration(
-                                                          color: Colors.grey.shade100,
-                                                          borderRadius: BorderRadius.circular(8),
-                                                          border: Border.all(color: Colors.grey.shade300),
-                                                        ),
-                                                        child: Text(
-                                                          selectedTranslationReport.translatedFile,
-                                                          style: TextStyle(fontSize: 16),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  },
+                                                    ),
+                                                  );
+                                                },
+                                              );
+                                            },
+                                          )
+                                        : SizedBox(),
+                                  ],
                                 ),
                               ],
                             ),
-
                             // Scrollable Content (non-fullscreen view)
                             Container(
                               height: 150,
@@ -332,10 +378,12 @@ class MetaPhraseScreen extends StatelessWidget {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        selectedTranslationReport.translatedFile,
-                                        style: TextStyle(fontSize: 16),
-                                      ),
+                                      Obx(() => Text(
+                                            controller.reverseTranslatedText.value.isNotEmpty
+                                                ? controller.reverseTranslatedText.value
+                                                : controller.selectedTranslationReport.value?.translatedFile ?? '',
+                                            style: TextStyle(fontSize: 16),
+                                          ))
                                     ],
                                   ),
                                 ),
@@ -368,7 +416,28 @@ class MetaPhraseScreen extends StatelessWidget {
                                     color: appBackGroundColor,
                                     border: Border.all(color: Colors.grey.shade400),
                                   ),
-                                  child: DropdownButtonHideUnderline(
+                                  child:
+                                  // DropdownButtonHideUnderline(
+                                  //   child: DropdownButton<String>(
+                                  //     dropdownColor: appBackGroundColor,
+                                  //     value: selected,
+                                  //     icon: const Icon(Icons.arrow_drop_down, color: appWhiteColor),
+                                  //     style: const TextStyle(fontSize: 16, color: appWhiteColor),
+                                  //     isExpanded: true,
+                                  //     items: controller.modes.map((String value) {
+                                  //       return DropdownMenuItem<String>(
+                                  //         value: value,
+                                  //         child: Text(value),
+                                  //       );
+                                  //     }).toList(),
+                                  //     onChanged: (String? newValue) {
+                                  //       if (newValue != null) {
+                                  //         controller.updateSelectedMode(newValue);
+                                  //       }
+                                  //     },
+                                  //   ),
+                                  // ),
+                                  DropdownButtonHideUnderline(
                                     child: DropdownButton<String>(
                                       dropdownColor: appBackGroundColor,
                                       value: selected,
@@ -376,18 +445,28 @@ class MetaPhraseScreen extends StatelessWidget {
                                       style: const TextStyle(fontSize: 16, color: appWhiteColor),
                                       isExpanded: true,
                                       items: controller.modes.map((String value) {
+                                        final isDisabled = selected == 'Review' && value == 'Peer Review';
+
                                         return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Text(value),
+                                          value: isDisabled ? null : value,
+                                          enabled: !isDisabled,
+                                          child: Text(
+                                            value,
+                                            style: TextStyle(
+                                              color: isDisabled ? Colors.grey : appWhiteColor,
+                                            ),
+                                          ),
                                         );
                                       }).toList(),
                                       onChanged: (String? newValue) {
+                                        // Prevent null (disabled item) from being selected
                                         if (newValue != null) {
                                           controller.updateSelectedMode(newValue);
                                         }
                                       },
                                     ),
                                   ),
+
                                 ),
 
                                 // Only show this if 'Certify' is selected
@@ -435,7 +514,7 @@ class MetaPhraseScreen extends StatelessWidget {
                           ],
                         ),
                       ],
-                    );
+                    ).paddingAll(10);
                   }),
                 ],
               ),
@@ -504,7 +583,7 @@ class MetaPhraseScreen extends StatelessWidget {
                 Expanded(child: _buildFileList()),
               ],
               if (controller.isCardSelected.value && controller.selectedTranslationReport.value != null) ...[
-                Expanded(child: _buildSelectedCard(context, controller.selectedTranslationReport.value)),
+                Expanded(child: _buildSelectedCard(context, controller.selectedTranslationReport.value))
               ],
             ],
           ),

@@ -9,5 +9,5 @@ class APIEndPoints {
 
   ///Meta Phrase Pv
   static const String openWorklist = 'v1/open_worklist';
-  // static const String openWorklistID = '?Id=';
+  static const String reverseTranslate = 'v1/reverse_translate';
 }
