@@ -11,7 +11,6 @@ class MetaPhraseScreen extends StatelessWidget {
   final MetaPhraseController controller = Get.put(MetaPhraseController());
 
   // Store the selected file locally
-  var isCardSelected = false.obs; // This will handle the toggle
   var selectedTranslationReport = Rx<TranslationWork?>(null);
 
   Widget _headerButton(String title, SortColumn column) {
@@ -73,7 +72,7 @@ class MetaPhraseScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSelectedCard(TranslationReport? selectedTranslationReport) {
+  Widget _buildSelectedCard(BuildContext context, TranslationReport? selectedTranslationReport) {
     String id = getStringAsync("setid");
     String fileName = getStringAsync("setfileName");
     String sourceLanguage = getStringAsync("setsourceLanguage");
@@ -105,9 +104,15 @@ class MetaPhraseScreen extends StatelessWidget {
                 trailing: Text("Score\n$score", textAlign: TextAlign.center),
               ),
             ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Icon(Icons.arrow_circle_up_rounded),
+            GestureDetector(
+              onTap: () async {
+                controller.isCardSelected.value = false;
+                controller.selectedTranslationReport.value = null;
+              },
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Icon(Icons.arrow_circle_up_rounded),
+              ),
             ),
             Card(
               color: appDashBoardCardColor,
@@ -115,41 +120,7 @@ class MetaPhraseScreen extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               child: Column(
                 children: [
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  //   children: [
-                  //     _buildStatusBox(Icons.rate_review, "Review", Colors.orange),
-                  //     _buildStatusBox(Icons.edit, "Edit", Colors.purple),
-                  //     _buildStatusBox(Icons.group, "Peer Review", Colors.teal),
-                  //     _buildStatusBox(Icons.verified, "Certify", Colors.green),
-                  //   ],
-                  // )
-                  // Obx(() {
-                  //   String mode = controller.selectedMode.value;
-                  //
-                  //   Color getColor(String button) {
-                  //     if (button == mode) return Colors.blue;
-                  //     if (mode == 'Edit' && button == 'View') return Colors.green;
-                  //     if (mode == 'Translate' && (button == 'Edit' || button == 'View')) return Colors.green;
-                  //     if (mode == 'Review' && (button != 'Review')) return Colors.green;
-                  //     return Colors.grey.shade300;
-                  //   }
-                  //
-                  //   return Row(
-                  //     mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  //     children: ['View', 'Edit', 'Translate', 'Review'].map((label) {
-                  //       return Card(
-                  //         color: getColor(label),
-                  //         child: Padding(
-                  //           padding: const EdgeInsets.all(8.0),
-                  //           child: Text(label, style: TextStyle(color: Colors.white)),
-                  //         ),
-                  //       );
-                  //     }).toList(),
-                  //   );
-                  // })
                   /// Button Row with icons & dynamic colors
-                  /// Buttons with icons and logic
                   Obx(() {
                     String mode = controller.selectedMode.value;
 
@@ -179,110 +150,298 @@ class MetaPhraseScreen extends StatelessWidget {
                     }
 
                     return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: controller.modes.map((label) {
-                        return Expanded(
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            child: Card(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                              color: getColor(label),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                                child: Column(
-                                  children: [
-                                    Icon(getIcon(label), color: Colors.white),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      label,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                    ),
-                                  ],
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: controller.modes.map((label) {
+                          return Expanded(
+                            child: Container(
+                              // margin: const EdgeInsets.symmetric(horizontal: 4),
+                              child: Card(
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                color: getColor(label),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(getIcon(label), color: Colors.white),
+                                      const SizedBox(height: 4),
+                                      Marquee(
+                                        child: Text(
+                                          maxLines: 1,
+                                          label,
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        );
-                      }).toList(),
-                    );
+                          );
+                        }).toList());
                   }).paddingOnly(top: 5, bottom: 10),
-                  ListTile(
-                    title: Text("Original File", style: TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text(selectedTranslationReport!.originalFile),
-                  ),
-                  Divider(),
-                  ListTile(
-                    title: Text("Translated File", style: TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text(selectedTranslationReport.translatedFile),
-                  ),
-                  /// Dropdown styled like a button
-                  Obx(() => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      color: appBackGroundColor,
-                      border: Border.all(color: Colors.grey.shade400),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        dropdownColor: appBackGroundColor,
-                        value: controller.selectedMode.value,
-                        icon: const Icon(
-                          Icons.arrow_drop_down,
-                          color: appWhiteColor,
+
+                  Column(
+                    children: [
+                      Card(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 5,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Title for Original File
+                            Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Text("Original File", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                            ),
+
+                            // Scrollable content for Original File
+                            Container(
+                              height: 150,
+                              padding: const EdgeInsets.all(16),
+                              child: Scrollbar(
+                                thumbVisibility: true,
+                                controller: controller.translatedScrollController,
+                                child: SingleChildScrollView(
+                                  controller: controller.translatedScrollController,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        selectedTranslationReport!.originalFile,
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        style: const TextStyle(fontSize: 16, color: appWhiteColor),
-                        items: controller.selectedMode.value == "Certify"
-                            ? ["Finalize", "Return","Reject"].map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList()
-                            : controller.modes.map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                        onChanged: (String? newValue) {
-                          if (newValue != null) {
-                            controller.updateSelectedMode(newValue);
-                          }
-                        },
                       ),
-                    ),
+                      Divider(),
 
-                  )).paddingBottom(10),
+                      // Translated File Card with Scrollable content
+                      Card(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 5,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Title Row with Fullscreen Icon
+                            Row(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Text(
+                                    "Translated File",
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                  ),
+                                ),
+                                Spacer(),
+                                IconButton(
+                                  icon: Icon(Icons.fullscreen),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return Dialog(
+                                          insetPadding: EdgeInsets.zero,
+                                          backgroundColor: Colors.white,
+                                          child: Scaffold(
+                                            appBar: AppBar(
+                                              title: Text("Translation Details"),
+                                              actions: [
+                                                IconButton(
+                                                  icon: Icon(Icons.close),
+                                                  onPressed: () => Navigator.of(context).pop(),
+                                                )
+                                              ],
+                                            ),
+                                            body: Padding(
+                                              padding: const EdgeInsets.all(16),
+                                              child: Scrollbar(
+                                                thumbVisibility: true,
+                                                child: SingleChildScrollView(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      // Original File
+                                                      Text(
+                                                        "Original File",
+                                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                                      ),
+                                                      const SizedBox(height: 8),
+                                                      Container(
+                                                        padding: const EdgeInsets.all(12),
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.grey.shade100,
+                                                          borderRadius: BorderRadius.circular(8),
+                                                          border: Border.all(color: Colors.grey.shade300),
+                                                        ),
+                                                        child: Text(
+                                                          selectedTranslationReport.originalFile,
+                                                          style: TextStyle(fontSize: 16),
+                                                        ),
+                                                      ),
 
+                                                      const SizedBox(height: 24),
+
+                                                      // Translated File
+                                                      Text(
+                                                        "Translated File",
+                                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                                      ),
+                                                      const SizedBox(height: 8),
+                                                      Container(
+                                                        padding: const EdgeInsets.all(12),
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.grey.shade100,
+                                                          borderRadius: BorderRadius.circular(8),
+                                                          border: Border.all(color: Colors.grey.shade300),
+                                                        ),
+                                                        child: Text(
+                                                          selectedTranslationReport.translatedFile,
+                                                          style: TextStyle(fontSize: 16),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+
+                            // Scrollable Content (non-fullscreen view)
+                            Container(
+                              height: 150,
+                              padding: const EdgeInsets.all(16),
+                              child: Scrollbar(
+                                controller: controller.translatedScrollController1,
+                                thumbVisibility: true,
+                                child: SingleChildScrollView(
+                                  controller: controller.translatedScrollController1,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        selectedTranslationReport.translatedFile,
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+
+                  /// Dropdown styled like a button
+                  Obx(() {
+                    final selected = controller.selectedMode.value;
+                    final certifyOptions = ['Finalize', 'Return', 'Reject'];
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Stack(
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 150,
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    color: appBackGroundColor,
+                                    border: Border.all(color: Colors.grey.shade400),
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      dropdownColor: appBackGroundColor,
+                                      value: selected,
+                                      icon: const Icon(Icons.arrow_drop_down, color: appWhiteColor),
+                                      style: const TextStyle(fontSize: 16, color: appWhiteColor),
+                                      isExpanded: true,
+                                      items: controller.modes.map((String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(value),
+                                        );
+                                      }).toList(),
+                                      onChanged: (String? newValue) {
+                                        if (newValue != null) {
+                                          controller.updateSelectedMode(newValue);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ),
+
+                                // Only show this if 'Certify' is selected
+                                if (selected == 'Certify') const SizedBox(height: 8),
+
+                                if (selected == 'Certify')
+                                  Container(
+                                    width: 150,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.1),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      children: certifyOptions.map((option) {
+                                        return InkWell(
+                                          onTap: () {
+                                            print("Selected: $option");
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.check_circle_outline, color: Colors.blue),
+                                                const SizedBox(width: 10),
+                                                Text(
+                                                  option,
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  }),
                 ],
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildStatusBox(IconData icon, String label, Color color) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        border: Border.all(color: color, width: 2),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: color, size: 24),
-          SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(color: color, fontSize: 12),
-            textAlign: TextAlign.center,
-          ),
-        ],
       ),
     );
   }
@@ -297,7 +456,7 @@ class MetaPhraseScreen extends StatelessWidget {
             controller.fetchMetaDataById(item.id);
             // Set the selected translation report and toggle visibility
             selectedTranslationReport.value = item;
-            isCardSelected.value = true;
+            controller.isCardSelected.value = true;
             setValue("setid", item.id.toString());
             setValue("setfileName", item.fileName.toString());
             setValue("setsourceLanguage", item.sourceLanguage.toString());
@@ -340,13 +499,12 @@ class MetaPhraseScreen extends StatelessWidget {
           color: appBackGroundColor,
           child: Column(
             children: [
-              // Show header row and file list only when no card is selected
-              if (!isCardSelected.value) ...[
+              if (!controller.isCardSelected.value && controller.selectedTranslationReport.value == null) ...[
                 _buildHeaderRow(),
                 Expanded(child: _buildFileList()),
               ],
-              if (isCardSelected.value && controller.selectedTranslationReport.value != null) ...[
-                Expanded(child: _buildSelectedCard(controller.selectedTranslationReport.value)),
+              if (controller.isCardSelected.value && controller.selectedTranslationReport.value != null) ...[
+                Expanded(child: _buildSelectedCard(context, controller.selectedTranslationReport.value)),
               ],
             ],
           ),

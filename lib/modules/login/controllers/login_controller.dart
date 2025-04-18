@@ -25,7 +25,8 @@ class LoginController extends BaseController {
 
     Map<String, dynamic> request = {
       ConstantKeys.emailKey: "sandesh.singhal@pvanalytica.com",//emailCont.text.trim(),//, //
-      ConstantKeys.passwordKey:"Pvana@123"//passwordCont.text.trim(),//  //
+      ConstantKeys.passwordKey:"Pvana@123",//passwordCont.text.trim(),//  //
+      // ConstantKeys.loginTypeKey:""
     };
     print(request);
     try {

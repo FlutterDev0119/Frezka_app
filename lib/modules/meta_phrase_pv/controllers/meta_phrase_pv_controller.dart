@@ -24,13 +24,19 @@ class MetaPhraseController extends BaseController {
   final RxString errorMessage = ''.obs;
   final RxBool isLoading = false.obs;
   var selectedMode = 'Review'.obs;
+  RxBool isCardSelected = false.obs;
+  late ScrollController translatedScrollController = ScrollController();
+  late ScrollController translatedScrollController1 = ScrollController();
   final List<String> modes = ['Review', 'Edit', 'Peer Review', 'Certify'];
   void updateSelectedMode(String mode) {
     selectedMode.value = mode;
   }
+
   @override
   void onInit() {
     super.onInit();
+    translatedScrollController = ScrollController();
+    translatedScrollController1 = ScrollController();
     fetchData();
   }
   List<Map<String, dynamic>>? getListFromStorage() {
@@ -132,5 +138,11 @@ class MetaPhraseController extends BaseController {
   void filterByLanguage(String language) {
     selectedLanguage.value = language;
     _applySortAndFilter();
+  }
+  @override
+  void dispose() {
+    translatedScrollController.dispose();
+    translatedScrollController1.dispose();
+    super.dispose();
   }
 }
