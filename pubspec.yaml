@@ -45,6 +45,9 @@ dependencies:
   # State Management
   get: ^4.7.2
 
+  # Chart
+  fl_chart: ^0.71.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

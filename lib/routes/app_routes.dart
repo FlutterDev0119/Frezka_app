@@ -12,6 +12,7 @@ abstract class Routes {
   static const MYAGENT = _Paths.MYAGENT;
   static const PROMPTADMIN = _Paths.PROMPTADMIN;
   static const META_PHRASE_PV = _Paths.META_PHRASE_PV;
+  static const GOVERNAI = _Paths.GOVERNAI;
 }
 
 abstract class _Paths {
@@ -24,4 +25,5 @@ abstract class _Paths {
   static const MYAGENT = '/my_agent';
   static const PROMPTADMIN = '/prompt_admin';
   static const META_PHRASE_PV = '/meta-phrase-pv';
+  static const GOVERNAI = '/governAI';
 }

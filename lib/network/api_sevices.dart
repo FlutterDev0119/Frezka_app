@@ -2,6 +2,8 @@ import 'package:nb_utils/nb_utils.dart';
 
 import 'package:apps/utils/library.dart';
 
+import '../modules/governAI/model/count_traces_model.dart';
+import '../modules/governAI/model/fetch_traces_model.dart';
 import '../modules/login/model/google_social_login_model.dart';
 import '../modules/meta_phrase_pv/model/open_worklist_model.dart';
 import '../modules/meta_phrase_pv/model/reverse_translate_model.dart';
@@ -153,5 +155,70 @@ class MetaPhrasePVServiceApis {
     );
     return ReverseTranslateResponse.fromJson(response);
   }
+}
 
+/// GOVERN AI
+class GovernAIServiceApis {
+  // Fetch CountTraces list and map to the model
+  static Future<List<CountTracesModel>> fetchCountTracesList() async {
+    try {
+      // final response = await buildHttpResponse(
+      //   endPoint: APIEndPoints.countTraces,
+      //   method: MethodType.get,
+      // );
+      //
+      // // Assuming response is a List of traces data
+      // if (response is List) {
+      //   return response.map((data) => CountTracesModel.fromJson(Map<String, dynamic>.from(data))).toList();
+      // } else {
+      //   throw Exception('Failed to load CountTraces');
+      // }
+      final response = await buildHttpResponse(
+        endPoint: APIEndPoints.countTraces,
+        method: MethodType.get,
+      );
+      print('Response: $response');  // Add this line to inspect the response
+
+      if (response is List) {
+        return response.map((data) => CountTracesModel.fromJson(Map<String, dynamic>.from(data))).toList();
+      } else {
+        throw Exception('Failed to load CountTraces');
+      }
+
+    } catch (e) {
+      throw Exception('Error fetching CountTracesList: $e');
+    }
+  }
+
+  // Fetch Traces list and map to Trace model
+  static Future<List<Trace>> fetchTracesList() async {
+    try {
+      final response = await buildHttpResponse(
+        endPoint: "${APIEndPoints.fetchTrace}?key=GenAI%20PV&date=01-04-2025",
+        method: MethodType.get,
+      );
+
+      // Assuming response is a List of trace data
+      if (response is List) {
+        return response.map((data) => Trace.fromJson(Map<String, dynamic>.from(data))).toList();
+      } else {
+        throw Exception('Failed to load Traces');
+      }
+    } catch (e) {
+      throw Exception('Error fetching TracesList: $e');
+    }
+  }
+
+// static Future<List<CountTracesModel>> fetchCountTracesList() async {
+//   final response = await buildHttpResponse(
+//     endPoint: APIEndPoints.countTraces,
+//     method: MethodType.get,
+//   );
+//   // Ensure response is a List and map it properl
+// }
+// static Future<List<Trace>> fetchTracesList() async {
+//   final response = await buildHttpResponse(
+//     endPoint: "${APIEndPoints.fetchTrace}?key=GenAI%20PV&date=01-04-2025",
+//     method: MethodType.get,
+//   );}
 }

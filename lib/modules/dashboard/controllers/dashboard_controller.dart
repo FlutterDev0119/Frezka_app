@@ -20,7 +20,7 @@ class DashboardController extends GetxController {
   void _getEmail() async {
     String? storedEmail = getValueFromLocal(AppSharedPreferenceKeys.userEmail);
     email.value = storedEmail ?? '';
-     print("-------------------- ${email.value}");
+    print("-------------------- ${email.value}");
     if (storedEmail != null && storedEmail.isNotEmpty) {
       _formatNameFromEmail(storedEmail);
     }
@@ -72,7 +72,12 @@ class DashboardController extends GetxController {
       "route": Routes.GENAICLINICAL
     },
     {"title": "ReconAI", "description": "Ensures data consistency, detects anomalies & integrates data.", "icon": Icons.sync_rounded, "route": ""},
-    {"title": "GovernAI", "description": "Automates compliance & enhances risk management.", "icon": Icons.security_rounded, "route": ""},
+    {
+      "title": "GovernAI",
+      "description": "Automates compliance & enhances risk management.",
+      "icon": Icons.security_rounded,
+      "route": Routes.GOVERNAI
+    },
     {
       "title": "Prompt Admin",
       "description": "Centralized prompt management with enforced guidelines.",
