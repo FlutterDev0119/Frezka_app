@@ -1,6 +1,9 @@
 // Custom TextField Widget
+import 'dart:convert';
+
 import 'package:nb_utils/nb_utils.dart';
 
+import '../shared_prefences.dart';
 import 'colors.dart';
 import '../library.dart';
 
@@ -48,6 +51,23 @@ Widget buildTextField({
     ),
   );
 
+}
+Future<void> loadLoggedInUser() async {
+  if (getBoolAsync(AppSharedPreferenceKeys.isUserLoggedIn)) {
+    String? jsonString = getStringAsync(AppSharedPreferenceKeys.currentUserData);
+    if (jsonString != null && jsonString.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(jsonString);
+        final userData = UserDataResponseModel.fromJson(decoded);
+        loggedInUser.value = userData;
+        apiToken = userData.access ?? '';
+        isLoggedIn(true);
+      } catch (e) {
+        log('Failed to decode stored user data: $e');
+        isLoggedIn(false);
+      }
+    }
+  }
 }
 
 RxString selectedLanguageCode = DEFAULT_LANGUAGE.obs;

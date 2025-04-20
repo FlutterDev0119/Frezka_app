@@ -87,7 +87,7 @@ class SplashController extends BaseController {
     final loginStatus = getBoolAsync(AppSharedPreferenceKeys.isUserLoggedIn, defaultValue: false);
     isLoggedIn(loginStatus);
 
-    if (kDebugMode) toast("Logged In: ${isLoggedIn.value}");
+    // if (kDebugMode) toast("Logged In: ${isLoggedIn.value}");
 
     final token = getStringAsync(AppSharedPreferenceKeys.apiToken);
     if (token.isNotEmpty) {
@@ -100,13 +100,13 @@ class SplashController extends BaseController {
         final userData = UserDataResponseModel.fromJson(jsonDecode(userDataStr));
         loggedInUser(userData);
       } catch (e) {
-        log("❌ Error decoding user data: $e");
+        log("Error decoding user data: $e");
       }
     }
   }
 
   /// Handles navigation after splash
-  Future<void> handleNavigation() async{
+  Future<void> handleNavigation() async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.microtask(() {
         if (isLoggedIn.value) {

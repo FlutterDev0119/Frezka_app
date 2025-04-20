@@ -29,11 +29,11 @@ class AuthServiceApis {
     isLoggedIn(true);
     loggedInUser(userDataResponse);
     apiToken = userDataResponse.access!;
-    setValueToLocal(AppSharedPreferenceKeys.isUserLoggedIn, true);
-    setValueToLocal(AppSharedPreferenceKeys.currentUserData, loggedInUser.value.toJson());
-    setValueToLocal(AppSharedPreferenceKeys.apiToken, loggedInUser.value.access);
-    setValue(AppSharedPreferenceKeys.userEmail, request['email'].toString()); //userDataResponse.userModel?.email
-    setValueToLocal(AppSharedPreferenceKeys.userPassword, request[ConstantKeys.passwordKey]);
+    setValue(AppSharedPreferenceKeys.isUserLoggedIn, true);
+    setValue(AppSharedPreferenceKeys.currentUserData, loggedInUser.value.toJson());
+    setValue(AppSharedPreferenceKeys.apiToken, loggedInUser.value.access);
+    setValue(AppSharedPreferenceKeys.userEmail, request['email'].toString());//userDataResponse.userModel?.email
+    setValue(AppSharedPreferenceKeys.userPassword, request[ConstantKeys.passwordKey]);
     return userDataResponse.refresh;
   }
 
