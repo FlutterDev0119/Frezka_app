@@ -1,5 +1,7 @@
-// import 'dart:convert';
 //
+// import 'dart:convert';
+// import 'package:flutter/widgets.dart';
+// import 'package:get/get.dart';
 // import 'package:nb_utils/nb_utils.dart';
 //
 // import '../../../utils/common/base_controller.dart';
@@ -14,16 +16,16 @@
 //     init();
 //   }
 //
+//   /// Initializes splash logic: fetch cache and navigate.
 //   Future<void> init() async {
-//     getCacheData();
-//     await Future.delayed(const Duration(seconds: 1));
-//     handleNavigation();
+//     await getCacheData();
+//
 //   }
 //
-//
-//   handleNavigation() async {
+//   /// Determines where to navigate after splash.
+//   void handleNavigation() {
 //     WidgetsBinding.instance.addPostFrameCallback((_) {
-//       if (isLoggedIn == true) {
+//       if (isLoggedIn.value == true) {
 //         Get.offAllNamed(Routes.DASHBOARD);
 //       } else {
 //         Get.offAllNamed(Routes.LOGIN);
@@ -31,21 +33,29 @@
 //     });
 //   }
 //
-//   getCacheData() {
-//     isLoggedIn(getBoolAsync(AppSharedPreferenceKeys.isUserLoggedIn,
-//         defaultValue: false));
-//
-//     if (getStringAsync(AppSharedPreferenceKeys.apiToken).isNotEmpty) {
-//       apiToken = getStringAsync(AppSharedPreferenceKeys.apiToken);
+//   /// Loads cached user data if present.
+//   Future<void> getCacheData() async {
+//     isLoggedIn(getBoolAsync(AppSharedPreferenceKeys.isUserLoggedIn, defaultValue: false));
+//     toast(isLoggedIn.value.toString());
+//     final token = getStringAsync(AppSharedPreferenceKeys.apiToken);
+//     if (token.isNotEmpty) {
+//       apiToken = token;
 //     }
 //
-//     if (getStringAsync(AppSharedPreferenceKeys.currentUserData).isNotEmpty) {
-//       loggedInUser(UserDataResponseModel.fromJson(
-//           jsonDecode(getStringAsync(AppSharedPreferenceKeys.currentUserData))));
+//     final userDataStr = getStringAsync(AppSharedPreferenceKeys.currentUserData);
+//     if (userDataStr.isNotEmpty) {
+//       try {
+//         final userData = UserDataResponseModel.fromJson(jsonDecode(userDataStr));
+//         loggedInUser(userData);
+//       } catch (e) {
+//         log("Error decoding user data: $e");
+//       }
 //     }
+//      handleNavigation();
 //   }
 // }
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -62,27 +72,22 @@ class SplashController extends BaseController {
     init();
   }
 
-  /// Initializes splash logic: fetch cache and navigate.
+  /// Initializes splash logic
   Future<void> init() async {
     await getCacheData();
-    // await Future.delayed(const Duration(seconds: 1));
-    handleNavigation();
+
+    // Add a small delay (optional, for splash screen feel)
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    await handleNavigation();
   }
 
-  /// Determines where to navigate after splash.
-  void handleNavigation() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (isLoggedIn.value == true) {
-        Get.offAllNamed(Routes.DASHBOARD);
-      } else {
-        Get.offAllNamed(Routes.LOGIN);
-      }
-    });
-  }
-
-  /// Loads cached user data if present.
+  /// Loads cached data and sets up state
   Future<void> getCacheData() async {
-    isLoggedIn(getBoolAsync(AppSharedPreferenceKeys.isUserLoggedIn, defaultValue: false));
+    final loginStatus = getBoolAsync(AppSharedPreferenceKeys.isUserLoggedIn, defaultValue: false);
+    isLoggedIn(loginStatus);
+
+    if (kDebugMode) toast("Logged In: ${isLoggedIn.value}");
 
     final token = getStringAsync(AppSharedPreferenceKeys.apiToken);
     if (token.isNotEmpty) {
@@ -95,8 +100,21 @@ class SplashController extends BaseController {
         final userData = UserDataResponseModel.fromJson(jsonDecode(userDataStr));
         loggedInUser(userData);
       } catch (e) {
-        log("Error decoding user data: $e");
+        log("❌ Error decoding user data: $e");
       }
     }
+  }
+
+  /// Handles navigation after splash
+  Future<void> handleNavigation() async{
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.microtask(() {
+        if (isLoggedIn.value) {
+          Get.offAllNamed(Routes.DASHBOARD);
+        } else {
+          Get.offAllNamed(Routes.LOGIN);
+        }
+      });
+    });
   }
 }

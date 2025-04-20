@@ -26,11 +26,11 @@ class DashboardScreen extends StatelessWidget {
         drawer: buildDrawer(),
         body: Obx(
           () {
-            if (controller.email.isEmpty) {
+            if (controller.email.value.isEmpty) {
               return Center(child: LoaderWidget());
-            }
+            }else{
             return buildBody(context);
-          },
+          }},
         ));
   }
 
@@ -264,14 +264,6 @@ class DashboardScreen extends StatelessWidget {
                 color: appBackGroundColor.withOpacity(0.2),
                 width: 1.5,
               ),
-              // boxShadow: [
-              //   BoxShadow(
-              //     color: AppColors.primary.withOpacity(0.3),
-              //     blurRadius: 12,
-              //     spreadRadius: 2,
-              //     offset: Offset(0, 6),
-              //   ),
-              // ],
             ),
             padding: const EdgeInsets.all(18),
             child: Column(
@@ -318,32 +310,6 @@ class DashboardScreen extends StatelessWidget {
               ],
             ),
           ),
-        )
-
-        //         Card(
-//           color: appDashBoardCardColor,
-//           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-//           elevation: 3,
-//           child: Padding(
-//             padding: const EdgeInsets.all(10.0),
-//             child: Column(
-//               mainAxisAlignment: MainAxisAlignment.center,
-//               children: [
-//                 Icon(item['icon'], size: 40, color: appBackGroundColor),
-//                 10.height,
-//                 Center(
-//                     child: Text(item['title'],
-//                         textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold, color: appTextColor))),
-//                 5.height,
-//                 Center(
-//                     child: Text(item['description'], textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 14, color: appTextColor))),
-//               ],
-//             ),
-//           ),
-//         ),
-//         );
-//   }
-// }
-        );
+        ));
   }
 }
