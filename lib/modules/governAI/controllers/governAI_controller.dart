@@ -10,16 +10,20 @@ class GovernAIController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchTraces();
-    fetchCountTraces();
+    init();
+  }
+
+  init() async {
+    await fetchTraces();
+    await fetchCountTraces();
   }
 
   // Fetch Traces list from API
-  void fetchTraces() async {
+  Future<void> fetchTraces() async {
     try {
       isLoading(true);
       final result = await GovernAIServiceApis.fetchTracesList();
-      traceList.assignAll(result);  // Add the fetched traces to the observable list
+      traceList.assignAll(result); // Add the fetched traces to the observable list
     } catch (e) {
       print('Error fetching traces: $e');
     } finally {
@@ -28,13 +32,13 @@ class GovernAIController extends GetxController {
   }
 
   // Fetch CountTraces list from API
-  void fetchCountTraces() async {
+  Future<void> fetchCountTraces() async {
     try {
       isLoading(true);
       final result = await GovernAIServiceApis.fetchCountTracesList();
-      countTracesList.assignAll(result);  // Add the fetched count traces to the observable list
+      countTracesList.assignAll(result); // Add the fetched count traces to the observable list
     } catch (e) {
-      print('Error fetching CountTraces: $e');  // This will help debug the error
+      print('Error fetching CountTraces: $e'); // This will help debug the error
     } finally {
       isLoading(false);
     }
