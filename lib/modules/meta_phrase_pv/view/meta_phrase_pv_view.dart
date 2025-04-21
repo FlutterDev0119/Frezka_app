@@ -579,7 +579,7 @@ class MetaPhraseScreen extends StatelessWidget {
           child: Column(
             children: [
               if (!controller.isCardSelected.value && controller.selectedTranslationReport.value == null) ...[
-                _buildHeaderRow(),
+                if(controller.filteredFiles.isNotEmpty) _buildHeaderRow(),
                 Expanded(child: _buildFileList()),
               ],
               if (controller.isCardSelected.value && controller.selectedTranslationReport.value != null) ...[
