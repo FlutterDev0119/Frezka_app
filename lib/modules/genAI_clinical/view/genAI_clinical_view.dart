@@ -539,7 +539,7 @@ class GenAIClinicalScreen extends StatelessWidget {
 
             // Curate the Response Section
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.only(top: 15),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -577,6 +577,7 @@ class GenAIClinicalScreen extends StatelessWidget {
                     }
 
                     return Container(
+                      width: double.infinity,
                       padding: EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.grey.shade300),
@@ -639,131 +640,137 @@ class GenAIClinicalScreen extends StatelessWidget {
                   }),
 
                   // Filter Icon for Selecting Attributes
-                  GestureDetector(
-                    onTap: () {
-                      Get.dialog(Dialog(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        child: Container(
-                          constraints: const BoxConstraints(maxHeight: 500, minWidth: 300),
-                          decoration: BoxDecoration(
-                            color: appBackGroundColor,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              // Title Row
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                decoration: BoxDecoration(
-                                  color: appBackGroundColor,
-                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Text(
-                                      "select prompt",
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: GestureDetector(
+                        onTap: () {
+                          Get.dialog(Dialog(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            child: Container(
+                              constraints: const BoxConstraints(maxHeight: 500, minWidth: 300),
+                              decoration: BoxDecoration(
+                                color: appBackGroundColor,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  // Title Row
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    decoration: BoxDecoration(
+                                      color: appBackGroundColor,
+                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          "select prompt",
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.close, color: Colors.white),
+                                          onPressed: () => Get.back(),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const Divider(height: 1, thickness: 1),
+                                  Container(
+                                    margin: const EdgeInsets.all(16),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    decoration: BoxDecoration(
+                                      color: appWhiteColor,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: Colors.grey.shade300),
+                                    ),
+                                    child: TextField(
+                                      controller: controller.searchController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Search Attributes',
+                                        prefixIcon: Icon(Icons.search),
+                                        suffixIcon: controller.searchController.text.isNotEmpty
+                                            ? IconButton(
+                                          icon: Icon(Icons.clear),
+                                          onPressed: () {
+                                            controller.searchController.clear();
+                                          },
+                                        )
+                                            : null,
+                                        border: InputBorder.none,
                                       ),
                                     ),
-                                    IconButton(
-                                      icon: const Icon(Icons.close, color: Colors.white),
-                                      onPressed: () => Get.back(),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const Divider(height: 1, thickness: 1),
-                              Container(
-                                margin: const EdgeInsets.all(16),
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
-                                decoration: BoxDecoration(
-                                  color: appWhiteColor,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: Colors.grey.shade300),
-                                ),
-                                child: TextField(
-                                  controller: controller.searchController,
-                                  decoration: InputDecoration(
-                                    labelText: 'Search Attributes',
-                                    prefixIcon: Icon(Icons.search),
-                                    suffixIcon: controller.searchController.text.isNotEmpty
-                                        ? IconButton(
-                                      icon: Icon(Icons.clear),
-                                      onPressed: () {
-                                        controller.searchController.clear();
-                                      },
-                                    )
-                                        : null,
-                                    border: InputBorder.none,
                                   ),
-                                ),
-                              ),
 
 
-                              // Chip List Section
-                              Expanded(
-                                child: Obx(
-                                  () => SingleChildScrollView(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: controller.filteredClassificationMap.entries.map((entry) {
-                                        final category = entry.key; // Investigator Analysis or Site Analysis
-                                        final attributes = entry.value;
-
-                                        return Column(
+                                  // Chip List Section
+                                  Expanded(
+                                    child: Obx(
+                                      () => SingleChildScrollView(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                        child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              category,
-                                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Column(
-                                              children: attributes.map((attribute) {
-                                                final isSelected = controller.selectedTags.contains(attribute);
+                                          children: controller.filteredClassificationMap.entries.map((entry) {
+                                            final category = entry.key; // Investigator Analysis or Site Analysis
+                                            final attributes = entry.value;
 
-                                                return GestureDetector(
-                                                  onTap: () => controller.toggleAttribute(attribute),
-                                                  child: Chip(
-                                                    label: Text(attribute),
-                                                    backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
-                                                    labelStyle: TextStyle(color: isSelected ? appBackGroundColor : Colors.black87),
-                                                  ),
-                                                );
-                                              }).toList(),
-                                            ),
-                                            const SizedBox(height: 16),
-                                          ],
-                                        );
-                                      }).toList(),
+                                            return Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  category,
+                                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                                ),
+                                                const SizedBox(height: 8),
+                                                Column(
+                                                  children: attributes.map((attribute) {
+                                                    final isSelected = controller.selectedTags.contains(attribute);
+
+                                                    return GestureDetector(
+                                                      onTap: () => controller.toggleAttribute(attribute),
+                                                      child: Chip(
+                                                        label: Text(attribute),
+                                                        backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
+                                                        labelStyle: TextStyle(color: isSelected ? appBackGroundColor : Colors.black87),
+                                                      ),
+                                                    );
+                                                  }).toList(),
+                                                ),
+                                                const SizedBox(height: 16),
+                                              ],
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
+                                ],
                               ),
-                            ],
+                            ),
+                          )).then((_) {
+                            // Clear the search controller and filtered list after dialog is closed
+                           controller.searchController.clear();
+                           controller.filteredClassificationMap.assignAll(controller.classificationMap);
+                          });;
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Image.asset(
+                            Assets.iconsFilterDownArrow,
+                            width: 25,
+                            height: 25,
+                            color: appBackGroundColor,
                           ),
                         ),
-                      )).then((_) {
-                        // Clear the search controller and filtered list after dialog is closed
-                       controller.searchController.clear();
-                       controller.filteredClassificationMap.assignAll(controller.classificationMap);
-                      });;
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8),
-                      child: Image.asset(
-                        Assets.iconsFilterDownArrow,
-                        width: 25,
-                        height: 25,
-                        color: appBackGroundColor,
                       ),
                     ),
                   ),
@@ -778,15 +785,18 @@ class GenAIClinicalScreen extends StatelessWidget {
                 child: Row(
                   children: prompts.map((chip) {
                     final isSelected = controller.selectedChips.contains(chip);
-                    return GestureDetector(
-                      onTap: () => controller.toggleSelection(chip), // Replaced toggleChip with toggleSelection
-                      child: FilterChip(
-                        label: Text(chip),
-                        selected: isSelected,
-                        onSelected: (_) => controller.toggleSelection(chip),
-                        // Replaced toggleChip with toggleSelection
-                        selectedColor: appBackGroundColor,
-                        backgroundColor: Colors.grey.shade200,
+                    return Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: GestureDetector(
+                        onTap: () => controller.toggleSelection(chip), // Replaced toggleChip with toggleSelection
+                        child: FilterChip(
+                          label: Text(chip),
+                          selected: isSelected,
+                          onSelected: (_) => controller.toggleSelection(chip),
+                          // Replaced toggleChip with toggleSelection
+                          selectedColor: appBackGroundColor,
+                          backgroundColor: Colors.grey.shade200,
+                        ),
                       ),
                     );
                   }).toList(),
