@@ -7,6 +7,9 @@ class APIEndPoints {
   ///Prompt Admin
   static const String fetchDoc = 'fetch_docs';
 
+  ///GenAI Clinical
+  static const String fetchDocClinical = 'v1/fetch_docs_clinical';
+
   ///Meta Phrase Pv
   static const String openWorklist = 'v1/open_worklist';
   static const String reverseTranslate = 'v1/reverse_translate';

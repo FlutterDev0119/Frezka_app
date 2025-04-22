@@ -30,6 +30,8 @@ dependencies:
   # Image & Media Handling
   image_picker: ^1.1.2
   photo_view: ^0.15.0
+  file_picker: ^9.0.1
+  open_file: ^3.5.10
 
   # Firebase Services
   firebase_core: ^3.12.1
@@ -47,6 +49,7 @@ dependencies:
 
   # Chart
   fl_chart: ^0.71.0
+
 
 dev_dependencies:
   flutter_test:

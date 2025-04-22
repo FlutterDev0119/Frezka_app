@@ -112,8 +112,8 @@ class MetaPhraseScreen extends StatelessWidget {
               },
               child: Align(
                 alignment: Alignment.centerRight,
-                child: Icon(Icons.arrow_circle_up_rounded),
-              ),
+                child: Icon(Icons.arrow_circle_up_rounded,color: appWhiteColor),
+              ).paddingOnly(right: 10,top: 5,bottom: 5),
             ),
             Card(
               color: appDashBoardCardColor,

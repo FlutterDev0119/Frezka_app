@@ -2,6 +2,7 @@ import 'package:nb_utils/nb_utils.dart';
 
 import 'package:apps/utils/library.dart';
 
+import '../modules/genAI_clinical/model/fetch_docs_clinical.dart';
 import '../modules/governAI/model/count_traces_model.dart';
 import '../modules/governAI/model/fetch_traces_model.dart';
 import '../modules/login/model/google_social_login_model.dart';
@@ -60,7 +61,6 @@ class AuthServiceApis {
 
       return BaseResponseModel.fromJson(responseJson);
     } catch (e) {
-      // You can customize this error model or throw the error if needed
       return BaseResponseModel(
         message: e.toString(),
         statusCode: 500,
@@ -193,4 +193,26 @@ class GovernAIServiceApis {
     }
   }
 
+}
+
+/// GenAI Clinical
+class ClinicalPromptServiceApis {
+  static Future<FetchDocsClinical?> getDocsClinical() async {
+    List<String> params = [];
+
+    try {
+      final response = await buildHttpResponse(
+        endPoint: getEndPoint(
+          endPoint: APIEndPoints.fetchDocClinical,
+          params: params,
+        ),
+      );
+
+      return FetchDocsClinical.fromJson(response);
+    } catch (e) {
+      toast(e.toString());
+      print("Error fetching clinical documents: $e");
+      return null;
+    }
+  }
 }
