@@ -5,7 +5,8 @@ class APIEndPoints {
   static const String socialLogin = 'google/';
 
   ///Prompt Admin
-  static const String fetchDoc = 'fetch_docs';
+  static const String fetchDoc = 'v1/fetch_docs';
+  static const String rolePromptResponse = 'v1/role_select';
 
   ///GenAI Clinical
   static const String fetchDocClinical = 'v1/fetch_docs_clinical';

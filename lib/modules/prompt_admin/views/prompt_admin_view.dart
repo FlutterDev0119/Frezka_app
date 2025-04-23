@@ -36,10 +36,11 @@ class PromptAdminScreen extends StatelessWidget {
             TextField(
               controller: controller.inputController,
               // onEditingComplete: controller.userSubmittedData,
+              readOnly: true,
               decoration: appInputDecoration(
                 context: context,
                 hintText: "Enter Prompt Name",
-                hintStyle: TextStyle(color:appGreyColor),
+                hintStyle: TextStyle(color: appGreyColor),
                 filled: true,
                 fillColor: appWhiteColor,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -176,6 +177,126 @@ class PromptAdminScreen extends StatelessWidget {
                       icon: Icon(controller.isChecked.value ? Icons.check_box : Icons.check_box_outline_blank),
                       onPressed: controller.toggleIcon,
                     ),
+                    Spacer(),
+
+                    /// Filter Icon (Dropdown)
+                    GestureDetector(
+                      onTap: () {
+                        Get.dialog(
+                          Dialog(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            child: Container(
+                              constraints: const BoxConstraints(maxHeight: 500, minWidth: 300),
+                              decoration: BoxDecoration(
+                                color: appBackGroundColor,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  /// Title Row with background color
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    decoration: BoxDecoration(
+                                      color: appBackGroundColor,
+                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          "Select Prompt",
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.close, color: Colors.white),
+                                          onPressed: () => Get.back(),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  const Divider(height: 1, thickness: 1),
+
+                                  /// Chip List Section (Full Width)
+                                  Expanded(
+                                    child: Obx(
+                                      () => SingleChildScrollView(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: controller.classificationMap.entries.map((entry) {
+                                            final category = entry.key;
+                                            final prompts = entry.value;
+
+                                            return Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                // Section Title
+                                                Padding(
+                                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                                  child: Text(
+                                                    "#$category",
+                                                    style: const TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Colors.black87,
+                                                    ),
+                                                  ),
+                                                ),
+
+                                                // Prompt Chips
+                                                Wrap(
+                                                  spacing: 8,
+                                                  runSpacing: 8,
+                                                  children: prompts.map((prompt) {
+                                                    final isSelected = controller.selectedTags.contains(prompt);
+                                                    return GestureDetector(
+                                                      onTap: () {
+                                                        controller.addTagInherit(prompt);
+                                                      },
+                                                      child: Chip(
+                                                        label: Text(
+                                                          prompt,
+                                                          style: TextStyle(
+                                                            fontWeight: FontWeight.w500,
+                                                            color: isSelected ? appBackGroundColor : Colors.black87,
+                                                          ),
+                                                        ),
+                                                        backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
+                                                      ),
+                                                    );
+                                                  }).toList(),
+                                                ),
+                                              ],
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: Image.asset(
+                          Assets.iconsFilterDownArrow,
+                          width: 25,
+                          height: 25,
+                          color: appBackGroundColor,
+                        ),
+                      ),
+                    ),
                   ],
                 )),
             10.height,
@@ -198,11 +319,12 @@ class PromptAdminScreen extends StatelessWidget {
                     children: items
                         .map((subTag) => GestureDetector(
                               onTap: () {
-                                //controller.addTag(subTag);
+                                controller.addTagInherit(subTag);
                               },
                               child: Chip(
                                 label: Text(subTag),
-                                backgroundColor: controller.selectedTags.contains(subTag) ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
+                                backgroundColor:
+                                    controller.selectedTags.contains(subTag) ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
                               ),
                             ))
                         .toList(),
@@ -214,7 +336,7 @@ class PromptAdminScreen extends StatelessWidget {
 
             10.height,
             Container(
-              height: size.height / 2,
+              height: size.height / 1.53,
               decoration: BoxDecoration(
                 color: appBackGroundColor.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(15),
@@ -241,15 +363,54 @@ class PromptAdminScreen extends StatelessWidget {
                         child: Center(
                           child: GestureDetector(
                             onTap: controller.pickImageFromGallery,
-                            child: Obx(() => controller.roleImage.value != null
-                                ? Image.file(controller.roleImage.value!, height: size.height / 4)
-                                : Card(
-                                    color: appDashBoardCardColor,
-                                    child: const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text("Select a file", style: TextStyle(fontSize: 20)),
-                                    ),
-                                  )),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text("User Role", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                    SizedBox(height: 8),
+                                    Obx(() => DropdownButton<String>(
+                                          isExpanded: true,
+                                          value: controller.selectedRole.value,
+                                          onChanged: (String? newValue) {
+                                            controller.selectedRole.value = newValue!;
+                                            controller.fetchRolePrompt(newValue);
+                                          },
+                                          items: controller.roles.map((String role) {
+                                            return DropdownMenuItem<String>(
+                                              value: role,
+                                              child: Text(role),
+                                            );
+                                          }).toList(),
+                                        )),
+                                    SizedBox(height: 20),
+                                    Text("Response", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                    SizedBox(height: 8),
+                                    Obx(() => TextField(
+                                          readOnly: true,
+                                          controller: TextEditingController(text: controller.responseText.value)
+                                            ..selection = TextSelection.collapsed(offset: controller.responseText.value.length),
+                                          maxLines: 4,
+                                          decoration: InputDecoration(
+                                            border: OutlineInputBorder(),
+                                          ),
+                                        )),
+                                  ],
+                                ),
+                              ),
+
+                              // => controller.roleImage.value != null
+                              // ? Image.file(controller.roleImage.value!, height: size.height / 4)
+                              // : Card(
+                              //     color: appDashBoardCardColor,
+                              //     child: const Padding(
+                              //       padding: EdgeInsets.all(8.0),
+                              //       child: Text("Select a file", style: TextStyle(fontSize: 20)),
+                              //     ),
+                              //   )
+                            ),
                           ),
                         ),
                       );
@@ -326,7 +487,13 @@ class PromptAdminScreen extends StatelessWidget {
                     child: Align(
                       alignment: Alignment.bottomRight,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          if (controller.currentIndex.value < 4) {
+                            controller.currentIndex.value++;
+                          } else {
+                            controller.currentIndex.value = 0;
+                          }
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: appBackGroundColor,
                         ),

@@ -10,6 +10,7 @@ import '../modules/meta_phrase_pv/model/open_worklist_model.dart';
 import '../modules/meta_phrase_pv/model/reverse_translate_model.dart';
 import '../modules/meta_phrase_pv/model/transalted_model.dart';
 import '../modules/prompt_admin/model/inherit_fetch_doc_model.dart';
+import '../modules/prompt_admin/model/role_model.dart';
 import '../utils/common/base_response_model.dart';
 import '../utils/common/common.dart';
 import '../utils/constants.dart';
@@ -97,6 +98,14 @@ class PromptAdminServiceApis {
       print("Error fetching prompt inherit: $e");
       return null;
     }
+  }
+  static Future<RoleResponse> getRolePromptResponse({required Map request}) async {
+    final response = await buildHttpResponse(
+      endPoint: APIEndPoints.rolePromptResponse,
+      request: request,
+      method: MethodType.post,
+    );
+    return RoleResponse.fromJson(response);
   }
 }
 
