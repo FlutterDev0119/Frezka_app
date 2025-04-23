@@ -34,14 +34,38 @@ class MetaPhraseController extends BaseController {
 
   RxString reverseTranslatedText = ''.obs;
 
+  // var isEditing = false.obs;
+  // var translatedText = ''.obs;
+  //
+  // void toggleEditing() {
+  //   isEditing.value = !isEditing.value;
+  // }
+  //
+  // void setText(String text) {
+  //   translatedText.value = text;
+  // }
+  var isEditing = false.obs;
+  late TextEditingController translatedTextController;
   @override
   void onInit() {
     super.onInit();
     translatedScrollController = ScrollController();
     translatedScrollController1 = ScrollController();
+    translatedTextController = TextEditingController();
     fetchData();
   }
+  void enterEditMode() {
+    // Get the current value from wherever necessary
+    translatedTextController.text = reverseTranslatedText.value.isNotEmpty
+        ? reverseTranslatedText.value
+        : selectedTranslationReport.value?.translatedFile ?? '';
+    isEditing.value = true;
+  }
 
+  void exitEditMode() {
+    isEditing.value = false;
+    reverseTranslatedText.value = translatedTextController.text;
+  }
   void updateSelectedMode(String mode) {
     selectedMode.value = mode;
   }

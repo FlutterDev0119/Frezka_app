@@ -80,7 +80,8 @@ class MetaPhraseScreen extends StatelessWidget {
     String score = getStringAsync("setscore");
     String originalCount = getStringAsync("setoriginalCount");
     String translatedCount = getStringAsync("settranslatedCount");
-    log("id------------------------------$id");
+    // controller.setText(selectedTranslationReport!.translatedFile);
+    // log("----------set text-----------------${controller.translatedText.value}");
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SingleChildScrollView(
@@ -367,6 +368,28 @@ class MetaPhraseScreen extends StatelessWidget {
                               ],
                             ),
                             // Scrollable Content (non-fullscreen view)
+                            // Container(
+                            //   height: 150,
+                            //   padding: const EdgeInsets.all(16),
+                            //   child: Scrollbar(
+                            //     controller: controller.translatedScrollController1,
+                            //     thumbVisibility: true,
+                            //     child: SingleChildScrollView(
+                            //       controller: controller.translatedScrollController1,
+                            //       child: Column(
+                            //         crossAxisAlignment: CrossAxisAlignment.start,
+                            //         children: [
+                            //           Obx(() => Text(
+                            //                 controller.reverseTranslatedText.value.isNotEmpty
+                            //                     ? controller.reverseTranslatedText.value
+                            //                     : controller.selectedTranslationReport.value?.translatedFile ?? '',
+                            //                 style: TextStyle(fontSize: 16),
+                            //               ))
+                            //         ],
+                            //       ),
+                            //     ),
+                            //   ),
+                            // ),
                             Container(
                               height: 150,
                               padding: const EdgeInsets.all(16),
@@ -378,17 +401,34 @@ class MetaPhraseScreen extends StatelessWidget {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Obx(() => Text(
-                                            controller.reverseTranslatedText.value.isNotEmpty
-                                                ? controller.reverseTranslatedText.value
-                                                : controller.selectedTranslationReport.value?.translatedFile ?? '',
-                                            style: TextStyle(fontSize: 16),
-                                          ))
+                                      Obx(() {
+                                        return (controller.isEditing.value || controller.selectedMode.value == "Edit")
+                                            ? TextField(
+                                                controller: controller.translatedTextController,
+                                                autofocus: true,
+                                                maxLines: null,
+                                                style: const TextStyle(fontSize: 16),
+                                                decoration: const InputDecoration.collapsed(hintText: 'Enter text...'),
+                                                onEditingComplete: () {
+                                                  controller.exitEditMode();
+                                                  FocusScope.of(Get.context!).unfocus();
+                                                },
+                                              )
+                                            : GestureDetector(
+                                                onTap: () => controller.enterEditMode(),
+                                                child: Text(
+                                                  controller.reverseTranslatedText.value.isNotEmpty
+                                                      ? controller.reverseTranslatedText.value
+                                                      : controller.selectedTranslationReport.value?.translatedFile ?? '',
+                                                  style: const TextStyle(fontSize: 16),
+                                                ),
+                                              );
+                                      })
                                     ],
                                   ),
                                 ),
                               ),
-                            ),
+                            )
                           ],
                         ),
                       )
@@ -417,27 +457,27 @@ class MetaPhraseScreen extends StatelessWidget {
                                     border: Border.all(color: Colors.grey.shade400),
                                   ),
                                   child:
-                                  // DropdownButtonHideUnderline(
-                                  //   child: DropdownButton<String>(
-                                  //     dropdownColor: appBackGroundColor,
-                                  //     value: selected,
-                                  //     icon: const Icon(Icons.arrow_drop_down, color: appWhiteColor),
-                                  //     style: const TextStyle(fontSize: 16, color: appWhiteColor),
-                                  //     isExpanded: true,
-                                  //     items: controller.modes.map((String value) {
-                                  //       return DropdownMenuItem<String>(
-                                  //         value: value,
-                                  //         child: Text(value),
-                                  //       );
-                                  //     }).toList(),
-                                  //     onChanged: (String? newValue) {
-                                  //       if (newValue != null) {
-                                  //         controller.updateSelectedMode(newValue);
-                                  //       }
-                                  //     },
-                                  //   ),
-                                  // ),
-                                  DropdownButtonHideUnderline(
+                                      // DropdownButtonHideUnderline(
+                                      //   child: DropdownButton<String>(
+                                      //     dropdownColor: appBackGroundColor,
+                                      //     value: selected,
+                                      //     icon: const Icon(Icons.arrow_drop_down, color: appWhiteColor),
+                                      //     style: const TextStyle(fontSize: 16, color: appWhiteColor),
+                                      //     isExpanded: true,
+                                      //     items: controller.modes.map((String value) {
+                                      //       return DropdownMenuItem<String>(
+                                      //         value: value,
+                                      //         child: Text(value),
+                                      //       );
+                                      //     }).toList(),
+                                      //     onChanged: (String? newValue) {
+                                      //       if (newValue != null) {
+                                      //         controller.updateSelectedMode(newValue);
+                                      //       }
+                                      //     },
+                                      //   ),
+                                      // ),
+                                      DropdownButtonHideUnderline(
                                     child: DropdownButton<String>(
                                       dropdownColor: appBackGroundColor,
                                       value: selected,
@@ -466,7 +506,6 @@ class MetaPhraseScreen extends StatelessWidget {
                                       },
                                     ),
                                   ),
-
                                 ),
 
                                 // Only show this if 'Certify' is selected
@@ -579,7 +618,7 @@ class MetaPhraseScreen extends StatelessWidget {
           child: Column(
             children: [
               if (!controller.isCardSelected.value && controller.selectedTranslationReport.value == null) ...[
-                if(controller.filteredFiles.isNotEmpty) _buildHeaderRow(),
+                if (controller.filteredFiles.isNotEmpty) _buildHeaderRow(),
                 Expanded(child: _buildFileList()),
               ],
               if (controller.isCardSelected.value && controller.selectedTranslationReport.value != null) ...[
