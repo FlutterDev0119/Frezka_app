@@ -359,111 +359,389 @@ class PromptAdminScreen extends StatelessWidget {
                   Obx(() {
                     int index = controller.currentIndex.value;
                     if (index == 0) {
-                      return Expanded(
-                        child: Center(
-                          child: GestureDetector(
-                            onTap: controller.pickImageFromGallery,
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text("User Role", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                    SizedBox(height: 8),
-                                    Obx(() => DropdownButton<String>(
-                                          isExpanded: true,
-                                          value: controller.selectedRole.value,
-                                          onChanged: (String? newValue) {
-                                            controller.selectedRole.value = newValue!;
-                                            controller.fetchRolePrompt(newValue);
-                                          },
-                                          items: controller.roles.map((String role) {
-                                            return DropdownMenuItem<String>(
-                                              value: role,
-                                              child: Text(role),
-                                            );
-                                          }).toList(),
-                                        )),
-                                    SizedBox(height: 20),
-                                    Text("Response", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                    SizedBox(height: 8),
-                                    Obx(() => TextField(
-                                          readOnly: true,
-                                          controller: TextEditingController(text: controller.responseText.value)
-                                            ..selection = TextSelection.collapsed(offset: controller.responseText.value.length),
-                                          maxLines: 4,
-                                          decoration: InputDecoration(
-                                            border: OutlineInputBorder(),
-                                          ),
-                                        )),
-                                  ],
+                      return Container(
+                            margin: EdgeInsets.all(16),
+                            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade400),
+                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.white,
+                            ),
+                        child: Expanded(
+                          child: Center(
+                            child: GestureDetector(
+                              onTap: controller.pickImageFromGallery,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text("User Role", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                      SizedBox(height: 8),
+                                      Obx(() => DropdownButton<String>(
+                                            isExpanded: true,
+                                            value: controller.selectedRole.value,
+                                            onChanged: (String? newValue) {
+                                              controller.selectedRole.value = newValue!;
+                                              controller.fetchRolePrompt(newValue);
+                                            },
+                                            items: controller.roles.map((String role) {
+                                              return DropdownMenuItem<String>(
+                                                value: role,
+                                                child: Text(role),
+                                              );
+                                            }).toList(),
+                                          )),
+                                      SizedBox(height: 20),
+                                      Text("Response", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                      SizedBox(height: 8),
+                                      Obx(() => TextField(
+                                            readOnly: true,
+                                            controller: TextEditingController(text: controller.responseText.value)
+                                              ..selection = TextSelection.collapsed(offset: controller.responseText.value.length),
+                                            maxLines: 4,
+                                            decoration: InputDecoration(
+                                              border: OutlineInputBorder(),
+                                            ),
+                                          )),
+                                    ],
+                                  ),
                                 ),
-                              ),
 
-                              // => controller.roleImage.value != null
-                              // ? Image.file(controller.roleImage.value!, height: size.height / 4)
-                              // : Card(
-                              //     color: appDashBoardCardColor,
-                              //     child: const Padding(
-                              //       padding: EdgeInsets.all(8.0),
-                              //       child: Text("Select a file", style: TextStyle(fontSize: 20)),
-                              //     ),
-                              //   )
+                                // => controller.roleImage.value != null
+                                // ? Image.file(controller.roleImage.value!, height: size.height / 4)
+                                // : Card(
+                                //     color: appDashBoardCardColor,
+                                //     child: const Padding(
+                                //       padding: EdgeInsets.all(8.0),
+                                //       child: Text("Select a file", style: TextStyle(fontSize: 20)),
+                                //     ),
+                                //   )
+                              ),
                             ),
                           ),
                         ),
                       );
                     } else if (index == 1) {
                       return Expanded(
-                        child: Center(
-                          child: GestureDetector(
-                            onTap: controller.pickImageFromGallery,
-                            child: Obx(() => controller.roleImage.value != null
-                                ? Image.file(controller.roleImage.value!, height: size.height / 4)
-                                : Card(
-                                    color: appDashBoardCardColor,
-                                    child: const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text("Choose Image from Gallery", style: TextStyle(fontSize: 20)),
-                                    ),
-                                  )),
-                          ),
+                        child:
+                        Center(
+                          child:Container(
+                            margin: EdgeInsets.all(16),
+                            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade400),
+                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.white,
+                            ),
+                            child: Obx(() {
+                              return DropdownButtonFormField<String>(
+                                decoration: InputDecoration(
+                                  labelText: 'Primary Data Source',
+                                  border: InputBorder.none,
+                                ),
+                                hint: Text("Select data sources"),
+                                value: controller.selectedSource.value,
+                                isExpanded: true,
+                                items: controller.dataSources.map((source) {
+                                  return DropdownMenuItem(
+                                    value: source,
+                                    child: Text(source),
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  controller.selectedSource.value = value;
+                                },
+                              );
+                            }),
+                          )
+                          // GestureDetector(
+                          //   onTap: controller.pickImageFromGallery,
+                          //   child: Obx(() => controller.roleImage.value != null
+                          //       ? Image.file(controller.roleImage.value!, height: size.height / 4)
+                          //       : Card(
+                          //           color: appDashBoardCardColor,
+                          //           child: const Padding(
+                          //             padding: EdgeInsets.all(8.0),
+                          //             child: Text("Choose Image from Gallery", style: TextStyle(fontSize: 20)),
+                          //           ),
+                          //         )),
+                          // ),
                         ),
                       );
-                    } else if (index == 2) {
-                      return Expanded(
-                        child: Center(
-                          child: GestureDetector(
-                            onTap: controller.pickImageFromCamera,
-                            child: Obx(() => controller.sourceImage.value != null
-                                ? Image.file(controller.sourceImage.value!, height: size.height / 4)
-                                : Card(
-                                    color: appDashBoardCardColor,
-                                    child: const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text("Click A Photo", style: TextStyle(fontSize: 20)),
-                                    ),
-                                  )),
-                          ),
-                        ),
-                      );
-                    } else if (index == 3) {
+                    }
+
+                    // else if (index == 2) {
+                    //
+                    //   return Expanded(
+                    //     child: Center(
+                    //       child: Column(
+                    //         crossAxisAlignment: CrossAxisAlignment.start,
+                    //         children: [
+                    //           // Metadata Source Section
+                    //           Row(
+                    //             mainAxisAlignment: MainAxisAlignment.start,
+                    //             children: [
+                    //               GestureDetector(
+                    //                 onTap: () {
+                    //                   // Handle the "Other" option
+                    //                 },
+                    //                 child: Container(
+                    //                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    //                   color: Colors.blue, // Color for selected option
+                    //                   child: Text('Other', style: TextStyle(color: Colors.white)),
+                    //                 ),
+                    //               ),
+                    //               SizedBox(width: 10),
+                    //               GestureDetector(
+                    //                 onTap: () {
+                    //                   // Handle the "Code list" option
+                    //                 },
+                    //                 child: Container(
+                    //                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    //                   color: Colors.blue, // Color for selected option
+                    //                   child: Text('Code list', style: TextStyle(color: Colors.white)),
+                    //                 ),
+                    //               ),
+                    //               SizedBox(width: 10),
+                    //               GestureDetector(
+                    //                 onTap: () {
+                    //                   // Handle the "Template" option
+                    //                 },
+                    //                 child: Container(
+                    //                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    //                   color: Colors.blue, // Color for selected option
+                    //                   child: Text('Template', style: TextStyle(color: Colors.white)),
+                    //                 ),
+                    //               ),
+                    //             ],
+                    //           ),
+                    //           SizedBox(height: 20),
+                    //           // Add Code list, Template, and Other Buttons
+                    //           Row(
+                    //             children: [
+                    //               ElevatedButton(
+                    //                 onPressed: () {
+                    //                   // Handle adding Code list
+                    //                 },
+                    //                 child: Text('+ Code list'),
+                    //               ),
+                    //               SizedBox(width: 10),
+                    //               ElevatedButton(
+                    //                 onPressed: () {
+                    //                   // Handle adding Template
+                    //                 },
+                    //                 child: Text('+ Template'),
+                    //               ),
+                    //               SizedBox(width: 10),
+                    //               ElevatedButton(
+                    //                 onPressed: () {
+                    //                   // Handle adding Other
+                    //                 },
+                    //                 child: Text('+ Other'),
+                    //               ),
+                    //             ],
+                    //           ),
+                    //           SizedBox(height: 20),
+                    //           // File Upload Section
+                    //           Text("Upload Code list File:"),
+                    //           SizedBox(height: 10),
+                    //           Row(
+                    //             children: [
+                    //               ElevatedButton(
+                    //                 onPressed: () {
+                    //                   // Handle file pick for Code list
+                    //                 },
+                    //                 child: Text('Choose File'),
+                    //               ),
+                    //               SizedBox(width: 10),
+                    //               Text("No file chosen"),
+                    //             ],
+                    //           ),
+                    //           SizedBox(height: 20),
+                    //           Text("Upload Template File:"),
+                    //           SizedBox(height: 10),
+                    //           Row(
+                    //             children: [
+                    //               ElevatedButton(
+                    //                 onPressed: () {
+                    //                   // Handle file pick for Template
+                    //                 },
+                    //                 child: Text('Choose File'),
+                    //               ),
+                    //               SizedBox(width: 10),
+                    //               Text("No file chosen"),
+                    //             ],
+                    //           ),
+                    //         ],
+                    //       ),
+                    //     ),
+                    //   );
+                    // }
+                    else if (index == 2) {
                       return Expanded(
                         child: Center(
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              20.height,
-                              Text("Task", style: const TextStyle(fontSize: 20)),
-                              ElevatedButton(
-                                onPressed: () => controller.taskText.value = "Updated Task",
-                                child: const Text("Update Task"),
+                              // Metadata Source Section
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  buildStyledOption("Other"),
+                                  SizedBox(width: 10),
+                                  buildStyledOption("Code list"),
+                                  SizedBox(width: 10),
+                                  buildStyledOption("Template"),
+                                ],
+                              ),
+                              SizedBox(height: 20),
+
+                              // Add Buttons
+                              Row(
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () => controller.addItem("Code list"),
+                                    child: Text('+ Code list'),
+                                  ),
+                                  SizedBox(width: 10),
+                                  ElevatedButton(
+                                    onPressed: () => controller.addItem("Template"),
+                                    child: Text('+ Template'),
+                                  ),
+                                  SizedBox(width: 10),
+                                  ElevatedButton(
+                                    onPressed: () => controller.addItem("Other"),
+                                    child: Text('+ Other'),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20),
+
+                              // Show selected items as chips
+                              Obx(() => Wrap(
+                                spacing: 8.0,
+                                runSpacing: 8.0,
+                                children: controller.selectedItems.map((item) {
+                                  return Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.shade100,
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(color: Colors.blue),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(item, style: TextStyle(color: Colors.blue)),
+                                        SizedBox(width: 4),
+                                        GestureDetector(
+                                          onTap: () => controller.removeItem(item),
+                                          child: Icon(Icons.close, size: 16, color: Colors.blue),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                              )),
+
+                              SizedBox(height: 20),
+                              Text("Upload Code list File:"),
+                              SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      // Handle file pick for Code list
+                                    },
+                                    child: Text('Choose File'),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Text("No file chosen"),
+                                ],
+                              ),
+                              SizedBox(height: 20),
+                              Text("Upload Template File:"),
+                              SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      // Handle file pick for Template
+                                    },
+                                    child: Text('Choose File'),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Text("No file chosen"),
+                                ],
                               ),
                             ],
                           ),
                         ),
                       );
-                    } else if (index == 4) {
+                    }
+
+                    // else if (index == 3) {
+                    //   return Expanded(
+                    //     child: Center(
+                    //       child: Column(
+                    //         children: [
+                    //           20.height,
+                    //           Text("Task", style: const TextStyle(fontSize: 20)),
+                    //           ElevatedButton(
+                    //             onPressed: () => controller.taskText.value = "Updated Task",
+                    //             child: const Text("Update Task"),
+                    //           ),
+                    //         ],
+                    //       ),
+                    //     ),
+                    //   );
+                    // }
+                    else if (index == 3) {
+                      return Expanded(
+                        child: Center(
+                          child: Container(
+                            margin: EdgeInsets.symmetric(horizontal: 16),
+                            padding: EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Color(0xFFF6FAFF), // light blue-ish background
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 8,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  "Actions",
+                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                                ),
+                                SizedBox(height: 12),
+                                Icon(Icons.open_in_new, size: 28, color: Colors.black87),
+                                SizedBox(height: 12),
+                                Container(
+                                  height: 100,
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.grey.shade300),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
+                    else if (index == 4) {
                       return Expanded(
                         child: Center(
                           child: Column(
@@ -543,5 +821,22 @@ class PromptAdminScreen extends StatelessWidget {
         ),
       );
     });
+  }
+  Widget buildStyledOption(String label) {
+    return GestureDetector(
+      onTap: () {
+        // Optional: Handle label tap
+      },
+      child: Container(
+        margin: EdgeInsets.all(16),
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade400),
+          borderRadius: BorderRadius.circular(12),
+          color: Colors.white,
+        ),
+        child: Text(label, style: TextStyle(color: Colors.black)),
+      ),
+    );
   }
 }

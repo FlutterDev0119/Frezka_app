@@ -44,6 +44,22 @@ class PromptAdminController extends BaseController {
     'Clinical Devops Specialist',
     'Clinical Research Associate',
   ].obs;
+
+  final List<String> dataSources = ['XML', 'PDF', 'DOCX', 'XLSX'];
+  var selectedSource = RxnString();
+
+  var selectedItems = <String>[].obs;
+
+  void addItem(String item) {
+    if (!selectedItems.contains(item)) {
+      selectedItems.add(item);
+    }
+  }
+
+  void removeItem(String item) {
+    selectedItems.remove(item);
+  }
+
   void toggleIcon() => isChecked.toggle();
 
   void selectParentTag(String tag) {
