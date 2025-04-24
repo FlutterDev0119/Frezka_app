@@ -1,7 +1,9 @@
+import 'package:apps/modules/governAI/view/governAI_view.dart';
 import 'package:apps/modules/splash/views/splash_screen.dart';
 
 import '../modules/forgot_password/bindings/forgot_password_binding.dart';
 import '../modules/forgot_password/views/forgot_password_view.dart';
+import '../modules/governAI/bindings/governAI_binding.dart';
 import '../modules/logout/bindings/logout_binding.dart';
 import '../modules/logout/views/logout_view.dart';
 import '../modules/meta_phrase_pv/bindings/meta_phrase_pv_binding.dart';
@@ -54,6 +56,12 @@ class AppPages {
       name: _Paths.GENAICLINICAL,
       page: () => GenAIClinicalScreen(),
       binding: GenAIClinicalBinding(),
+      transition: Transition.downToUp,
+    ),
+    GetPage(
+      name: _Paths.GOVERNAI,
+      page: () => GovernAIScreen(),
+      binding: GovernAIBinding(),
       transition: Transition.downToUp,
     ),
     GetPage(

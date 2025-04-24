@@ -1,7 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:html/parser.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
+import '../constants.dart';
 import 'colors.dart';
 
 InputDecoration appInputDecoration({
@@ -137,4 +142,40 @@ String formatJson(String jsonStr) {
     log("\x1b[31m formatJson error ::-> ${e.toString()} \x1b[0m");
     return jsonStr;
   }
+}
+Future<RxList<File>> pickFilesFromDevice({bool allowMultipleFiles = false}) async {
+  List<File> file = [];
+  await FilePicker.platform.pickFiles(
+    allowMultiple: allowMultipleFiles,
+    type: FileType.custom,
+    allowedExtensions: [
+      'jpg',
+      'jpeg',
+      'png',
+      'pdf',
+      'doc',
+    ],
+  ).then((value) {
+    if (value != null) {
+      List<File> tempFiles = [];
+      for (var e in value.files) {
+        if (e.size <= DefaultConstants.maxUploadSize) {
+          tempFiles.add(File(e.path.validate()));
+        } else {
+          Fluttertoast.showToast(
+            msg: "File ${e.name} exceeds the 5MB size limit.",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+          );
+        }
+      }
+
+      if (allowMultipleFiles) {
+        file = tempFiles;
+      } else if (tempFiles.isNotEmpty) {
+        file = [tempFiles.first];
+      }
+    }
+  });
+  return file.obs;
 }

@@ -1,34 +1,38 @@
 import 'dart:math';
 
+import 'package:nb_utils/nb_utils.dart';
+
 import '../../../utils/library.dart';
 import '../../../utils/shared_prefences.dart';
 
 class DashboardController extends GetxController {
   // Observable variables to hold the state of email, full name, and first letter
-  var email = "".obs;
-  var fullName = "".obs;
-  var firstLetter = "".obs;
+  RxString email = "".obs;
+  RxString email1 = "".obs;
+  RxString fullName = "".obs;
+  RxString firstLetter = "".obs;
 
   @override
   void onInit() {
     print("-------------------- INIT");
     super.onInit();
-    _getEmail();
+    getEmail();
   }
 
-  // Fetch email from shared preferences and process it
-  void _getEmail() async {
-    String? storedEmail = getValueFromLocal(AppSharedPreferenceKeys.userEmail);
-    email.value = storedEmail ?? '';
-     print("-------------------- ${email.value}");
-    if (storedEmail != null && storedEmail.isNotEmpty) {
+  void getEmail() async {
+    String storedEmail = getStringAsync(AppSharedPreferenceKeys.userEmail);
+    print("-------------------- EMAIL: ${email.value}");
+    email.value = storedEmail;
+    print("-------------------- EMAIL: ${email.value}");
+
+    if (storedEmail.isNotEmpty) {
       _formatNameFromEmail(storedEmail);
     }
   }
 
   // Format the full name and first letter from the email
-  void _formatNameFromEmail(String email) {
-    final namePart = email.split('@').first;
+  void _formatNameFromEmail(String emailData) {
+    final namePart = emailData.split('@').first;
     final nameSegments = namePart.split('.');
 
     // Format the full name (capitalize first letter of each part)
@@ -37,7 +41,9 @@ class DashboardController extends GetxController {
     }).join(' ');
 
     // Get the first letter of the first name
-    firstLetter.value = email.isNotEmpty ? email[0].toUpperCase() : '';
+    firstLetter.value = emailData.isNotEmpty ? emailData[0].toUpperCase() : '';
+    //Email
+    email.value = emailData.isNotEmpty ? emailData.validate() : "";
   }
 
   final List<Map<String, dynamic>> items = [
@@ -72,7 +78,12 @@ class DashboardController extends GetxController {
       "route": Routes.GENAICLINICAL
     },
     {"title": "ReconAI", "description": "Ensures data consistency, detects anomalies & integrates data.", "icon": Icons.sync_rounded, "route": ""},
-    {"title": "GovernAI", "description": "Automates compliance & enhances risk management.", "icon": Icons.security_rounded, "route": ""},
+    {
+      "title": "GovernAI",
+      "description": "Automates compliance & enhances risk management.",
+      "icon": Icons.security_rounded,
+      "route": Routes.GOVERNAI
+    },
     {
       "title": "Prompt Admin",
       "description": "Centralized prompt management with enforced guidelines.",

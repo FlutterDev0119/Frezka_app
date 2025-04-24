@@ -7,6 +7,7 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../utils/library.dart';
 import '../model/inherit_fetch_doc_model.dart';
+import '../model/role_model.dart';
 
 class PromptAdminController extends BaseController {
   // Loading State
@@ -15,7 +16,7 @@ class PromptAdminController extends BaseController {
   var currentIndex = 0.obs;
 
   // UI Data
-  final RxString selectedRole = "Select Role".obs;
+  final RxString selectedRole = "Select a Role".obs;
   final RxString taskText = "Task".obs;
   final RxString verifyText = "Verify".obs;
 
@@ -27,8 +28,37 @@ class PromptAdminController extends BaseController {
   final Rx<File?> sourceImage = Rx<File?>(null);
 
   final selectedTags = <String>[].obs;
+  final selectedTagsInherit = <String>[].obs;
   final classificationMap = <String, List<String>>{}.obs;
   final RxString selectedParentTag = ''.obs;
+
+  RxString responseText = ''.obs;
+
+  final roles = [
+    'Select a Role',
+    'Case Intake User',
+    'Case Data Entry Analyst',
+    'Aggregate Reports Author',
+    'Safety Scientist',
+    'Drug Safety Associate',
+    'Clinical Devops Specialist',
+    'Clinical Research Associate',
+  ].obs;
+
+  final List<String> dataSources = ['XML', 'PDF', 'DOCX', 'XLSX'];
+  var selectedSource = RxnString();
+
+  var selectedItems = <String>[].obs;
+
+  void addItem(String item) {
+    if (!selectedItems.contains(item)) {
+      selectedItems.add(item);
+    }
+  }
+
+  void removeItem(String item) {
+    selectedItems.remove(item);
+  }
 
   void toggleIcon() => isChecked.toggle();
 
@@ -69,6 +99,13 @@ class PromptAdminController extends BaseController {
   void addTag(String tag) {
     if (!selectedTags.contains(tag)) {
       selectedTags.add(tag);
+    }
+  }
+
+  void addTagInherit(String tag) {
+    if (!selectedTagsInherit.contains(tag)) {
+      selectedTagsInherit.add(tag);
+      inputController.text = tag;
     }
   }
 
@@ -121,20 +158,6 @@ class PromptAdminController extends BaseController {
 
   void changeByUser() => isSuffixVisible.value = inputController.text.isNotEmpty;
 
-  //
-  // void userSubmittedData() {
-  //   final input = inputController.text.trim();
-  //   if (input.isNotEmpty && !userInput.contains("#$input")) {
-  //     userInput.add("#$input");
-  //     inputController.clear();
-  //   }
-  // }
-
-  // void setTextFromList(int index) {
-  //   if (index >= 0 && index < userInput.length) {
-  //     inputController.text = userInput[index];
-  //   }
-  // }
   Future<void> pickImageFromGallery() async {
     try {
       await Permission.photos.request();
@@ -162,6 +185,42 @@ class PromptAdminController extends BaseController {
       }
     } on PlatformException catch (e) {
       print(e);
+    }
+  }
+
+  /// role
+
+
+  Future<void> fetchRolePrompt(String role) async {
+    if (isLoading.value) return;
+    setLoading(true);
+
+    try {
+      final RoleResponse result = await PromptAdminServiceApis.getRolePromptResponse(
+        request: {"role": role},
+      );
+      responseText.value = result.output;
+    } catch (e) {
+      toast("Error: $e");
+      log("Error fetching role prompt: $e");
+    } finally {
+      setLoading(false);
+    }
+    Future<void> fetchRolePrompt(String role) async {
+      if (isLoading.value) return;
+      setLoading(true);
+
+      try {
+        final RoleResponse result = await PromptAdminServiceApis.getRolePromptResponse(
+          request: {"role": role},
+        );
+        responseText.value = result.output;
+      } catch (e) {
+        toast("Error: $e");
+        log("Error fetching role prompt: $e");
+      } finally {
+        setLoading(false);
+      }
     }
   }
 }
