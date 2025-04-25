@@ -1,8 +1,12 @@
 import 'package:apps/modules/governAI/view/governAI_view.dart';
 import 'package:apps/modules/splash/views/splash_screen.dart';
 
+import '../modules/engageAI/bindings/engageAI_binding.dart';
+import '../modules/engageAI/view/engageAI_view.dart';
 import '../modules/forgot_password/bindings/forgot_password_binding.dart';
 import '../modules/forgot_password/views/forgot_password_view.dart';
+import '../modules/genAI_pv/bindings/genAI_pv_binding.dart';
+import '../modules/genAI_pv/view/genAI_pv_view.dart';
 import '../modules/governAI/bindings/governAI_binding.dart';
 import '../modules/logout/bindings/logout_binding.dart';
 import '../modules/logout/views/logout_view.dart';
@@ -56,6 +60,18 @@ class AppPages {
       name: _Paths.GENAICLINICAL,
       page: () => GenAIClinicalScreen(),
       binding: GenAIClinicalBinding(),
+      transition: Transition.downToUp,
+    ),
+    GetPage(
+      name: _Paths.GENAIPV,
+      page: () => GenAIPVScreen(),
+      binding: GenAIPVBinding(),
+      transition: Transition.downToUp,
+    ),
+    GetPage(
+      name: _Paths.ENGAGEAI,
+      page: () => EngageAIScreen(),
+      binding: EngageAIBinding(),
       transition: Transition.downToUp,
     ),
     GetPage(

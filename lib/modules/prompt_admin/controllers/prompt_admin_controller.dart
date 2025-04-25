@@ -7,6 +7,7 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../utils/library.dart';
 import '../model/inherit_fetch_doc_model.dart';
+import '../model/new_prompt_response_model.dart';
 import '../model/role_model.dart';
 
 class PromptAdminController extends BaseController {
@@ -45,11 +46,11 @@ class PromptAdminController extends BaseController {
     'Clinical Research Associate',
   ].obs;
 
-  final List<String> dataSources = ['XML', 'PDF', 'DOCX', 'XLSX'];
+  final List<String> dataSources = ['XML', 'PDF', 'DOCX', 'XLSX','Data Lake','API'];
   var selectedSource = RxnString();
 
   var selectedItems = <String>[].obs;
-
+  final selectedFileNames = <String, String>{}.obs;
   void addItem(String item) {
     if (!selectedItems.contains(item)) {
       selectedItems.add(item);
@@ -96,9 +97,18 @@ class PromptAdminController extends BaseController {
     }
   }
 
+  // void addTag(String tag) {
+  //   if (!selectedTags.contains(tag)) {
+  //     selectedTags.add(tag);
+  //   }
+  // }
   void addTag(String tag) {
-    if (!selectedTags.contains(tag)) {
-      selectedTags.add(tag);
+    if (selectedParentTag.value == tag) {
+      selectedParentTag.value = '';
+      selectedTags.clear(); // Clear the list if deselected
+    } else {
+      selectedParentTag.value = tag;
+      selectedTags.value = [tag]; // Only allow one selected
     }
   }
 
@@ -106,6 +116,14 @@ class PromptAdminController extends BaseController {
     if (!selectedTagsInherit.contains(tag)) {
       selectedTagsInherit.add(tag);
       inputController.text = tag;
+    }
+  }
+  void toggleSubTag(String subTag) {
+    if (selectedTags.contains(subTag)) {
+      selectedTags.clear(); // Deselect if already selected
+    } else {
+      selectedTags.value = [subTag];
+      inputController.text = subTag;// Select only this one
     }
   }
 
@@ -206,21 +224,24 @@ class PromptAdminController extends BaseController {
     } finally {
       setLoading(false);
     }
-    Future<void> fetchRolePrompt(String role) async {
-      if (isLoading.value) return;
-      setLoading(true);
+  }
 
-      try {
-        final RoleResponse result = await PromptAdminServiceApis.getRolePromptResponse(
-          request: {"role": role},
-        );
-        responseText.value = result.output;
-      } catch (e) {
-        toast("Error: $e");
-        log("Error fetching role prompt: $e");
-      } finally {
-        setLoading(false);
-      }
+  Future<void> createNewPrompt(Map<String, dynamic> requestData) async {
+    if (isLoading.value) return;
+    setLoading(true);
+
+    try {
+      final NewPromptResponse result = await PromptAdminServiceApis.createNewPrompt(
+        request: requestData,
+      );
+      toast("Prompt Created: ${result.message}");
+      log("New Prompt Data: ${result.data?.promptName}");
+    } catch (e) {
+      toast("Error: $e");
+      log("Error creating new prompt: $e");
+    } finally {
+      setLoading(false);
     }
   }
+
 }

@@ -6,7 +6,7 @@
 // import '../../../utils/common/colors.dart';
 // import '../../../utils/app_scaffold.dart';
 // import '../../../utils/component/image_source_selection_component.dart';
-// import '../controllers/genAI_clinical_controller.dart';
+// import '../controllers/engageAI_controller.dart';
 //
 // class GeneralClinicController extends GetxController {
 //   var selectedFile = ''.obs;
