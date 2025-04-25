@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:apps/utils/library.dart';
 import 'package:get/get.dart';
 import 'package:nb_utils/nb_utils.dart';
+import '../../../utils/common/common.dart';
 import '../../../utils/shared_prefences.dart';
 import '../model/engageAI.dart';
+
 class EngageAIController extends GetxController {
   final TextEditingController textController = TextEditingController();
   var messages = <ChatMessage>[].obs;
@@ -10,6 +14,8 @@ class EngageAIController extends GetxController {
 
   RxString fullName = "".obs;
   RxString firstLetter = "".obs;
+  int userId = 0;
+
   @override
   void onInit() {
     super.onInit();
@@ -18,6 +24,16 @@ class EngageAIController extends GetxController {
 
   void getEmail() async {
     String storedEmail = getStringAsync(AppSharedPreferenceKeys.userEmail);
+    String jsonString = getStringAsync(AppSharedPreferenceKeys.currentUserData);
+
+// Parse the string to a Map
+    Map<String, dynamic> data = json.decode(jsonString);
+
+// Access the user ID
+     userId = data['user_serializer']['id'];
+
+    log('User ID: $userId');
+    log('------id2-----${loggedInUser.value.userModel?.id}');
     if (storedEmail.isNotEmpty) {
       _formatNameFromEmail(storedEmail);
       // Show greeting after formatting name
@@ -58,8 +74,8 @@ class EngageAIController extends GetxController {
 
     final reply = await ChatServiceApi.sendMessage(
       message: message,
-      userName: "Sandesh Singhal",
-      userId: "2",
+      userName: fullName.value,
+      userId: userId.toString(),
     );
 
     if (reply != null) {

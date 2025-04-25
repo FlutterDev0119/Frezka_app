@@ -244,7 +244,7 @@ class ChatServiceApi {
         method: MethodType.get,
       );
 
-      return response['response']; // Assuming API returns { "response": "..." }
+      return response['response'];
     } catch (e) {
       toast(e.toString());
       print("Error sending message: $e");
