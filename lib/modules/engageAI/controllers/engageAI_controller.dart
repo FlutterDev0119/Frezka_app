@@ -3,14 +3,13 @@ import 'package:get/get.dart';
 import 'package:nb_utils/nb_utils.dart';
 import '../../../utils/shared_prefences.dart';
 import '../model/engageAI.dart';
-
 class EngageAIController extends GetxController {
   final TextEditingController textController = TextEditingController();
   var messages = <ChatMessage>[].obs;
   var isLoading = false.obs;
 
+  RxString fullName = "".obs;
   RxString firstLetter = "".obs;
-
   @override
   void onInit() {
     super.onInit();
@@ -21,6 +20,19 @@ class EngageAIController extends GetxController {
     String storedEmail = getStringAsync(AppSharedPreferenceKeys.userEmail);
     if (storedEmail.isNotEmpty) {
       _formatNameFromEmail(storedEmail);
+      // Show greeting after formatting name
+      Future.delayed(Duration(milliseconds: 100), () {
+        final name = fullName.value;
+        if (name.isNotEmpty) {
+          messages.insert(
+            0,
+            ChatMessage(
+              message: "Hi $name, How may I assist you today?",
+              isUser: false,
+            ),
+          );
+        }
+      });
     }
   }
 
@@ -32,6 +44,7 @@ class EngageAIController extends GetxController {
     String firstName = parts.isNotEmpty ? parts[0] : '';
     String lastName = parts.length > 1 ? parts[1] : '';
 
+    fullName.value = "${_capitalize(firstName)} ${_capitalize(lastName)}";
     firstLetter.value = "${_getFirstLetter(firstName)}${_getFirstLetter(lastName)}";
   }
 

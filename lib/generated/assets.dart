@@ -7,6 +7,7 @@ class Assets {
   static const String iconsIcGallery = 'assets/icons/ic_gallery.png';
   static const String iconsSend = 'assets/icons/send.png';
   static const String imagesAppLogo = 'assets/images/app_logo.png';
+  static const String imagesDoctor = 'assets/images/doctor.png';
   static const String imagesForgot = 'assets/images/forgot.jpg';
   static const String imagesIcConfirmation = 'assets/images/ic_confirmation.png';
   static const String imagesIcNoDataImage = 'assets/images/ic_no_data_image.png';
