@@ -1,5 +1,8 @@
 import 'package:apps/modules/governAI/view/governAI_view.dart';
 import 'package:apps/modules/splash/views/splash_screen.dart';
+import 'package:apps/modules/translation_memory/bindings/translation_memory_binding.dart';
+import 'package:apps/modules/translation_memory/controllers/translation_memory_controller.dart';
+import 'package:apps/modules/translation_memory/view/translation_memory_view.dart';
 
 import '../modules/forgot_password/bindings/forgot_password_binding.dart';
 import '../modules/forgot_password/views/forgot_password_view.dart';
@@ -82,6 +85,11 @@ class AppPages {
       binding: MetaPhraseBinding(), // if you have it
       transition: Transition.downToUp,
     ),
-
+    GetPage(
+      name: _Paths.TRANSLATIONMEMORY,
+      page: () => TranslationMemoryView(),
+      binding: TranslationMemoryBinding(), // if you have it
+      transition: Transition.downToUp,
+    ),
   ];
 }
