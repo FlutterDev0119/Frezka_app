@@ -1,14 +1,408 @@
+// import 'package:flutter/material.dart';
+// import 'package:get/get.dart';
+// import 'package:nb_utils/nb_utils.dart';
+//
+// import '../../../generated/assets.dart';
+// import '../../../utils/common/colors.dart';
+// import '../../../utils/app_scaffold.dart';
+// import '../../../utils/component/image_source_selection_component.dart';
+// import '../controllers/engageAI_controller.dart';
+//
+// class GeneralClinicController extends GetxController {
+//   var selectedFile = ''.obs;
+// }
+//
+// class GenAIClinicalScreen extends StatelessWidget {
+//   final GenAIClinicalController controller = Get.put(GenAIClinicalController());
+//
+//   GenAIClinicalScreen({super.key});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return AppScaffold(
+//       isLoading: controller.isLoading,
+//       appBarBackgroundColor: appBackGroundColor,
+//       appBarTitleText: "GenAI Clinical",
+//       appBarTitleTextStyle: TextStyle(
+//         fontSize: 20,
+//         color: appWhiteColor,
+//       ),
+//       body: Padding(
+//         padding: const EdgeInsets.all(16.0),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             Row(
+//               children: [
+//                 GestureDetector(
+//                   onTap: () {
+//                     Get.bottomSheet(
+//                       enableDrag: true,
+//                       isScrollControlled: true,
+//                       ImageSourceSelectionComponent(
+//                         onSourceSelected: (imageSource) {
+//                           hideKeyboard(context);
+//                           controller.onSourceSelected(imageSource);
+//                         },
+//                       ),
+//                     );
+//                   },
+//                   child: Container(
+//                     padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+//                     decoration: BoxDecoration(
+//                       border: Border.all(color: appBackGroundColor),
+//                       borderRadius: BorderRadius.circular(8.0),
+//                     ),
+//                     child: Text(
+//                       'Upload File',
+//                       style: TextStyle(
+//                         color: appBackGroundColor,
+//                         fontSize: 16.0,
+//                       ),
+//                     ),
+//                   ),
+//                 ),
+//                 10.width,
+//                 Expanded(
+//                   child: Obx(() {
+//                     if (controller.fileNames.isEmpty) {
+//                       return Text('No files selected');
+//                     }
+//
+//                     return Container(
+//                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+//                       decoration: BoxDecoration(
+//                         border: Border.all(color: appBackGroundColor),
+//                         borderRadius: BorderRadius.circular(12),
+//                       ),
+//                       child: SingleChildScrollView(
+//                         scrollDirection: Axis.horizontal,
+//                         child: Row(
+//                           children: controller.fileNames.asMap().entries.map((entry) {
+//                             final index = entry.key;
+//                             final fileName = entry.value;
+//
+//                             return Container(
+//                               margin: EdgeInsets.only(right: 8),
+//                               decoration: BoxDecoration(
+//                                 color: Colors.blue.shade100,
+//                                 borderRadius: BorderRadius.circular(6),
+//                               ),
+//                               child: Row(
+//                                 mainAxisSize: MainAxisSize.min,
+//                                 children: [
+//                                   // File name
+//                                   Padding(
+//                                     padding: EdgeInsets.only(left: 8),
+//                                     child: Text(
+//                                       fileName,
+//                                       overflow: TextOverflow.ellipsis,
+//                                       style: TextStyle(color: Colors.black),
+//                                     ),
+//                                   ),
+//                                   // Popup menu suffix icon
+//                                   PopupMenuButton<String>(
+//                                     padding: EdgeInsets.zero,
+//                                     onSelected: (value) {
+//                                       if (value == 'view') {
+//                                         toast('Viewing ${controller.fileNames[index]}');
+//                                       } else if (value == 'remove') {
+//                                         controller.fileNames.removeAt(index);
+//                                         controller.imageFiles.removeAt(index);
+//                                       }
+//                                     },
+//                                     icon: Icon(Icons.menu, size: 18),
+//                                     itemBuilder: (context) => [
+//                                       PopupMenuItem(
+//                                         value: 'view',
+//                                         child: Row(
+//                                           children: [
+//                                             Icon(Icons.remove_red_eye, size: 18),
+//                                             SizedBox(width: 8),
+//                                             Text('View'),
+//                                           ],
+//                                         ),
+//                                       ),
+//                                       PopupMenuItem(
+//                                         value: 'remove',
+//                                         child: Row(
+//                                           children: [
+//                                             Icon(Icons.close, size: 18, color: Colors.red),
+//                                             SizedBox(width: 8),
+//                                             Text('Remove', style: TextStyle(color: Colors.red)),
+//                                           ],
+//                                         ),
+//                                       ),
+//                                     ],
+//                                   ),
+//                                 ],
+//                               ),
+//                             );
+//                           }).toList(),
+//                         ),
+//                       ),
+//                     );
+//                   }),
+//                 ),
+//               ],
+//             ),
+//
+//
+//             /// curate he response
+//             Card(
+//               margin: EdgeInsets.only(top: 24),
+//               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+//               elevation: 2,
+//               child: Padding(
+//                 padding: const EdgeInsets.all(16.0),
+//                 child: Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     Row(
+//                       children: const [
+//                         Icon(Icons.build, color: Colors.blue),
+//                         SizedBox(width: 8),
+//                         Text(
+//                           'Curate The Response',
+//                           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+//                         ),
+//                       ],
+//                     ),
+//                     const SizedBox(height: 16),
+//                     Text(
+//                       'Ready to Use Prompts',
+//                       style: TextStyle(fontWeight: FontWeight.w600),
+//                     ),
+//                     // Text(
+//                     //   'Selected Attributes:',
+//                     //   style: TextStyle(fontWeight: FontWeight.w600),
+//                     // ),
+//                     Obx(() {
+//                       if (controller.selectedChips.isEmpty) {
+//                         return Container(
+//                           width: double.infinity,
+//                           padding: EdgeInsets.all(8),
+//                           decoration: BoxDecoration(
+//                             border: Border.all(color: Colors.grey.shade300),
+//                             borderRadius: BorderRadius.circular(8),
+//                           ),
+//                           child: Text(
+//                             'Selected Attributes',
+//                             style: TextStyle(color: appGreyColor),
+//                           ),
+//                           //SizedBox(width: double.infinity,height: 12,), // Empty space but with a border
+//                         );
+//                       }
+//
+//                       return Container(
+//                         padding: EdgeInsets.all(8),
+//                         decoration: BoxDecoration(
+//                           border: Border.all(color: Colors.grey.shade300),
+//                           borderRadius: BorderRadius.circular(8),
+//                         ),
+//                         child: SingleChildScrollView(
+//                           scrollDirection: Axis.horizontal,
+//                           child: Row(
+//                             children: controller.selectedChips.map((chip) {
+//                               return Container(
+//                                 margin: EdgeInsets.only(right: 8),
+//                                 padding: EdgeInsets.symmetric(horizontal: 8),
+//                                 decoration: BoxDecoration(
+//                                   color: appDashBoardCardColor,
+//                                   borderRadius: BorderRadius.circular(8),
+//                                 ),
+//                                 child: Row(
+//                                   mainAxisSize: MainAxisSize.min,
+//                                   children: [
+//                                     Text(chip),
+//                                     PopupMenuButton<String>(
+//                                       icon: Icon(Icons.menu, size: 18),
+//                                       onSelected: (value) {
+//                                         if (value == 'view') {
+//                                           toast('Viewing "$chip"');
+//                                         } else if (value == 'remove') {
+//                                           controller.toggleChip(chip);
+//                                         }
+//                                       },
+//                                       itemBuilder: (context) => [
+//                                         PopupMenuItem(
+//                                           value: 'view',
+//                                           child: Row(
+//                                             children: [
+//                                               Icon(Icons.remove_red_eye, size: 18),
+//                                               SizedBox(width: 8),
+//                                               Text('View'),
+//                                             ],
+//                                           ),
+//                                         ),
+//                                         PopupMenuItem(
+//                                           value: 'remove',
+//                                           child: Row(
+//                                             children: [
+//                                               Icon(Icons.close, size: 18, color: Colors.red),
+//                                               SizedBox(width: 8),
+//                                               Text('Remove', style: TextStyle(color: Colors.red)),
+//                                             ],
+//                                           ),
+//                                         ),
+//                                       ],
+//                                     ),
+//                                   ],
+//                                 ),
+//                               );
+//                             }).toList(),
+//                           ),
+//                         ),
+//                       );
+//                     }),
+//                     /// Filter Icon (Dropdown)
+//                     GestureDetector(
+//                       onTap: () {
+//                         Get.dialog(
+//                           Dialog(
+//                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+//                             child: Container(
+//                               constraints: const BoxConstraints(maxHeight: 500, minWidth: 300),
+//                               decoration: BoxDecoration(
+//                                 color: appBackGroundColor,
+//                                 borderRadius: BorderRadius.circular(16),
+//                               ),
+//                               child: Column(
+//                                 mainAxisSize: MainAxisSize.min,
+//                                 mainAxisAlignment: MainAxisAlignment.start,
+//                                 children: [
+//                                   /// Title Row with background color
+//                                   Container(
+//                                     width: double.infinity,
+//                                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+//                                     decoration: BoxDecoration(
+//                                       color: appBackGroundColor,
+//                                       borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+//                                     ),
+//                                     child: Row(
+//                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                                       children: [
+//                                         const Text(
+//                                           "Classification",
+//                                           style: TextStyle(
+//                                             fontSize: 18,
+//                                             fontWeight: FontWeight.bold,
+//                                             color: Colors.white,
+//                                           ),
+//                                         ),
+//                                         IconButton(
+//                                           icon: const Icon(Icons.close, color: Colors.white),
+//                                           onPressed: () => Get.back(),
+//                                         ),
+//                                       ],
+//                                     ),
+//                                   ),
+//
+//                                   const Divider(height: 1, thickness: 1),
+//
+//                                   /// Chip List Section (Full Width)
+//                                   Expanded(
+//                                     child: Obx(() => SingleChildScrollView(
+//                                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+//                                       child: Column(
+//                                         crossAxisAlignment: CrossAxisAlignment.start,
+//                                         children: controller.classificationMap.entries.map((entry) {
+//                                           final category = entry.key; // Clinical category, e.g., 'Investigator Analysis'
+//                                           final isSelected = controller.selectedTags.contains(category);
+//
+//                                           return GestureDetector(
+//                                             onTap: () => controller.addTag(category),
+//                                             child: Chip(
+//                                               label: Text(
+//                                                 category,
+//                                                 style: TextStyle(
+//                                                   fontWeight: FontWeight.w500,
+//                                                   color: isSelected ? appBackGroundColor : Colors.black87,
+//                                                 ),
+//                                               ),
+//                                               backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
+//                                             ),
+//                                           );
+//                                         }).toList(),
+//                                       ),
+//                                     )),
+//                                   )
+//
+//                                 ],
+//                               ),
+//                             ),
+//                           ),
+//                         );
+//                       },
+//                       child: Padding(
+//                         padding: const EdgeInsets.only(left: 8),
+//                         child: Image.asset(
+//                           Assets.iconsFilterDownArrow,
+//                           width: 25,
+//                           height: 25,
+//                           color: appBackGroundColor,
+//                         ),
+//                       ),
+//                     ),
+//                     const SizedBox(height: 8),
+//                     Obx(() {
+//                       final prompts = controller.classificationMap.values.expand((e) => e).toList();
+//                       return SingleChildScrollView(
+//                         scrollDirection: Axis.horizontal,
+//                         child: Row(
+//                           children: prompts.map((chip) {
+//                             final isSelected = controller.selectedChips.contains(chip);
+//                             return Padding(
+//                               padding: const EdgeInsets.only(right: 8),
+//                               child: FilterChip(
+//                                 showCheckmark: false,
+//                                 label: Text(chip),
+//                                 selected: isSelected,
+//                                 onSelected: (_) => controller.toggleChip(chip),
+//                               ),
+//                             );
+//                           }).toList(),
+//                         ),
+//                       );
+//                     }),
+//                     const SizedBox(height: 16),
+//                     Text(
+//                       'Personalize The Prompt',
+//                       style: TextStyle(fontWeight: FontWeight.w600),
+//                     ),
+//                     const SizedBox(height: 8),
+//                     Container(
+//                       padding: EdgeInsets.symmetric(horizontal: 12),
+//                       decoration: BoxDecoration(
+//                         border: Border.all(color: Colors.grey.shade300),
+//                         borderRadius: BorderRadius.circular(8),
+//                       ),
+//                       child: TextField(
+//                         decoration: InputDecoration(
+//                           border: InputBorder.none,
+//                           hintText: 'Enter The Prompt',
+//                         ),
+//                       ),
+//                     )
+//                   ],
+//                 ),
+//               ),
+//             )
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nb_utils/nb_utils.dart';
 
+import '../../../generated/assets.dart';
 import '../../../utils/common/colors.dart';
 import '../../../utils/app_scaffold.dart';
+import '../../../utils/component/image_source_selection_component.dart';
 import '../controllers/genAI_clinical_controller.dart';
-
-class GeneralClinicController extends GetxController {
-  var selectedFile = ''.obs;
-}
 
 class GenAIClinicalScreen extends StatelessWidget {
   final GenAIClinicalController controller = Get.put(GenAIClinicalController());
@@ -18,71 +412,419 @@ class GenAIClinicalScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-        appBarBackgroundColor: appBackGroundColor,
-        appBarTitleText: "GenAI Clinical",
-
-        appBarTitleTextStyle: TextStyle(
+      isLoading: controller.isLoading,
+      appBarBackgroundColor: appBackGroundColor,
+      appBarTitleText: "GenAI Clinical",
+      appBarTitleTextStyle: TextStyle(
         fontSize: 20,
         color: appWhiteColor,
-    ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Upload File Section
             Row(
               children: [
-                ElevatedButton(
-                  onPressed: () {},
-                  child: Text('Upload File'),
+                GestureDetector(
+                  onTap: () {
+                    Get.bottomSheet(
+                      enableDrag: true,
+                      isScrollControlled: true,
+                      ImageSourceSelectionComponent(
+                        onSourceSelected: (imageSource) {
+                          hideKeyboard(context);
+                          controller.onSourceSelected(imageSource);
+                        },
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: appBackGroundColor),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Text(
+                      'Upload File',
+                      style: TextStyle(
+                        color: appBackGroundColor,
+                        fontSize: 16.0,
+                      ),
+                    ),
+                  ),
                 ),
                 10.width,
                 Expanded(
-                  child: DropdownButtonFormField<String>(
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'Select File',
-                    ),
-                    items: [],
-                    onChanged: (value) {},
-                  ),
+                  child: Obx(() {
+                    if (controller.fileNames.isEmpty) {
+                      return Text('No files selected');
+                    }
+                    return Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: appBackGroundColor),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: controller.fileNames.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final fileName = entry.value;
+
+                            return Container(
+                              margin: EdgeInsets.only(right: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade100,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 8),
+                                    child: Text(
+                                      fileName,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(color: Colors.black),
+                                    ),
+                                  ),
+                                  PopupMenuButton<String>(
+                                    padding: EdgeInsets.zero,
+                                    onSelected: (value) {
+                                      if (value == 'view') {
+                                        toast('Viewing ${controller.fileNames[index]}');
+                                      } else if (value == 'remove') {
+                                        controller.fileNames.removeAt(index);
+                                        controller.imageFiles.removeAt(index);
+                                      }
+                                    },
+                                    icon: Icon(Icons.menu, size: 18),
+                                    itemBuilder: (context) => [
+                                      PopupMenuItem(
+                                        value: 'view',
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.remove_red_eye, size: 18),
+                                            SizedBox(width: 8),
+                                            Text('View'),
+                                          ],
+                                        ),
+                                      ),
+                                      PopupMenuItem(
+                                        value: 'remove',
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.close, size: 18, color: Colors.red),
+                                            SizedBox(width: 8),
+                                            Text('Remove', style: TextStyle(color: Colors.red)),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    );
+                  }),
                 ),
               ],
             ),
-            20.height,
-            Text('Ready to Use Prompts',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            Wrap(
-              spacing: 10,
-              children: [
-                _buildPromptChip('Batch_Narrative_Generation'),
-                _buildPromptChip('Literature Case'),
-                _buildPromptChip('Medical Device Case'),
-                _buildPromptChip('SUSAR/Fatal/Death'),
-                _buildPromptChip('Pregnancy Case'),
-                _buildPromptChip('Follow-up Prompt'),
-              ],
-            ),
-            20.height,
-            Text('Personalize The Prompt',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            TextField(
-              decoration: InputDecoration(
-                hintText: 'Enter The Prompt',
-                border: OutlineInputBorder(),
+
+            // Curate the Response Section
+            Padding(
+              padding: const EdgeInsets.only(top: 15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: const [
+                      Icon(Icons.build, color: Colors.blue),
+                      SizedBox(width: 8),
+                      Text(
+                        'Curate The Response',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Ready to Use Prompts',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+
+                  // Display Selected Tags
+                  Obx(() {
+                    if (controller.selectedTags.isEmpty) {
+                      return Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'Selected Attributes',
+                          style: TextStyle(color: appGreyColor),
+                        ),
+                      );
+                    }
+
+                    return Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: controller.selectedTags.map((attribute) {
+                            return Container(
+                              margin: EdgeInsets.only(right: 8),
+                              padding: EdgeInsets.symmetric(horizontal: 8),
+                              decoration: BoxDecoration(
+                                color: appDashBoardCardColor,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(attribute),
+                                  PopupMenuButton<String>(
+                                    icon: Icon(Icons.menu, size: 18),
+                                    onSelected: (value) {
+                                      if (value == 'view') {
+                                        toast('Viewing "$attribute"');
+                                      } else if (value == 'remove') {
+                                        controller.removeAttribute(attribute);
+                                      }
+                                    },
+                                    itemBuilder: (context) => [
+                                      PopupMenuItem(
+                                        value: 'view',
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.remove_red_eye, size: 18),
+                                            SizedBox(width: 8),
+                                            Text('View'),
+                                          ],
+                                        ),
+                                      ),
+                                      PopupMenuItem(
+                                        value: 'remove',
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.close, size: 18, color: Colors.red),
+                                            SizedBox(width: 8),
+                                            Text('Remove', style: TextStyle(color: Colors.red)),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    );
+                  }),
+
+                  // Filter Icon for Selecting Attributes
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: GestureDetector(
+                        onTap: () {
+                          Get.dialog(Dialog(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            child: Container(
+                              constraints: const BoxConstraints(maxHeight: 500, minWidth: 300),
+                              decoration: BoxDecoration(
+                                color: appBackGroundColor,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  // Title Row
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    decoration: BoxDecoration(
+                                      color: appBackGroundColor,
+                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          "select prompt",
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.close, color: Colors.white),
+                                          onPressed: () => Get.back(),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const Divider(height: 1, thickness: 1),
+                                  Container(
+                                    margin: const EdgeInsets.all(16),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    decoration: BoxDecoration(
+                                      color: appWhiteColor,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: Colors.grey.shade300),
+                                    ),
+                                    child: TextField(
+                                      controller: controller.searchController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Search Attributes',
+                                        prefixIcon: Icon(Icons.search),
+                                        suffixIcon: controller.searchController.text.isNotEmpty
+                                            ? IconButton(
+                                          icon: Icon(Icons.clear),
+                                          onPressed: () {
+                                            controller.searchController.clear();
+                                          },
+                                        )
+                                            : null,
+                                        border: InputBorder.none,
+                                      ),
+                                    ),
+                                  ),
+
+
+                                  // Chip List Section
+                                  Expanded(
+                                    child: Obx(
+                                      () => SingleChildScrollView(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: controller.filteredClassificationMap.entries.map((entry) {
+                                            final category = entry.key; // Investigator Analysis or Site Analysis
+                                            final attributes = entry.value;
+
+                                            return Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  category,
+                                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                                ),
+                                                const SizedBox(height: 8),
+                                                Column(
+                                                  children: attributes.map((attribute) {
+                                                    final isSelected = controller.selectedTags.contains(attribute);
+
+                                                    return GestureDetector(
+                                                      onTap: () => controller.toggleAttribute(attribute),
+                                                      child: Chip(
+                                                        label: Text(attribute),
+                                                        backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
+                                                        labelStyle: TextStyle(color: isSelected ? appBackGroundColor : Colors.black87),
+                                                      ),
+                                                    );
+                                                  }).toList(),
+                                                ),
+                                                const SizedBox(height: 16),
+                                              ],
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )).then((_) {
+                            // Clear the search controller and filtered list after dialog is closed
+                           controller.searchController.clear();
+                           controller.filteredClassificationMap.assignAll(controller.classificationMap);
+                          });;
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Image.asset(
+                            Assets.iconsFilterDownArrow,
+                            width: 25,
+                            height: 25,
+                            color: appBackGroundColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
+            const SizedBox(height: 8),
+            Obx(() {
+              final prompts = controller.classificationMap.values.expand((e) => e).toList();
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: prompts.map((chip) {
+                    final isSelected = controller.selectedChips.contains(chip);
+                    return Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: GestureDetector(
+                        onTap: () => controller.toggleSelection(chip), // Replaced toggleChip with toggleSelection
+                        child: FilterChip(
+                          label: Text(chip),
+                          selected: isSelected,
+                          onSelected: (_) => controller.toggleSelection(chip),
+                          // Replaced toggleChip with toggleSelection
+                          selectedColor: appBackGroundColor,
+                          backgroundColor: Colors.grey.shade200,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              );
+            }),
+            const SizedBox(height: 16),
+                    Text(
+                      'Personalize The Prompt',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Enter The Prompt',
+                        ),
+                      ),
+                    )
           ],
         ),
       ),
     );
   }
-
-  Widget _buildPromptChip(String label) {
-    return Chip(
-      label: Text(label),
-      backgroundColor: Colors.blue.shade100,
-    );
-  }
 }
-

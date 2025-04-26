@@ -5,9 +5,21 @@ class APIEndPoints {
   static const String socialLogin = 'google/';
 
   ///Prompt Admin
-  static const String fetchDoc = 'fetch_docs';
+  static const String fetchDoc = 'v1/fetch_docs';
+  static const String rolePromptResponse = 'v1/role_select';
+  static const String newPrompt = 'v1/new_prompt';
+
+  ///GenAI Clinical
+  static const String fetchDocClinical = 'v1/fetch_docs_clinical';
 
   ///Meta Phrase Pv
   static const String openWorklist = 'v1/open_worklist';
-  // static const String openWorklistID = '?Id=';
+  static const String reverseTranslate = 'v1/reverse_translate';
+
+  ///GovernAI
+   static const String countTraces = 'v1/count_traces';
+   static const String fetchTrace = 'v1/fetch_trace';
+
+   /// Engage AI
+  static const String chat = 'v1/chat';
 }

@@ -1,15 +1,18 @@
 import '../library.dart';
 
-// class AppColors {
-//   static const Color primary = Color(0xFF3b82f6);
-//   static const Color background = Color(0xFF7AA2C4);
-//   static const Color appBackground = Color(0xFFcfe2f3);
-//   static const Color cardColor = Color(0xFFE3F2FD);
-//   static const Color textColor = Colors.black87;
-//   static const Color greyColor = Colors.grey;
-//   static const Color redColor = Colors.red;
-//   static const Color whiteColor = Colors.white;
-// }
+class AppColors {
+  static const Color primary = Color(0xFF3b82f6);
+  static const Color background = Color(0xFF7AA2C4);
+  static const Color appBackground = Color(0xFFcfe2f3);
+  static const Color appBackground1 = Color(0xFFE5F1FD);
+  static const Color appBackground2 = Color(0xFFE4F2FD);
+  static const Color appBackground3 = Color(0xFFD5E5FE);
+  static const Color cardColor = Color(0xFFE3F2FD);
+  static const Color textColor = Colors.black87;
+  static const Color greyColor = Colors.grey;
+  static const Color redColor = Colors.red;
+  static const Color whiteColor = Colors.white;
+}
 
 /// APP COLOR
 const Color appBackGroundColor = Color(0xFF4682b4);

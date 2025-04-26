@@ -24,8 +24,8 @@ class LoginController extends BaseController {
     setLoading(true);
 
     Map<String, dynamic> request = {
-      ConstantKeys.emailKey: "sandesh.singhal@pvanalytica.com",//emailCont.text.trim(),//, //
-      ConstantKeys.passwordKey:"Pvana@123"//passwordCont.text.trim(),//  //
+      ConstantKeys.emailKey: "sandesh.singhal@pvanalytica.com", //emailCont.text.trim(),//, //
+      ConstantKeys.passwordKey: "Pvana@123", //passwordCont.text.trim(),//
     };
     print(request);
     try {
@@ -36,12 +36,12 @@ class LoginController extends BaseController {
       if (refreshToken != null) {
         toast("Logged in successfully!");
         Get.offAllNamed(Routes.DASHBOARD);
+        await setValue(AppSharedPreferenceKeys.isUserLoggedIn, true);
       } else {
         toast("Login failed");
       }
     } catch (e) {
       setLoading(false);
-      Get.offAllNamed(Routes.DASHBOARD);
       toast("Login failed: ${e.toString()}");
     } finally {
       setLoading(false);
@@ -69,6 +69,7 @@ class LoginController extends BaseController {
           request: req,
         ).then(
           (value) async {
+            await setValue(AppSharedPreferenceKeys.isUserLoggedIn, true);
             await setValue(AppSharedPreferenceKeys.apiToken, accessToken);
             toast("Logged in as ${googleUser.displayName}");
             Get.offAllNamed(Routes.DASHBOARD);
