@@ -5,9 +5,12 @@ import 'package:nb_utils/nb_utils.dart';
 import '../../../utils/app_scaffold.dart';
 import '../../../utils/common/colors.dart';
 import '../../../utils/component/image_source_selection_component.dart';
+import '../../../utils/constants.dart';
+import '../../../utils/shared_prefences.dart';
 import '../controllers/meta_phrase_pv_controller.dart';
 import '../model/open_worklist_model.dart';
 import '../model/transalted_model.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 
 class MetaPhraseScreen extends StatelessWidget {
   final MetaPhraseController controller = Get.put(MetaPhraseController());
@@ -541,7 +544,6 @@ class MetaPhraseScreen extends StatelessWidget {
                                       Obx(() {
                                         final isScoreHighlight = controller.isScoreHighlightMode.value;
 
-
                                         // Check if we need to show the scored sentences
                                         if (isScoreHighlight) {
                                           final scoredTexts = controller.selectedTranslationReport.value?.sentenceScore ?? [];
@@ -706,6 +708,26 @@ class MetaPhraseScreen extends StatelessWidget {
                                       children: certifyOptions.map((option) {
                                         return InkWell(
                                           onTap: () {
+                                            if (option == "Finalize") {
+                                              showCredentialsDialog(
+                                                context,
+                                                () {
+                                                  Get.back();
+                                                },
+                                                () {
+                                                  Get.back();
+                                                },
+                                              );
+                                              controller.isReturnSelected.value = false;
+                                              controller.isRejectSelected.value = false;
+                                            } else if (option == "Return") {
+                                              controller.isReturnSelected.value = true;
+                                              controller.isRejectSelected.value = false;
+                                            } else if (option == "Reject") {
+                                              controller.isRejectSelected.value = true;
+                                              controller.isReturnSelected.value = false;
+                                            }
+
                                             print("Selected: $option");
                                           },
                                           child: Padding(
@@ -730,7 +752,75 @@ class MetaPhraseScreen extends StatelessWidget {
                                         );
                                       }).toList(),
                                     ),
-                                  )
+                                  ),
+                                if (selected == 'Certify' && controller.isRejectSelected.value)
+                                  // Obx(() => Column(
+                                  //   children: [
+                                  //     DropdownButtonFormField<String>(
+                                  //       decoration: const InputDecoration(
+                                  //         labelText: 'Select a reason',
+                                  //         border: OutlineInputBorder(),
+                                  //       ),
+                                  //       value: controller.selectedReason.value.isEmpty
+                                  //           ? null
+                                  //           : controller.selectedReason.value,
+                                  //       items: controller.reasons.map((reason) {
+                                  //         return DropdownMenuItem(
+                                  //           value: reason,
+                                  //           child: Text(reason),
+                                  //         );
+                                  //       }).toList(),
+                                  //       onChanged: (value) {
+                                  //         controller.updateSelectedReason(value);
+                                  //       },
+                                  //     ),
+                                  //     const SizedBox(height: 20),
+                                  //     TextField(
+                                  //       controller: controller.textRejectController,
+                                  //       decoration: const InputDecoration(
+                                  //         labelText: 'Or type your reason',
+                                  //         border: OutlineInputBorder(),
+                                  //       ),
+                                  //       onChanged: (text) {
+                                  //         controller.clearSelectedIfTyped(text);
+                                  //       },
+                                  //     ),
+                                  //   ],
+                                  // )),
+                                  Obx(() {
+                                    if (controller.isRejectSelected.value) {
+                                      return Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          // TextField(
+                                          //   controller: controller.textSearchController,
+                                          //   decoration: const InputDecoration(
+                                          //     labelText: 'Type or search reason',
+                                          //     border: OutlineInputBorder(),
+                                          //   ),
+                                          //   onChanged: controller.onSearchTextChanged,
+                                          // ),
+                                          const SizedBox(height: 10),
+                                          DropdownButtonFormField<String>(
+                                            value: controller.selectedReason.value.isEmpty ? null : controller.selectedReason.value,
+                                            decoration: const InputDecoration(
+                                              // labelText: 'Select a reason',
+                                              border: OutlineInputBorder(),
+                                            ),
+                                            items: controller.filteredReasons.map((reason) {
+                                              return DropdownMenuItem<String>(
+                                                value: reason,
+                                                child: Text(reason),
+                                              );
+                                            }).toList(),
+                                            onChanged: controller.onReasonSelected,
+                                          ),
+                                        ],
+                                      );
+                                    } else {
+                                      return const SizedBox();
+                                    }
+                                  })
                               ],
                             ),
                           ],
@@ -877,6 +967,97 @@ void showPeerReviewDialog(BuildContext context, VoidCallback onConfirm, VoidCall
                       "Confirm",
                       style: TextStyle(color: Colors.black),
                     ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+void showCredentialsDialog(BuildContext context, VoidCallback onConfirm, VoidCallback onCancel) {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final ValueNotifier<bool> obscurePassword = ValueNotifier<bool>(true);
+  String storedEmail = getStringAsync(AppSharedPreferenceKeys.userEmail);
+  String storedPass = getStringAsync(ConstantKeys.passwordKey);
+  emailController.text = storedEmail.toString();
+  passwordController.text = storedPass.toString();
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Credentials",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 16),
+
+              // Email Field
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  hintText: "Enter your email",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 16),
+
+              // Password Field with visibility toggle
+              ValueListenableBuilder<bool>(
+                valueListenable: obscurePassword,
+                builder: (context, isObscure, child) {
+                  return TextField(
+                    controller: passwordController,
+                    obscureText: isObscure,
+                    decoration: InputDecoration(
+                      hintText: "Enter your password",
+                      border: OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          isObscure ? Icons.visibility_off : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          obscurePassword.value = !obscurePassword.value;
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
+              SizedBox(height: 24),
+
+              // Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: onCancel,
+                    child: Text("Cancel"),
+                  ),
+                  SizedBox(width: 12),
+                  ElevatedButton(
+                    onPressed: onConfirm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                    ),
+                    child: Text("Confirm"),
                   ),
                 ],
               ),

@@ -49,6 +49,21 @@ class MetaPhraseController extends BaseController {
   RxList<File> imageFiles = <File>[].obs;
   var isScoreHighlightMode = false.obs;
 
+  /// reject
+  var reasons = [
+    'Major structural or grammatical issues',
+    'Translation inappropriate for target culture',
+    'Literal translation altering the meaning',
+    'Other',
+  ].obs;
+
+  var filteredReasons = <String>[].obs;
+  var selectedReason = ''.obs;
+  var isRejectSelected = false.obs;
+
+  final TextEditingController textSearchController = TextEditingController();
+
+  RxBool isReturnSelected = false.obs;
 
   @override
   void onInit() {
@@ -57,6 +72,24 @@ class MetaPhraseController extends BaseController {
     translatedScrollController1 = ScrollController();
     translatedTextController = TextEditingController();
     fetchData();
+    filteredReasons.assignAll(reasons);
+  }
+  void onSearchTextChanged(String text) {
+    if (text.isEmpty) {
+      filteredReasons.assignAll(reasons);
+    } else {
+      filteredReasons.assignAll(
+        reasons.where((reason) => reason.toLowerCase().contains(text.toLowerCase())),
+      );
+    }
+    selectedReason.value = text;
+  }
+
+  void onReasonSelected(String? value) {
+    if (value != null) {
+      selectedReason.value = value;
+      textSearchController.text = value;
+    }
   }
   void startEditing() {
     // Set the text in the controller based on the `translatedFile`
