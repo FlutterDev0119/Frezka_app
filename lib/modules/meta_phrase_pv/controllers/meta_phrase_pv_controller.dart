@@ -1,9 +1,16 @@
+import 'dart:io';
+
 import 'package:apps/utils/common/base_controller.dart';
 import 'package:apps/utils/library.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
+import '../../../utils/common/common_base.dart';
+import '../../../utils/component/app_dialogue_component.dart';
 import '../model/open_worklist_model.dart';
 import '../model/transalted_model.dart';
+
+
 
 enum SortColumn {
   id,
@@ -24,6 +31,7 @@ class MetaPhraseController extends BaseController {
 
   final RxString errorMessage = ''.obs;
   final RxBool isLoading = false.obs;
+  final RxBool isReverse = false.obs;
 
   var selectedMode = 'Review'.obs;
   RxBool isCardSelected = false.obs;
@@ -33,19 +41,15 @@ class MetaPhraseController extends BaseController {
   final List<String> modes = ['Review', 'Edit', 'Peer Review', 'Certify'];
 
   RxString reverseTranslatedText = ''.obs;
-
-  // var isEditing = false.obs;
-  // var translatedText = ''.obs;
-  //
-  // void toggleEditing() {
-  //   isEditing.value = !isEditing.value;
-  // }
-  //
-  // void setText(String text) {
-  //   translatedText.value = text;
-  // }
   var isEditing = false.obs;
   late TextEditingController translatedTextController;
+
+  RxBool isPersonalSelected = false.obs;
+  RxBool isWorkGroupSelected = false.obs;
+  RxList<File> imageFiles = <File>[].obs;
+  var isScoreHighlightMode = false.obs;
+
+
   @override
   void onInit() {
     super.onInit();
@@ -53,6 +57,11 @@ class MetaPhraseController extends BaseController {
     translatedScrollController1 = ScrollController();
     translatedTextController = TextEditingController();
     fetchData();
+  }
+  void startEditing() {
+    // Set the text in the controller based on the `translatedFile`
+    translatedTextController.text = selectedTranslationReport.value?.translatedFile ?? '';
+    isEditing.value = true;  // Mark the edit mode as active
   }
   void enterEditMode() {
     // Get the current value from wherever necessary
@@ -124,6 +133,7 @@ class MetaPhraseController extends BaseController {
         "text": translatedText,
         "source_language":selectedTranslationReport.value?.sourceLanguage.toString()
       });
+      isReverse.value=true;
       reverseTranslatedText.value = response.reverseTranslated;
     } catch (e) {
       print('Reverse translation error: $e');
@@ -184,6 +194,32 @@ class MetaPhraseController extends BaseController {
     _applySortAndFilter();
   }
 
+  RxList<String> fileNames = <String>[].obs;
+  void togglePersonal(bool? value) {
+    isPersonalSelected.value = value ?? false;
+  }
+
+  void toggleWorkGroup(bool? value) {
+    isWorkGroupSelected.value = value ?? false;
+  }
+
+  // Handle source selection for image upload
+  void onSourceSelected(ImageSource imageSource) async {
+    final pickedFile = await pickFilesFromDevice(allowMultipleFiles: true);
+    if (pickedFile.isNotEmpty) {
+      Get.bottomSheet(
+        AppDialogueComponent(
+          titleText: "Do you want to upload this attachment?",
+          confirmText: "Upload",
+          onConfirm: () {
+            imageFiles.addAll(pickedFile);
+            fileNames.addAll(pickedFile.map((e) => e.path.split('/').last));
+          },
+        ),
+        isScrollControlled: true,
+      );
+    }
+  }
   @override
   void dispose() {
     translatedScrollController.dispose();

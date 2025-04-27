@@ -32,11 +32,11 @@ class ImageSourceSelectionComponent extends StatelessWidget {
           duration: Duration(milliseconds: 800),
         ),
         children: <Widget>[
-          Text('Choose Image Source', style: boldTextStyle(size: DefaultConstants.labelTextSize)),
+          Text('Choose File Source', style: boldTextStyle(size: DefaultConstants.labelTextSize)),
           SettingItemWidget(
-            title: 'Gallery',
+            title: 'File',
             leading: CachedImageWidget(
-              url: Assets.iconsIcGallery,
+              url: Assets.iconsIcFile,
               height: 16,
               width: 16,
             ),
@@ -65,10 +65,10 @@ class ImageSourceSelectionComponent extends StatelessWidget {
           //     onSourceSelected.call(ImageSource.camera);
           //   },
           // ),
-          Text(
-            'Support: JPG,PNG,JPEG and up 5mb size',
-            style: secondaryTextStyle(color: Colors.red, fontStyle: FontStyle.italic),
-          ),
+          // Text(
+          //   'Support: JPG,PNG,JPEG and up 5mb size',
+          //   style: secondaryTextStyle(color: Colors.red, fontStyle: FontStyle.italic),
+          // ),
         ],
       ),
     );

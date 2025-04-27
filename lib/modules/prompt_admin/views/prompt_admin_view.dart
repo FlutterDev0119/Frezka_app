@@ -11,6 +11,7 @@ import '../../../generated/assets.dart';
 import '../../../utils/common/colors.dart';
 import '../../../utils/app_scaffold.dart';
 import '../../../utils/common/common_base.dart';
+import '../../../utils/component/image_source_selection_component.dart';
 import '../controllers/prompt_admin_controller.dart';
 
 class PromptAdminScreen extends StatelessWidget {
@@ -370,9 +371,7 @@ class PromptAdminScreen extends StatelessWidget {
                               color: isSelected ? Colors.blueAccent : Colors.black,
                             ),
                           ),
-                          backgroundColor: isSelected
-                              ? appBackGroundColor.withOpacity(0.2)
-                              : Colors.grey.shade200,
+                          backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
                         ),
                       );
                     }).toList(),
@@ -381,7 +380,6 @@ class PromptAdminScreen extends StatelessWidget {
                 ],
               );
             }),
-
 
             10.height,
             Container(
@@ -449,6 +447,7 @@ class PromptAdminScreen extends StatelessWidget {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: appBackGroundColor,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text("Next", style: TextStyle(color: appWhiteColor)),
                       ),
@@ -576,23 +575,74 @@ class PromptAdminScreen extends StatelessWidget {
         color: Colors.white,
       ),
       child: Obx(() {
-        return DropdownButtonFormField<String>(
-          decoration: InputDecoration(
-            labelText: 'Primary Data Source',
-            border: InputBorder.none,
-          ),
-          hint: Text("Select data sources"),
-          value: controller.selectedSource.value,
-          isExpanded: true,
-          items: controller.dataSources.map((source) {
-            return DropdownMenuItem(
-              value: source,
-              child: Text(source),
-            );
-          }).toList(),
-          onChanged: (value) {
-            controller.selectedSource.value = value;
-          },
+        final availableSources = controller.dataSources.where((source) => !controller.selectedSources.contains(source)).toList();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Primary Data Source",
+              style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade400),
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.white,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: controller.selectedSources.isEmpty
+                        ? Text(
+                            "Select Data Source",
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 14,
+                            ),
+                          )
+                        : Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
+                            children: controller.selectedSources.map((source) {
+                              return Container(
+                                margin: EdgeInsets.only(top: 2, bottom: 2),
+                                child: Chip(
+                                  label: Text(source),
+                                  backgroundColor: Colors.blue.shade50,
+                                  labelStyle: TextStyle(color: Colors.blue),
+                                  deleteIconColor: Colors.blue,
+                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  visualDensity: VisualDensity.compact,
+                                  padding: EdgeInsets.symmetric(horizontal: 4),
+                                  onDeleted: () {
+                                    controller.selectedSources.remove(source);
+                                  },
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                  ),
+                  PopupMenuButton<String>(
+                    icon: Icon(Icons.arrow_drop_down),
+                    onSelected: (value) {
+                      controller.selectedSources.add(value);
+                    },
+                    itemBuilder: (context) {
+                      return availableSources.map((source) {
+                        return PopupMenuItem<String>(
+                          value: source,
+                          child: Text(source),
+                        );
+                      }).toList();
+                    },
+                    enabled: availableSources.isNotEmpty,
+                  ),
+                ],
+              ),
+            ),
+          ],
         );
       }),
     );
@@ -642,14 +692,43 @@ class PromptAdminScreen extends StatelessWidget {
                                 onSelected: (value) {
                                   switch (value) {
                                     case 'View':
+                                      showViewPopup(
+                                        context,
+                                        controller.selectedFileNames[item] ?? "10.png",
+                                      );
                                       break;
                                     case 'Replace':
+                                      // showReplacePopup(
+                                      //   context,
+                                      //   controller.selectedFileNames[item] ?? "10.png",
+                                      //   () {
+                                      //     // Simulate file replace with "No file chosen"
+                                      //     controller.selectedFileNames[item] = "";
+                                      //   },
+                                      //   () {
+                                      //     controller.removeItem(item);
+                                      //   },
+                                      // );
                                       showReplacePopup(
                                         context,
                                         controller.selectedFileNames[item] ?? "10.png",
-                                            () {
-                                          // Simulate file replace with "No file chosen"
+                                            () async {
+                                          // First clear the old file
                                           controller.selectedFileNames[item] = "";
+
+                                          // Now immediately open the file picker to choose new file
+                                          final result = await Get.bottomSheet(
+                                            enableDrag: true,
+                                            isScrollControlled: true,
+                                            ImageSourceSelectionComponent(
+                                              onSourceSelected: (imageSource) {
+                                                hideKeyboard(context);
+                                                controller.onSourceSelected(imageSource, item); // pass the item name
+                                              },
+                                            ),
+                                          );
+
+                                          // (Inside your onSourceSelected, handle the upload and update the controller.selectedFileNames[item])
                                         },
                                             () {
                                           controller.removeItem(item);
@@ -742,21 +821,32 @@ class PromptAdminScreen extends StatelessWidget {
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                        // Handle file pick for Code list
+                        Get.bottomSheet(
+                          enableDrag: true,
+                          isScrollControlled: true,
+                          ImageSourceSelectionComponent(
+                            onSourceSelected: (imageSource) {
+                              hideKeyboard(context);
+                              controller.onSourceSelected(imageSource,"Code list");
+                            },
+                          ),
+                        );
                       },
                       child: Text('Choose File'),
                       style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
                     ),
                     SizedBox(width: 10),
                     Obx(() {
-                      final fileName = controller.selectedFileNames["Code list"]; // or "Template"
+                      // final fileName = controller.selectedFileNames["Code list"];
+                      // return Text(
+                      //   fileName == null || fileName.isEmpty || fileName == "No file chosen" ? "No file chosen" : fileName,
+                      // );
+                      final fileName = controller.selectedFileNames["Code list"];
                       return Text(
-                        fileName == null || fileName.isEmpty || fileName == "No file chosen"
-                            ? "No file chosen"
-                            : fileName,
+                        (fileName?.isEmpty ?? true) ? "No file chosen" : fileName!,
+                        overflow: TextOverflow.ellipsis,
                       );
                     }),
-
                   ],
                 ),
                 SizedBox(height: 20),
@@ -839,48 +929,137 @@ class PromptAdminScreen extends StatelessWidget {
       ],
     );
   }
-
-  void showReplacePopup(
-    BuildContext context,
-    String filename,
-    VoidCallback onReplace,
-    VoidCallback onRemove,
-  ) {
+  void showViewPopup(
+      BuildContext context,
+      String filename,
+      ) {
     showDialog(
       context: context,
-      barrierColor: Colors.transparent,
+      barrierColor: Colors.black.withOpacity(0.3), // slight background dim
       builder: (context) => Dialog(
         backgroundColor: Colors.white,
-        insetPadding: EdgeInsets.only(left: 100, top: 200), // adjust to position near the button
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(filename),
-              SizedBox(width: 10),
-              IconButton(
-                icon: Icon(Icons.edit, size: 18, color: Colors.blue),
-                onPressed: () {
-
-                  Navigator.pop(context);
-                  onReplace();
-                },
-                tooltip: "Replace",
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            3.width,
+            Expanded(
+              child: Text(
+                filename,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              IconButton(
-                icon: Icon(Icons.close, size: 18, color: Colors.red),
-                onPressed: () {
-                  Navigator.pop(context);
-                  onRemove();
-                },
-                tooltip: "Remove",
-              ),
-            ],
-          ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.close, size: 18, color: Colors.red),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              tooltip: "Close",
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
+          ],
         ),
       ),
     );
   }
+
+  // void showReplacePopup(
+  //   BuildContext context,
+  //   String filename,
+  //   VoidCallback onReplace,
+  //   VoidCallback onRemove,
+  // ) {
+  //   showDialog(
+  //     context: context,
+  //     barrierColor: Colors.transparent,
+  //     builder: (context) => Dialog(
+  //       backgroundColor: Colors.white,
+  //       insetPadding: EdgeInsets.only(left: 100, top: 200), // adjust to position near the button
+  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+  //       child: Padding(
+  //         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+  //         child: Row(
+  //           mainAxisSize: MainAxisSize.min,
+  //           crossAxisAlignment: CrossAxisAlignment.center,
+  //           children: [
+  //             Expanded(
+  //               child: Text(
+  //                 filename,
+  //                 style: TextStyle(fontSize: 16),
+  //                 overflow: TextOverflow.ellipsis,
+  //               ),
+  //             ),
+  //             IconButton(
+  //               icon: Icon(Icons.edit, size: 20, color: Colors.blue),
+  //               onPressed: () {
+  //                 Navigator.pop(context);
+  //                 onReplace();
+  //               },
+  //               tooltip: "Replace",
+  //             ),
+  //             IconButton(
+  //               icon: Icon(Icons.close, size: 20, color: Colors.red),
+  //               onPressed: () {
+  //                 Navigator.pop(context);
+  //                 onRemove();
+  //               },
+  //               tooltip: "Remove",
+  //             ),
+  //           ],
+  //         )
+  //         ,
+  //       ),
+  //     ),
+  //   );
+  // }
+  void showReplacePopup(BuildContext context, String filename, VoidCallback onReplace, VoidCallback onRemove) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Replace File'),
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                child: Text(
+                  filename.isEmpty ? "No file chosen" : filename,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.close, color: Colors.red),
+                onPressed: () {
+                  Navigator.pop(context);
+                  onRemove();
+                },
+                tooltip: 'Remove',
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                onReplace(); // Important: triggers picking new file
+              },
+              child: Text('Replace'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 }

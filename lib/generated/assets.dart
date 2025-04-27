@@ -4,6 +4,7 @@ class Assets {
 
   static const String fontInterTightRegular = 'assets/font/InterTight-Regular.ttf';
   static const String iconsFilterDownArrow = 'assets/icons/filter_down_arrow.png';
+  static const String iconsIcFile = 'assets/icons/ic_file.png';
   static const String iconsIcGallery = 'assets/icons/ic_gallery.png';
   static const String iconsSend = 'assets/icons/send.png';
   static const String imagesAppLogo = 'assets/images/app_logo.png';
