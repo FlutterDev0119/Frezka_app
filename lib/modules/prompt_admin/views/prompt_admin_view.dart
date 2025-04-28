@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class PromptAdminScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return AppScaffold(
+      resizeToAvoidBottomPadding: true,
       appBarBackgroundColor: appBackGroundColor,
       appBarTitleText: "Prompt Admin",
       appBarTitleTextStyle: TextStyle(
@@ -54,15 +56,47 @@ class PromptAdminScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     /// Tags Section
+                    // Expanded(
+                    //   child: SingleChildScrollView(
+                    //     scrollDirection: Axis.horizontal, // Make it scrollable horizontally
+                    //     child: Row(
+                    //       children: controller.classificationMap.keys.map((tag) {
+                    //         final isSelected = controller.selectedParentTag.value == tag;
+                    //
+                    //         return GestureDetector(
+                    //           onTap: () => controller.addTag(tag),
+                    //           child: Padding(
+                    //             padding: const EdgeInsets.symmetric(horizontal: 4.0), // Add spacing between chips
+                    //             child: Chip(
+                    //               label: Text(
+                    //                 "# $tag",
+                    //                 style: TextStyle(
+                    //                   fontWeight: FontWeight.w500,
+                    //                   color: isSelected ? Colors.white : Colors.black87,
+                    //                 ),
+                    //               ),
+                    //               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    //               backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.4) : appBackGroundColor.withOpacity(0.1),
+                    //             ),
+                    //           ),
+                    //         );
+                    //       }).toList(),
+                    //     ),
+                    //   ),
+                    // ),
+
                     Expanded(
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal, // Make it scrollable horizontally
                         child: Row(
-                          children: controller.classificationMap.keys.map((tag) {
+                          children: controller.tags.map((tag) {
                             final isSelected = controller.selectedParentTag.value == tag;
 
                             return GestureDetector(
-                              onTap: () => controller.addTag(tag),
+                              onTap: () async {
+                                controller.addTag(tag);
+                                await setValue("group", tag);
+                              },
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 4.0), // Add spacing between chips
                                 child: Chip(
@@ -70,11 +104,18 @@ class PromptAdminScreen extends StatelessWidget {
                                     "# $tag",
                                     style: TextStyle(
                                       fontWeight: FontWeight.w500,
-                                      color: isSelected ? Colors.white : Colors.black87,
+                                      color: isSelected ? appBackGroundColor : Colors.black87,
+                                    ),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8), // adjust the roundness
+                                    side: BorderSide(
+                                      color: isSelected ? Colors.blueAccent : Colors.transparent,
+                                      width: 1.5,
                                     ),
                                   ),
                                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.4) : appBackGroundColor.withOpacity(0.1),
+                                  backgroundColor: isSelected ? appDashBoardCardColor : appWhiteColor,
                                 ),
                               ),
                             );
@@ -132,31 +173,59 @@ class PromptAdminScreen extends StatelessWidget {
                                   const Divider(height: 1, thickness: 1),
 
                                   /// Chip List Section (Full Width)
+                                  // Expanded(
+                                  //   child: Obx(() => SingleChildScrollView(
+                                  //         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  //         child: Column(
+                                  //           crossAxisAlignment: CrossAxisAlignment.start,
+                                  //           children: controller.classificationMap.entries.map((entry) {
+                                  //             final category = entry.key;
+                                  //             final isSelected = controller.selectedTags.contains(category);
+                                  //
+                                  //             return GestureDetector(
+                                  //               onTap: () => controller.addTag(category),
+                                  //               child: Chip(
+                                  //                 label: Text(
+                                  //                   category,
+                                  //                   style: TextStyle(
+                                  //                     fontWeight: FontWeight.w500,
+                                  //                     color: isSelected ? appBackGroundColor : Colors.black87,
+                                  //                   ),
+                                  //                 ),
+                                  //                 backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
+                                  //               ),
+                                  //             );
+                                  //           }).toList(),
+                                  //         ),
+                                  //       )),
+                                  // ),
                                   Expanded(
-                                    child: Obx(() => SingleChildScrollView(
-                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: controller.classificationMap.entries.map((entry) {
-                                              final category = entry.key;
-                                              final isSelected = controller.selectedTags.contains(category);
+                                    child: SingleChildScrollView(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: controller.tags.map((category) {
+                                          final isSelected = controller.selectedTags.contains(category);
 
-                                              return GestureDetector(
-                                                onTap: () => controller.addTag(category),
-                                                child: Chip(
-                                                  label: Text(
-                                                    category,
-                                                    style: TextStyle(
-                                                      fontWeight: FontWeight.w500,
-                                                      color: isSelected ? appBackGroundColor : Colors.black87,
-                                                    ),
+                                          return GestureDetector(
+                                            onTap: () => controller.addTag(category),
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(vertical: 4.0), // optional: adds spacing between chips
+                                              child: Chip(
+                                                label: Text(
+                                                  "# $category",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.w500,
+                                                    color: isSelected ? appBackGroundColor : Colors.black87,
                                                   ),
-                                                  backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
                                                 ),
-                                              );
-                                            }).toList(),
-                                          ),
-                                        )),
+                                                backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -313,6 +382,50 @@ class PromptAdminScreen extends StatelessWidget {
             10.height,
 
             /// Conditionally Show Chips If Inherit Checked
+            Obx(() {
+              if (!controller.isChecked.value) {
+                return SizedBox.shrink(); // If not checked, show nothing
+              }
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: -8,
+                    children: controller.subTags.map((subTag) {
+                      final isSelected = controller.selectedTags.contains(subTag);
+
+                      return GestureDetector(
+                        onTap: () async {
+                          controller.toggleSubTag(subTag);
+
+                          await setValue("promptName", subTag);
+                        },
+                        child: Chip(
+                          label: Text(
+                            "+ $subTag",
+                            style: TextStyle(
+                              color: isSelected ? Colors.blueAccent : Colors.black,
+                            ),
+                          ),
+                          backgroundColor: isSelected ? appDashBoardCardColor : appWhiteColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(
+                              color: isSelected ? Colors.blueAccent : Colors.transparent,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              );
+            }),
+
             // Obx(() {
             //   if (!controller.isChecked.value || controller.selectedParentTag.value.isEmpty) {
             //     return const SizedBox.shrink();
@@ -327,59 +440,28 @@ class PromptAdminScreen extends StatelessWidget {
             //       Wrap(
             //         spacing: 6,
             //         runSpacing: -8,
-            //         children: items
-            //             .map((subTag) => GestureDetector(
-            //                   onTap: () {
-            //                     controller.addTagInherit(subTag);
-            //                   },
-            //                   child: Chip(
-            //                     label: Text(subTag),
-            //                     backgroundColor:
-            //                         controller.selectedTags.contains(subTag) ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
-            //                   ),
-            //                 ))
-            //             .toList(),
+            //         children: items.map((subTag) {
+            //           final isSelected = controller.selectedTags.contains(subTag);
+            //           return GestureDetector(
+            //             onTap: () {
+            //               controller.toggleSubTag(subTag);
+            //             },
+            //             child: Chip(
+            //               label: Text(
+            //                 subTag,
+            //                 style: TextStyle(
+            //                   color: isSelected ? Colors.blueAccent : Colors.black,
+            //                 ),
+            //               ),
+            //               backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
+            //             ),
+            //           );
+            //         }).toList(),
             //       ),
             //       12.height,
             //     ],
             //   );
             // }),
-            Obx(() {
-              if (!controller.isChecked.value || controller.selectedParentTag.value.isEmpty) {
-                return const SizedBox.shrink();
-              }
-
-              final tag = controller.selectedParentTag.value;
-              final items = controller.classificationMap[tag] ?? [];
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: -8,
-                    children: items.map((subTag) {
-                      final isSelected = controller.selectedTags.contains(subTag);
-                      return GestureDetector(
-                        onTap: () {
-                          controller.toggleSubTag(subTag);
-                        },
-                        child: Chip(
-                          label: Text(
-                            subTag,
-                            style: TextStyle(
-                              color: isSelected ? Colors.blueAccent : Colors.black,
-                            ),
-                          ),
-                          backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  12.height,
-                ],
-              );
-            }),
 
             10.height,
             Container(
@@ -437,13 +519,48 @@ class PromptAdminScreen extends StatelessWidget {
                     Align(
                       alignment: Alignment.bottomRight,
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async{
                           // controller.createNewPrompt();
                           if (controller.currentIndex.value < 4) {
                             controller.currentIndex.value++;
                           } else {
                             controller.currentIndex.value = 0;
                           }
+                          // if (controller.currentIndex.value == 4) {
+
+                          //  String promptName = getStringAsync("promptName");
+                          //  String Role = getStringAsync("Role");
+                          //
+                          //  List<String> Sources =  controller.selectedSources.toList();
+                          //  String action =  controller.actionController.text;
+                          // String group = getStringAsync("group");
+                           // log("promptName---------------$promptName");
+                           // log("Role---------------$Role");
+                           // log("Sources---------------$Sources");
+                           // log("action---------------$action");
+                           // log("group---------------$group");
+                          String promptName = getStringAsync("promptName").trim();
+                          String role = getStringAsync("Role").trim();
+                          List<String> sources = controller.selectedSources.toList();
+                          String action = controller.actionController.text.trim();
+                          String group = getStringAsync("group").trim();
+
+                          Map<String, dynamic> payload = {
+                            "prompt_name": promptName.isNotEmpty ? promptName : "",
+                            "role": {
+                              "user_role": role.isNotEmpty ? role : "",
+                            },
+                            "group": group.isNotEmpty ? group : "",
+                            "source": sources.isNotEmpty ? sources : [],
+                            "metadata": {},
+                            "task": action.isNotEmpty ? action : "",
+                          };
+
+// Now you can log it or send it to API
+                          log("Payload: ${jsonEncode(payload)}");
+                          await controller.createNewPrompt(payload);
+
+                          // }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: appBackGroundColor,
@@ -532,9 +649,10 @@ class PromptAdminScreen extends StatelessWidget {
               Obx(() => DropdownButton<String>(
                     isExpanded: true,
                     value: controller.selectedRole.value,
-                    onChanged: (String? newValue) {
+                    onChanged: (String? newValue) async{
                       controller.selectedRole.value = newValue!;
                       controller.fetchRolePrompt(newValue);
+                      await setValue("Role", newValue);
                     },
                     items: controller.roles.map((String role) {
                       return DropdownMenuItem<String>(
@@ -628,6 +746,8 @@ class PromptAdminScreen extends StatelessWidget {
                     icon: Icon(Icons.arrow_drop_down),
                     onSelected: (value) {
                       controller.selectedSources.add(value);
+                      log("---------$value");
+
                     },
                     itemBuilder: (context) {
                       return availableSources.map((source) {
@@ -684,35 +804,24 @@ class PromptAdminScreen extends StatelessWidget {
                             Text(item, style: TextStyle(color: Colors.blue)),
                             SizedBox(width: 4),
                             SizedBox(
-                              width: 28,
+                              width:item =="Other" ?0: 28,
                               height: 28,
                               child: PopupMenuButton<String>(
                                 padding: EdgeInsets.zero,
-                                icon: Icon(Icons.menu, size: 16, color: Colors.blue),
+                                icon: item =="Other" ? SizedBox() : Icon(Icons.menu, size: 16, color: Colors.blue) ,
                                 onSelected: (value) {
                                   switch (value) {
                                     case 'View':
                                       showViewPopup(
                                         context,
-                                        controller.selectedFileNames[item] ?? "10.png",
+                                        controller.selectedFileNames[item] ?? "No file chosen",
                                       );
                                       break;
                                     case 'Replace':
-                                      // showReplacePopup(
-                                      //   context,
-                                      //   controller.selectedFileNames[item] ?? "10.png",
-                                      //   () {
-                                      //     // Simulate file replace with "No file chosen"
-                                      //     controller.selectedFileNames[item] = "";
-                                      //   },
-                                      //   () {
-                                      //     controller.removeItem(item);
-                                      //   },
-                                      // );
                                       showReplacePopup(
                                         context,
-                                        controller.selectedFileNames[item] ?? "10.png",
-                                            () async {
+                                        controller.selectedFileNames[item] ?? "No file chosen",
+                                        () async {
                                           // First clear the old file
                                           controller.selectedFileNames[item] = "";
 
@@ -730,7 +839,7 @@ class PromptAdminScreen extends StatelessWidget {
 
                                           // (Inside your onSourceSelected, handle the upload and update the controller.selectedFileNames[item])
                                         },
-                                            () {
+                                        () {
                                           controller.removeItem(item);
                                         },
                                       );
@@ -827,7 +936,7 @@ class PromptAdminScreen extends StatelessWidget {
                           ImageSourceSelectionComponent(
                             onSourceSelected: (imageSource) {
                               hideKeyboard(context);
-                              controller.onSourceSelected(imageSource,"Code list");
+                              controller.onSourceSelected(imageSource, "Code list");
                             },
                           ),
                         );
@@ -837,16 +946,19 @@ class PromptAdminScreen extends StatelessWidget {
                     ),
                     SizedBox(width: 10),
                     Obx(() {
-                      // final fileName = controller.selectedFileNames["Code list"];
-                      // return Text(
-                      //   fileName == null || fileName.isEmpty || fileName == "No file chosen" ? "No file chosen" : fileName,
-                      // );
                       final fileName = controller.selectedFileNames["Code list"];
-                      return Text(
-                        (fileName?.isEmpty ?? true) ? "No file chosen" : fileName!,
-                        overflow: TextOverflow.ellipsis,
+                      return Expanded( // or use Flexible
+                        child: Marquee(
+                          child: Text(
+                            (fileName?.isEmpty ?? true) ? "No file chosen" : fileName!,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            softWrap: false,
+                          ),
+                        ),
                       );
-                    }),
+                    })
+
                   ],
                 ),
                 SizedBox(height: 20),
@@ -911,7 +1023,18 @@ class PromptAdminScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.grey.shade300),
             ),
-          ),
+            child: TextField(
+              controller: controller.actionController,
+              maxLines: null, // Allow infinite lines (multiline)
+              expands: true,  // Makes the TextField fill the container
+              decoration: InputDecoration(
+                contentPadding: const EdgeInsets.all(12),
+                border: InputBorder.none, // Remove the default border
+              ),
+              style: TextStyle(fontSize: 16),
+            ),
+          )
+
         ],
       ),
     );
@@ -929,10 +1052,11 @@ class PromptAdminScreen extends StatelessWidget {
       ],
     );
   }
+
   void showViewPopup(
-      BuildContext context,
-      String filename,
-      ) {
+    BuildContext context,
+    String filename,
+  ) {
     showDialog(
       context: context,
       barrierColor: Colors.black.withOpacity(0.3), // slight background dim
@@ -968,55 +1092,6 @@ class PromptAdminScreen extends StatelessWidget {
     );
   }
 
-  // void showReplacePopup(
-  //   BuildContext context,
-  //   String filename,
-  //   VoidCallback onReplace,
-  //   VoidCallback onRemove,
-  // ) {
-  //   showDialog(
-  //     context: context,
-  //     barrierColor: Colors.transparent,
-  //     builder: (context) => Dialog(
-  //       backgroundColor: Colors.white,
-  //       insetPadding: EdgeInsets.only(left: 100, top: 200), // adjust to position near the button
-  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-  //       child: Padding(
-  //         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-  //         child: Row(
-  //           mainAxisSize: MainAxisSize.min,
-  //           crossAxisAlignment: CrossAxisAlignment.center,
-  //           children: [
-  //             Expanded(
-  //               child: Text(
-  //                 filename,
-  //                 style: TextStyle(fontSize: 16),
-  //                 overflow: TextOverflow.ellipsis,
-  //               ),
-  //             ),
-  //             IconButton(
-  //               icon: Icon(Icons.edit, size: 20, color: Colors.blue),
-  //               onPressed: () {
-  //                 Navigator.pop(context);
-  //                 onReplace();
-  //               },
-  //               tooltip: "Replace",
-  //             ),
-  //             IconButton(
-  //               icon: Icon(Icons.close, size: 20, color: Colors.red),
-  //               onPressed: () {
-  //                 Navigator.pop(context);
-  //                 onRemove();
-  //               },
-  //               tooltip: "Remove",
-  //             ),
-  //           ],
-  //         )
-  //         ,
-  //       ),
-  //     ),
-  //   );
-  // }
   void showReplacePopup(BuildContext context, String filename, VoidCallback onReplace, VoidCallback onRemove) {
     showDialog(
       context: context,
@@ -1032,14 +1107,14 @@ class PromptAdminScreen extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              IconButton(
-                icon: Icon(Icons.close, color: Colors.red),
-                onPressed: () {
-                  Navigator.pop(context);
-                  onRemove();
-                },
-                tooltip: 'Remove',
-              ),
+              // IconButton(
+              //   icon: Icon(Icons.close, color: Colors.red),
+              //   onPressed: () {
+              //     Navigator.pop(context);
+              //     onRemove();
+              //   },
+              //   tooltip: 'Remove',
+              // ),
             ],
           ),
           actions: [
@@ -1049,17 +1124,18 @@ class PromptAdminScreen extends StatelessWidget {
               },
               child: Text('Cancel'),
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                onReplace(); // Important: triggers picking new file
-              },
-              child: Text('Replace'),
-            ),
+            filename.isEmpty
+                ? SizedBox()
+                : ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      onReplace(); // Important: triggers picking new file
+                    },
+                    child: Text('Replace'),
+                  ),
           ],
         );
       },
     );
   }
-
 }

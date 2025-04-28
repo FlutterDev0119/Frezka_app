@@ -10,6 +10,7 @@ import '../../../utils/component/app_dialogue_component.dart';
 import '../../../utils/library.dart';
 import '../model/inherit_fetch_doc_model.dart';
 import '../model/new_prompt_response_model.dart';
+import '../model/output_model.dart';
 import '../model/role_model.dart';
 
 class PromptAdminController extends BaseController {
@@ -25,6 +26,7 @@ class PromptAdminController extends BaseController {
 
   // Text Input
   final TextEditingController inputController = TextEditingController();
+  final TextEditingController actionController = TextEditingController();
 
   // Images
   final Rx<File?> roleImage = Rx<File?>(null);
@@ -33,6 +35,29 @@ class PromptAdminController extends BaseController {
   final selectedTags = <String>[].obs;
   final selectedTagsInherit = <String>[].obs;
   final classificationMap = <String, List<String>>{}.obs;
+  List<String> tags = [
+    "Adverse Event Reporting",
+    "Aggregate Reporting",
+    "Investigator Analysis",
+    "PV Agreements",
+    "Quality Control",
+    "Reconciliation",
+    "Risk Management",
+    "Sampling",
+    "Site Analysis",
+    "System",
+    "Trial Analysis",
+  ];
+  List<String> subTags = [
+    "Batch_Narrative_Generation",
+    "Literature Case",
+    "Medical Device Case",
+    "SUSAR/Fatal/Death Case",
+    "Pregnancy Case",
+    "Follow-up Prompt",
+    "Clinical Case",
+  ];
+
   final RxString selectedParentTag = ''.obs;
 
   RxString responseText = ''.obs;
@@ -197,15 +222,14 @@ class PromptAdminController extends BaseController {
   Future<void> createNewPrompt(Map<String, dynamic> requestData) async {
     if (isLoading.value) return;
     setLoading(true);
+    log(requestData);
 
     try {
-      final NewPromptResponse result = await PromptAdminServiceApis.createNewPrompt(
+      final NewPromptInherit result = await PromptAdminServiceApis.createNewPrompt(
         request: requestData,
       );
-      toast("Prompt Created: ${result.message}");
-      log("New Prompt Data: ${result.data?.promptName}");
+      toast(" ${result.output}");
     } catch (e) {
-      toast("Error: $e");
       log("Error creating new prompt: $e");
     } finally {
       setLoading(false);

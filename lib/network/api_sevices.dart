@@ -11,6 +11,7 @@ import '../modules/meta_phrase_pv/model/reverse_translate_model.dart';
 import '../modules/meta_phrase_pv/model/transalted_model.dart';
 import '../modules/prompt_admin/model/inherit_fetch_doc_model.dart';
 import '../modules/prompt_admin/model/new_prompt_response_model.dart';
+import '../modules/prompt_admin/model/output_model.dart';
 import '../modules/prompt_admin/model/role_model.dart';
 import '../utils/common/base_response_model.dart';
 import '../utils/common/common.dart';
@@ -108,13 +109,13 @@ class PromptAdminServiceApis {
     );
     return RoleResponse.fromJson(response);
   }
-  static Future<NewPromptResponse> createNewPrompt({required Map<String, dynamic> request}) async {
+  static Future<NewPromptInherit> createNewPrompt({required Map<String, dynamic> request}) async {
     final response = await buildHttpResponse(
       endPoint: APIEndPoints.newPrompt,
       request: request,
       method: MethodType.post,
     );
-    return NewPromptResponse.fromJson(response);
+    return NewPromptInherit.fromJson(response);
   }
 }
 
