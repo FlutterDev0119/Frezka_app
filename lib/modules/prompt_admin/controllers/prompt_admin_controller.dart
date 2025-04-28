@@ -5,8 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../../../utils/common/common_base.dart';
+import '../../../utils/component/app_dialogue_component.dart';
 import '../../../utils/library.dart';
 import '../model/inherit_fetch_doc_model.dart';
+import '../model/new_prompt_response_model.dart';
+import '../model/output_model.dart';
 import '../model/role_model.dart';
 
 class PromptAdminController extends BaseController {
@@ -22,6 +26,7 @@ class PromptAdminController extends BaseController {
 
   // Text Input
   final TextEditingController inputController = TextEditingController();
+  final TextEditingController actionController = TextEditingController();
 
   // Images
   final Rx<File?> roleImage = Rx<File?>(null);
@@ -30,6 +35,29 @@ class PromptAdminController extends BaseController {
   final selectedTags = <String>[].obs;
   final selectedTagsInherit = <String>[].obs;
   final classificationMap = <String, List<String>>{}.obs;
+  List<String> tags = [
+    "Adverse Event Reporting",
+    "Aggregate Reporting",
+    "Investigator Analysis",
+    "PV Agreements",
+    "Quality Control",
+    "Reconciliation",
+    "Risk Management",
+    "Sampling",
+    "Site Analysis",
+    "System",
+    "Trial Analysis",
+  ];
+  List<String> subTags = [
+    "Batch_Narrative_Generation",
+    "Literature Case",
+    "Medical Device Case",
+    "SUSAR/Fatal/Death Case",
+    "Pregnancy Case",
+    "Follow-up Prompt",
+    "Clinical Case",
+  ];
+
   final RxString selectedParentTag = ''.obs;
 
   RxString responseText = ''.obs;
@@ -45,10 +73,15 @@ class PromptAdminController extends BaseController {
     'Clinical Research Associate',
   ].obs;
 
-  final List<String> dataSources = ['XML', 'PDF', 'DOCX', 'XLSX'];
-  var selectedSource = RxnString();
+  var selectedSources = <String>[].obs;
+  final List<String> dataSources = ['XML', 'PDF', 'DOCX', 'XLSX','Data Lake','API'].obs;
+  // var selectedSource = RxnString();
 
   var selectedItems = <String>[].obs;
+  final selectedFileNames = <String, String>{}.obs;
+
+  RxList<File> imageFiles = <File>[].obs;
+  RxList<String> fileNames = <String>[].obs;
 
   void addItem(String item) {
     if (!selectedItems.contains(item)) {
@@ -64,7 +97,7 @@ class PromptAdminController extends BaseController {
 
   void selectParentTag(String tag) {
     if (selectedParentTag.value == tag) {
-      selectedParentTag.value = ''; // deselect if tapped again
+      selectedParentTag.value = '';
     } else {
       selectedParentTag.value = tag;
     }
@@ -96,9 +129,18 @@ class PromptAdminController extends BaseController {
     }
   }
 
+  // void addTag(String tag) {
+  //   if (!selectedTags.contains(tag)) {
+  //     selectedTags.add(tag);
+  //   }
+  // }
   void addTag(String tag) {
-    if (!selectedTags.contains(tag)) {
-      selectedTags.add(tag);
+    if (selectedParentTag.value == tag) {
+      selectedParentTag.value = '';
+      selectedTags.clear(); // Clear the list if deselected
+    } else {
+      selectedParentTag.value = tag;
+      selectedTags.value = [tag]; // Only allow one selected
     }
   }
 
@@ -108,43 +150,12 @@ class PromptAdminController extends BaseController {
       inputController.text = tag;
     }
   }
-
-  /// Image Pickers
-
-  Future<void> pickRoleImage() async {
-    await _handlePermissionAndPick(
-      permission: Permission.photos,
-      source: ImageSource.gallery,
-      setter: (file) => roleImage.value = file,
-    );
-  }
-
-  Future<void> pickSourceImage() async {
-    await _handlePermissionAndPick(
-      permission: Permission.camera,
-      source: ImageSource.camera,
-      setter: (file) => sourceImage.value = file,
-    );
-  }
-
-  Future<void> _handlePermissionAndPick({
-    required Permission permission,
-    required ImageSource source,
-    required void Function(File) setter,
-  }) async {
-    try {
-      await permission.request();
-      if (await permission.isPermanentlyDenied) {
-        openAppSettings();
-        return;
-      }
-
-      final pickedImage = await ImagePicker().pickImage(source: source);
-      if (pickedImage != null) {
-        setter(File(pickedImage.path));
-      }
-    } on PlatformException catch (e) {
-      print("Image picking error: $e");
+  void toggleSubTag(String subTag) {
+    if (selectedTags.contains(subTag)) {
+      selectedTags.clear(); // Deselect if already selected
+    } else {
+      selectedTags.value = [subTag];
+      inputController.text = subTag;// Select only this one
     }
   }
 
@@ -206,21 +217,51 @@ class PromptAdminController extends BaseController {
     } finally {
       setLoading(false);
     }
-    Future<void> fetchRolePrompt(String role) async {
-      if (isLoading.value) return;
-      setLoading(true);
+  }
 
-      try {
-        final RoleResponse result = await PromptAdminServiceApis.getRolePromptResponse(
-          request: {"role": role},
-        );
-        responseText.value = result.output;
-      } catch (e) {
-        toast("Error: $e");
-        log("Error fetching role prompt: $e");
-      } finally {
-        setLoading(false);
-      }
+  Future<void> createNewPrompt(Map<String, dynamic> requestData) async {
+    if (isLoading.value) return;
+    setLoading(true);
+    log(requestData);
+
+    try {
+      final NewPromptInherit result = await PromptAdminServiceApis.createNewPrompt(
+        request: requestData,
+      );
+      toast(" ${result.output}");
+    } catch (e) {
+      log("Error creating new prompt: $e");
+    } finally {
+      setLoading(false);
     }
   }
+// Handle source selection for image upload
+//   void onSourceSelected(ImageSource imageSource, String item) async {
+//     final pickedFile = await pickFilesFromDevice(allowMultipleFiles: true);
+//     if (pickedFile.isNotEmpty) {
+//       Get.bottomSheet(
+//         AppDialogueComponent(
+//           titleText: "Do you want to upload this attachment?",
+//           confirmText: "Upload",
+//           onConfirm: () {
+//             imageFiles.addAll(pickedFile);
+//             fileNames.addAll(pickedFile.map((e) => e.path.split('/').last));
+//           },
+//         ),
+//         isScrollControlled: true,
+//       );
+//     }
+//   }
+  void onSourceSelected(ImageSource source, String item) async {
+    final pickedFile = await ImagePicker().pickImage(source: source);
+    if (pickedFile != null) {
+      final file = File(pickedFile.path);
+      imageFiles.add(file);
+      final fileName = file.path.split('/').last;
+
+      // Update specific item
+      selectedFileNames[item] = fileName;
+    }
+  }
+
 }

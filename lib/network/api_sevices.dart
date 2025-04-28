@@ -11,6 +11,8 @@ import '../modules/meta_phrase_pv/model/open_worklist_model.dart';
 import '../modules/meta_phrase_pv/model/reverse_translate_model.dart';
 import '../modules/meta_phrase_pv/model/transalted_model.dart';
 import '../modules/prompt_admin/model/inherit_fetch_doc_model.dart';
+import '../modules/prompt_admin/model/new_prompt_response_model.dart';
+import '../modules/prompt_admin/model/output_model.dart';
 import '../modules/prompt_admin/model/role_model.dart';
 import '../utils/common/base_response_model.dart';
 import '../utils/common/common.dart';
@@ -107,6 +109,14 @@ class PromptAdminServiceApis {
       method: MethodType.post,
     );
     return RoleResponse.fromJson(response);
+  }
+  static Future<NewPromptInherit> createNewPrompt({required Map<String, dynamic> request}) async {
+    final response = await buildHttpResponse(
+      endPoint: APIEndPoints.newPrompt,
+      request: request,
+      method: MethodType.post,
+    );
+    return NewPromptInherit.fromJson(response);
   }
 }
 
@@ -273,6 +283,24 @@ class ClinicalPromptServiceApis {
     } catch (e) {
       toast(e.toString());
       print("Error fetching clinical documents: $e");
+      return null;
+    }
+  }
+}
+
+/// Engage AI
+class ChatServiceApi {
+  static Future<String?> sendMessage({required String message, required String userName, required String userId}) async {
+    try {
+      final response = await buildHttpResponse(
+        endPoint: "${APIEndPoints.chat}?message=$message&user_name=$userName&userId=$userId",
+        method: MethodType.get,
+      );
+
+      return response['response'];
+    } catch (e) {
+      toast(e.toString());
+      print("Error sending message: $e");
       return null;
     }
   }

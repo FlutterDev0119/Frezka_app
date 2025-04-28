@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import '../../../generated/assets.dart';
 import '../../../utils/common/colors.dart';
 import '../../../utils/app_scaffold.dart';
 import '../../../utils/common/common_base.dart';
+import '../../../utils/component/image_source_selection_component.dart';
 import '../controllers/prompt_admin_controller.dart';
 
 class PromptAdminScreen extends StatelessWidget {
@@ -20,6 +22,7 @@ class PromptAdminScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return AppScaffold(
+      resizeToAvoidBottomPadding: true,
       appBarBackgroundColor: appBackGroundColor,
       appBarTitleText: "Prompt Admin",
       appBarTitleTextStyle: TextStyle(
@@ -53,22 +56,71 @@ class PromptAdminScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     /// Tags Section
-                    Expanded(
-                      child: Wrap(
-                        spacing: 2.0,
-                        runSpacing: 2.0,
-                        children: controller.selectedTags.map((tag) {
-                          final isActive = controller.selectedParentTag.value == tag;
+                    // Expanded(
+                    //   child: SingleChildScrollView(
+                    //     scrollDirection: Axis.horizontal, // Make it scrollable horizontally
+                    //     child: Row(
+                    //       children: controller.classificationMap.keys.map((tag) {
+                    //         final isSelected = controller.selectedParentTag.value == tag;
+                    //
+                    //         return GestureDetector(
+                    //           onTap: () => controller.addTag(tag),
+                    //           child: Padding(
+                    //             padding: const EdgeInsets.symmetric(horizontal: 4.0), // Add spacing between chips
+                    //             child: Chip(
+                    //               label: Text(
+                    //                 "# $tag",
+                    //                 style: TextStyle(
+                    //                   fontWeight: FontWeight.w500,
+                    //                   color: isSelected ? Colors.white : Colors.black87,
+                    //                 ),
+                    //               ),
+                    //               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    //               backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.4) : appBackGroundColor.withOpacity(0.1),
+                    //             ),
+                    //           ),
+                    //         );
+                    //       }).toList(),
+                    //     ),
+                    //   ),
+                    // ),
 
-                          return GestureDetector(
-                            onTap: () => controller.selectParentTag(tag),
-                            child: Chip(
-                              label: Text("# $tag"),
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              backgroundColor: isActive ? appBackGroundColor.withOpacity(0.4) : appBackGroundColor.withOpacity(0.1),
-                            ),
-                          );
-                        }).toList(),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal, // Make it scrollable horizontally
+                        child: Row(
+                          children: controller.tags.map((tag) {
+                            final isSelected = controller.selectedParentTag.value == tag;
+
+                            return GestureDetector(
+                              onTap: () async {
+                                controller.addTag(tag);
+                                await setValue("group", tag);
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 4.0), // Add spacing between chips
+                                child: Chip(
+                                  label: Text(
+                                    "# $tag",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      color: isSelected ? appBackGroundColor : Colors.black87,
+                                    ),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8), // adjust the roundness
+                                    side: BorderSide(
+                                      color: isSelected ? Colors.blueAccent : Colors.transparent,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  backgroundColor: isSelected ? appDashBoardCardColor : appWhiteColor,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ),
 
@@ -121,31 +173,59 @@ class PromptAdminScreen extends StatelessWidget {
                                   const Divider(height: 1, thickness: 1),
 
                                   /// Chip List Section (Full Width)
+                                  // Expanded(
+                                  //   child: Obx(() => SingleChildScrollView(
+                                  //         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  //         child: Column(
+                                  //           crossAxisAlignment: CrossAxisAlignment.start,
+                                  //           children: controller.classificationMap.entries.map((entry) {
+                                  //             final category = entry.key;
+                                  //             final isSelected = controller.selectedTags.contains(category);
+                                  //
+                                  //             return GestureDetector(
+                                  //               onTap: () => controller.addTag(category),
+                                  //               child: Chip(
+                                  //                 label: Text(
+                                  //                   category,
+                                  //                   style: TextStyle(
+                                  //                     fontWeight: FontWeight.w500,
+                                  //                     color: isSelected ? appBackGroundColor : Colors.black87,
+                                  //                   ),
+                                  //                 ),
+                                  //                 backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
+                                  //               ),
+                                  //             );
+                                  //           }).toList(),
+                                  //         ),
+                                  //       )),
+                                  // ),
                                   Expanded(
-                                    child: Obx(() => SingleChildScrollView(
-                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: controller.classificationMap.entries.map((entry) {
-                                              final category = entry.key;
-                                              final isSelected = controller.selectedTags.contains(category);
+                                    child: SingleChildScrollView(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: controller.tags.map((category) {
+                                          final isSelected = controller.selectedTags.contains(category);
 
-                                              return GestureDetector(
-                                                onTap: () => controller.addTag(category),
-                                                child: Chip(
-                                                  label: Text(
-                                                    category,
-                                                    style: TextStyle(
-                                                      fontWeight: FontWeight.w500,
-                                                      color: isSelected ? appBackGroundColor : Colors.black87,
-                                                    ),
+                                          return GestureDetector(
+                                            onTap: () => controller.addTag(category),
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(vertical: 4.0), // optional: adds spacing between chips
+                                              child: Chip(
+                                                label: Text(
+                                                  "# $category",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.w500,
+                                                    color: isSelected ? appBackGroundColor : Colors.black87,
                                                   ),
-                                                  backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
                                                 ),
-                                              );
-                                            }).toList(),
-                                          ),
-                                        )),
+                                                backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -303,12 +383,9 @@ class PromptAdminScreen extends StatelessWidget {
 
             /// Conditionally Show Chips If Inherit Checked
             Obx(() {
-              if (!controller.isChecked.value || controller.selectedParentTag.value.isEmpty) {
-                return const SizedBox.shrink();
+              if (!controller.isChecked.value) {
+                return SizedBox.shrink(); // If not checked, show nothing
               }
-
-              final tag = controller.selectedParentTag.value;
-              final items = controller.classificationMap[tag] ?? [];
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -316,472 +393,186 @@ class PromptAdminScreen extends StatelessWidget {
                   Wrap(
                     spacing: 6,
                     runSpacing: -8,
-                    children: items
-                        .map((subTag) => GestureDetector(
-                              onTap: () {
-                                controller.addTagInherit(subTag);
-                              },
-                              child: Chip(
-                                label: Text(subTag),
-                                backgroundColor:
-                                    controller.selectedTags.contains(subTag) ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
-                              ),
-                            ))
-                        .toList(),
+                    children: controller.subTags.map((subTag) {
+                      final isSelected = controller.selectedTags.contains(subTag);
+
+                      return GestureDetector(
+                        onTap: () async {
+                          controller.toggleSubTag(subTag);
+
+                          await setValue("promptName", subTag);
+                        },
+                        child: Chip(
+                          label: Text(
+                            "+ $subTag",
+                            style: TextStyle(
+                              color: isSelected ? Colors.blueAccent : Colors.black,
+                            ),
+                          ),
+                          backgroundColor: isSelected ? appDashBoardCardColor : appWhiteColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(
+                              color: isSelected ? Colors.blueAccent : Colors.transparent,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
-                  12.height,
+                  const SizedBox(height: 12),
                 ],
               );
             }),
 
+            // Obx(() {
+            //   if (!controller.isChecked.value || controller.selectedParentTag.value.isEmpty) {
+            //     return const SizedBox.shrink();
+            //   }
+            //
+            //   final tag = controller.selectedParentTag.value;
+            //   final items = controller.classificationMap[tag] ?? [];
+            //
+            //   return Column(
+            //     crossAxisAlignment: CrossAxisAlignment.start,
+            //     children: [
+            //       Wrap(
+            //         spacing: 6,
+            //         runSpacing: -8,
+            //         children: items.map((subTag) {
+            //           final isSelected = controller.selectedTags.contains(subTag);
+            //           return GestureDetector(
+            //             onTap: () {
+            //               controller.toggleSubTag(subTag);
+            //             },
+            //             child: Chip(
+            //               label: Text(
+            //                 subTag,
+            //                 style: TextStyle(
+            //                   color: isSelected ? Colors.blueAccent : Colors.black,
+            //                 ),
+            //               ),
+            //               backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
+            //             ),
+            //           );
+            //         }).toList(),
+            //       ),
+            //       12.height,
+            //     ],
+            //   );
+            // }),
+
             10.height,
             Container(
-              height: size.height / 1.53,
               decoration: BoxDecoration(
                 color: appBackGroundColor.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(15),
               ),
-              child: Column(
-                children: [
-                  10.height,
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 8,
-                    children: [
-                      _buildOption("Role", Icons.person, 0),
-                      _buildOption("Choose Image", Icons.folder, 1),
-                      _buildOption("Click", Icons.camera_alt, 2),
-                      _buildOption("Task", Icons.list_rounded, 3),
-                      _buildOption("Verify", Icons.verified, 4),
-                    ],
-                  ),
-                  10.height,
-                  Obx(() {
-                    int index = controller.currentIndex.value;
-                    if (index == 0) {
-                      return Container(
-                            margin: EdgeInsets.all(16),
-                            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey.shade400),
-                              borderRadius: BorderRadius.circular(12),
-                              color: Colors.white,
-                            ),
-                        child: Expanded(
-                          child: Center(
-                            child: GestureDetector(
-                              onTap: controller.pickImageFromGallery,
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: SingleChildScrollView(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text("User Role", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                      SizedBox(height: 8),
-                                      Obx(() => DropdownButton<String>(
-                                            isExpanded: true,
-                                            value: controller.selectedRole.value,
-                                            onChanged: (String? newValue) {
-                                              controller.selectedRole.value = newValue!;
-                                              controller.fetchRolePrompt(newValue);
-                                            },
-                                            items: controller.roles.map((String role) {
-                                              return DropdownMenuItem<String>(
-                                                value: role,
-                                                child: Text(role),
-                                              );
-                                            }).toList(),
-                                          )),
-                                      SizedBox(height: 20),
-                                      Text("Response", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                      SizedBox(height: 8),
-                                      Obx(() => TextField(
-                                            readOnly: true,
-                                            controller: TextEditingController(text: controller.responseText.value)
-                                              ..selection = TextSelection.collapsed(offset: controller.responseText.value.length),
-                                            maxLines: 4,
-                                            decoration: InputDecoration(
-                                              border: OutlineInputBorder(),
-                                            ),
-                                          )),
-                                    ],
-                                  ),
-                                ),
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    10.height,
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 8,
+                      children: [
+                        _buildOption("Role", Icons.person, 0),
+                        _buildOption("Choose Image", Icons.folder, 1),
+                        _buildOption("Metadata", Icons.info_outline_rounded, 2),
+                        _buildOption("Task", Icons.list_rounded, 3),
+                        _buildOption("Verify", Icons.verified, 4),
+                      ],
+                    ),
+                    10.height,
+                    Obx(() {
+                      int index = controller.currentIndex.value;
 
-                                // => controller.roleImage.value != null
-                                // ? Image.file(controller.roleImage.value!, height: size.height / 4)
-                                // : Card(
-                                //     color: appDashBoardCardColor,
-                                //     child: const Padding(
-                                //       padding: EdgeInsets.all(8.0),
-                                //       child: Text("Select a file", style: TextStyle(fontSize: 20)),
-                                //     ),
-                                //   )
-                              ),
-                            ),
-                          ),
-                        ),
+                      Widget content;
+                      switch (index) {
+                        case 0:
+                          content = buildRoleSection();
+                          break;
+                        case 1:
+                          content = buildChooseImageSection();
+                          break;
+                        case 2:
+                          content = buildClickSection(context);
+                          break;
+                        case 3:
+                          content = buildTaskSection();
+                          break;
+                        case 4:
+                          content = buildVerifySection();
+                          break;
+                        default:
+                          content = SizedBox.shrink();
+                      }
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10.0),
+                        child: content,
                       );
-                    } else if (index == 1) {
-                      return Expanded(
-                        child:
-                        Center(
-                          child:Container(
-                            margin: EdgeInsets.all(16),
-                            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey.shade400),
-                              borderRadius: BorderRadius.circular(12),
-                              color: Colors.white,
-                            ),
-                            child: Obx(() {
-                              return DropdownButtonFormField<String>(
-                                decoration: InputDecoration(
-                                  labelText: 'Primary Data Source',
-                                  border: InputBorder.none,
-                                ),
-                                hint: Text("Select data sources"),
-                                value: controller.selectedSource.value,
-                                isExpanded: true,
-                                items: controller.dataSources.map((source) {
-                                  return DropdownMenuItem(
-                                    value: source,
-                                    child: Text(source),
-                                  );
-                                }).toList(),
-                                onChanged: (value) {
-                                  controller.selectedSource.value = value;
-                                },
-                              );
-                            }),
-                          )
-                          // GestureDetector(
-                          //   onTap: controller.pickImageFromGallery,
-                          //   child: Obx(() => controller.roleImage.value != null
-                          //       ? Image.file(controller.roleImage.value!, height: size.height / 4)
-                          //       : Card(
-                          //           color: appDashBoardCardColor,
-                          //           child: const Padding(
-                          //             padding: EdgeInsets.all(8.0),
-                          //             child: Text("Choose Image from Gallery", style: TextStyle(fontSize: 20)),
-                          //           ),
-                          //         )),
-                          // ),
-                        ),
-                      );
-                    }
-
-                    // else if (index == 2) {
-                    //
-                    //   return Expanded(
-                    //     child: Center(
-                    //       child: Column(
-                    //         crossAxisAlignment: CrossAxisAlignment.start,
-                    //         children: [
-                    //           // Metadata Source Section
-                    //           Row(
-                    //             mainAxisAlignment: MainAxisAlignment.start,
-                    //             children: [
-                    //               GestureDetector(
-                    //                 onTap: () {
-                    //                   // Handle the "Other" option
-                    //                 },
-                    //                 child: Container(
-                    //                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    //                   color: Colors.blue, // Color for selected option
-                    //                   child: Text('Other', style: TextStyle(color: Colors.white)),
-                    //                 ),
-                    //               ),
-                    //               SizedBox(width: 10),
-                    //               GestureDetector(
-                    //                 onTap: () {
-                    //                   // Handle the "Code list" option
-                    //                 },
-                    //                 child: Container(
-                    //                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    //                   color: Colors.blue, // Color for selected option
-                    //                   child: Text('Code list', style: TextStyle(color: Colors.white)),
-                    //                 ),
-                    //               ),
-                    //               SizedBox(width: 10),
-                    //               GestureDetector(
-                    //                 onTap: () {
-                    //                   // Handle the "Template" option
-                    //                 },
-                    //                 child: Container(
-                    //                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    //                   color: Colors.blue, // Color for selected option
-                    //                   child: Text('Template', style: TextStyle(color: Colors.white)),
-                    //                 ),
-                    //               ),
-                    //             ],
-                    //           ),
-                    //           SizedBox(height: 20),
-                    //           // Add Code list, Template, and Other Buttons
-                    //           Row(
-                    //             children: [
-                    //               ElevatedButton(
-                    //                 onPressed: () {
-                    //                   // Handle adding Code list
-                    //                 },
-                    //                 child: Text('+ Code list'),
-                    //               ),
-                    //               SizedBox(width: 10),
-                    //               ElevatedButton(
-                    //                 onPressed: () {
-                    //                   // Handle adding Template
-                    //                 },
-                    //                 child: Text('+ Template'),
-                    //               ),
-                    //               SizedBox(width: 10),
-                    //               ElevatedButton(
-                    //                 onPressed: () {
-                    //                   // Handle adding Other
-                    //                 },
-                    //                 child: Text('+ Other'),
-                    //               ),
-                    //             ],
-                    //           ),
-                    //           SizedBox(height: 20),
-                    //           // File Upload Section
-                    //           Text("Upload Code list File:"),
-                    //           SizedBox(height: 10),
-                    //           Row(
-                    //             children: [
-                    //               ElevatedButton(
-                    //                 onPressed: () {
-                    //                   // Handle file pick for Code list
-                    //                 },
-                    //                 child: Text('Choose File'),
-                    //               ),
-                    //               SizedBox(width: 10),
-                    //               Text("No file chosen"),
-                    //             ],
-                    //           ),
-                    //           SizedBox(height: 20),
-                    //           Text("Upload Template File:"),
-                    //           SizedBox(height: 10),
-                    //           Row(
-                    //             children: [
-                    //               ElevatedButton(
-                    //                 onPressed: () {
-                    //                   // Handle file pick for Template
-                    //                 },
-                    //                 child: Text('Choose File'),
-                    //               ),
-                    //               SizedBox(width: 10),
-                    //               Text("No file chosen"),
-                    //             ],
-                    //           ),
-                    //         ],
-                    //       ),
-                    //     ),
-                    //   );
-                    // }
-                    else if (index == 2) {
-                      return Expanded(
-                        child: Center(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Metadata Source Section
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  buildStyledOption("Other"),
-                                  SizedBox(width: 10),
-                                  buildStyledOption("Code list"),
-                                  SizedBox(width: 10),
-                                  buildStyledOption("Template"),
-                                ],
-                              ),
-                              SizedBox(height: 20),
-
-                              // Add Buttons
-                              Row(
-                                children: [
-                                  ElevatedButton(
-                                    onPressed: () => controller.addItem("Code list"),
-                                    child: Text('+ Code list'),
-                                  ),
-                                  SizedBox(width: 10),
-                                  ElevatedButton(
-                                    onPressed: () => controller.addItem("Template"),
-                                    child: Text('+ Template'),
-                                  ),
-                                  SizedBox(width: 10),
-                                  ElevatedButton(
-                                    onPressed: () => controller.addItem("Other"),
-                                    child: Text('+ Other'),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 20),
-
-                              // Show selected items as chips
-                              Obx(() => Wrap(
-                                spacing: 8.0,
-                                runSpacing: 8.0,
-                                children: controller.selectedItems.map((item) {
-                                  return Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue.shade100,
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(color: Colors.blue),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(item, style: TextStyle(color: Colors.blue)),
-                                        SizedBox(width: 4),
-                                        GestureDetector(
-                                          onTap: () => controller.removeItem(item),
-                                          child: Icon(Icons.close, size: 16, color: Colors.blue),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }).toList(),
-                              )),
-
-                              SizedBox(height: 20),
-                              Text("Upload Code list File:"),
-                              SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      // Handle file pick for Code list
-                                    },
-                                    child: Text('Choose File'),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text("No file chosen"),
-                                ],
-                              ),
-                              SizedBox(height: 20),
-                              Text("Upload Template File:"),
-                              SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      // Handle file pick for Template
-                                    },
-                                    child: Text('Choose File'),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text("No file chosen"),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }
-
-                    // else if (index == 3) {
-                    //   return Expanded(
-                    //     child: Center(
-                    //       child: Column(
-                    //         children: [
-                    //           20.height,
-                    //           Text("Task", style: const TextStyle(fontSize: 20)),
-                    //           ElevatedButton(
-                    //             onPressed: () => controller.taskText.value = "Updated Task",
-                    //             child: const Text("Update Task"),
-                    //           ),
-                    //         ],
-                    //       ),
-                    //     ),
-                    //   );
-                    // }
-                    else if (index == 3) {
-                      return Expanded(
-                        child: Center(
-                          child: Container(
-                            margin: EdgeInsets.symmetric(horizontal: 16),
-                            padding: EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Color(0xFFF6FAFF), // light blue-ish background
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 8,
-                                  offset: Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  "Actions",
-                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                                ),
-                                SizedBox(height: 12),
-                                Icon(Icons.open_in_new, size: 28, color: Colors.black87),
-                                SizedBox(height: 12),
-                                Container(
-                                  height: 100,
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: Colors.grey.shade300),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-
-                    else if (index == 4) {
-                      return Expanded(
-                        child: Center(
-                          child: Column(
-                            children: [
-                              20.height,
-                              Text("Verify", style: const TextStyle(fontSize: 20)),
-                              ElevatedButton(
-                                onPressed: () => controller.verifyText.value = "Verified",
-                                child: const Text("Verify Now"),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    } else {
-                      return const SizedBox.shrink();
-                    }
-                  }),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Align(
+                    }),
+                    Align(
                       alignment: Alignment.bottomRight,
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async{
+                          // controller.createNewPrompt();
                           if (controller.currentIndex.value < 4) {
                             controller.currentIndex.value++;
                           } else {
                             controller.currentIndex.value = 0;
                           }
+                          // if (controller.currentIndex.value == 4) {
+
+                          //  String promptName = getStringAsync("promptName");
+                          //  String Role = getStringAsync("Role");
+                          //
+                          //  List<String> Sources =  controller.selectedSources.toList();
+                          //  String action =  controller.actionController.text;
+                          // String group = getStringAsync("group");
+                           // log("promptName---------------$promptName");
+                           // log("Role---------------$Role");
+                           // log("Sources---------------$Sources");
+                           // log("action---------------$action");
+                           // log("group---------------$group");
+                          String promptName = getStringAsync("promptName").trim();
+                          String role = getStringAsync("Role").trim();
+                          List<String> sources = controller.selectedSources.toList();
+                          String action = controller.actionController.text.trim();
+                          String group = getStringAsync("group").trim();
+
+                          Map<String, dynamic> payload = {
+                            "prompt_name": promptName.isNotEmpty ? promptName : "",
+                            "role": {
+                              "user_role": role.isNotEmpty ? role : "",
+                            },
+                            "group": group.isNotEmpty ? group : "",
+                            "source": sources.isNotEmpty ? sources : [],
+                            "metadata": {},
+                            "task": action.isNotEmpty ? action : "",
+                          };
+
+// Now you can log it or send it to API
+                          log("Payload: ${jsonEncode(payload)}");
+                          await controller.createNewPrompt(payload);
+
+                          // }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: appBackGroundColor,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         child: Text("Next", style: TextStyle(color: appWhiteColor)),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+            )
           ],
         ),
       ),
@@ -822,6 +613,7 @@ class PromptAdminScreen extends StatelessWidget {
       );
     });
   }
+
   Widget buildStyledOption(String label) {
     return GestureDetector(
       onTap: () {
@@ -837,6 +629,513 @@ class PromptAdminScreen extends StatelessWidget {
         ),
         child: Text(label, style: TextStyle(color: Colors.black)),
       ),
+    );
+  }
+
+  Widget buildRoleSection() {
+    return Container(
+      margin: EdgeInsets.all(16),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade400),
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+      ),
+      child: Obx(() => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("User Role", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              Obx(() => DropdownButton<String>(
+                    isExpanded: true,
+                    value: controller.selectedRole.value,
+                    onChanged: (String? newValue) async{
+                      controller.selectedRole.value = newValue!;
+                      controller.fetchRolePrompt(newValue);
+                      await setValue("Role", newValue);
+                    },
+                    items: controller.roles.map((String role) {
+                      return DropdownMenuItem<String>(
+                        value: role,
+                        child: Text(role),
+                      );
+                    }).toList(),
+                  )),
+              controller.responseText.value.isNotEmpty ? 20.height : SizedBox(),
+              controller.responseText.value.isNotEmpty ? Text("Response", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)) : SizedBox(),
+              controller.responseText.value.isNotEmpty ? 8.height : SizedBox(),
+              Obx(
+                () => controller.responseText.value.isNotEmpty
+                    ? TextField(
+                        readOnly: true,
+                        controller: TextEditingController(text: controller.responseText.value)
+                          ..selection = TextSelection.collapsed(offset: controller.responseText.value.length),
+                        maxLines: 4,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                        ),
+                      )
+                    : SizedBox(),
+              ),
+              8.height,
+            ],
+          )),
+    );
+  }
+
+  Widget buildChooseImageSection() {
+    return Container(
+      margin: EdgeInsets.all(16),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade400),
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+      ),
+      child: Obx(() {
+        final availableSources = controller.dataSources.where((source) => !controller.selectedSources.contains(source)).toList();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Primary Data Source",
+              style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade400),
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.white,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: controller.selectedSources.isEmpty
+                        ? Text(
+                            "Select Data Source",
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 14,
+                            ),
+                          )
+                        : Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
+                            children: controller.selectedSources.map((source) {
+                              return Container(
+                                margin: EdgeInsets.only(top: 2, bottom: 2),
+                                child: Chip(
+                                  label: Text(source),
+                                  backgroundColor: Colors.blue.shade50,
+                                  labelStyle: TextStyle(color: Colors.blue),
+                                  deleteIconColor: Colors.blue,
+                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  visualDensity: VisualDensity.compact,
+                                  padding: EdgeInsets.symmetric(horizontal: 4),
+                                  onDeleted: () {
+                                    controller.selectedSources.remove(source);
+                                  },
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                  ),
+                  PopupMenuButton<String>(
+                    icon: Icon(Icons.arrow_drop_down),
+                    onSelected: (value) {
+                      controller.selectedSources.add(value);
+                      log("---------$value");
+
+                    },
+                    itemBuilder: (context) {
+                      return availableSources.map((source) {
+                        return PopupMenuItem<String>(
+                          value: source,
+                          child: Text(source),
+                        );
+                      }).toList();
+                    },
+                    enabled: availableSources.isNotEmpty,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget buildClickSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 20),
+
+        /// Selected Items Container
+        Obx(
+          () => Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.blue),
+            ),
+            constraints: BoxConstraints(minHeight: 48),
+            child: controller.selectedItems.isEmpty
+                ? Center(child: Text("No items selected", style: TextStyle(color: Colors.grey)))
+                : Wrap(
+                    spacing: 8.0,
+                    runSpacing: 8.0,
+                    children: controller.selectedItems.map((item) {
+                      return Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade100,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.blue),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(item, style: TextStyle(color: Colors.blue)),
+                            SizedBox(width: 4),
+                            SizedBox(
+                              width:item =="Other" ?0: 28,
+                              height: 28,
+                              child: PopupMenuButton<String>(
+                                padding: EdgeInsets.zero,
+                                icon: item =="Other" ? SizedBox() : Icon(Icons.menu, size: 16, color: Colors.blue) ,
+                                onSelected: (value) {
+                                  switch (value) {
+                                    case 'View':
+                                      showViewPopup(
+                                        context,
+                                        controller.selectedFileNames[item] ?? "No file chosen",
+                                      );
+                                      break;
+                                    case 'Replace':
+                                      showReplacePopup(
+                                        context,
+                                        controller.selectedFileNames[item] ?? "No file chosen",
+                                        () async {
+                                          // First clear the old file
+                                          controller.selectedFileNames[item] = "";
+
+                                          // Now immediately open the file picker to choose new file
+                                          final result = await Get.bottomSheet(
+                                            enableDrag: true,
+                                            isScrollControlled: true,
+                                            ImageSourceSelectionComponent(
+                                              onSourceSelected: (imageSource) {
+                                                hideKeyboard(context);
+                                                controller.onSourceSelected(imageSource, item); // pass the item name
+                                              },
+                                            ),
+                                          );
+
+                                          // (Inside your onSourceSelected, handle the upload and update the controller.selectedFileNames[item])
+                                        },
+                                        () {
+                                          controller.removeItem(item);
+                                        },
+                                      );
+                                      break;
+                                    case 'Unlock':
+                                      // Handle Unlock
+                                      break;
+                                    case 'Remove':
+                                      controller.removeItem(item);
+                                      break;
+                                  }
+                                },
+                                itemBuilder: (context) => [
+                                  PopupMenuItem(
+                                      value: 'View', child: Row(children: [Icon(Icons.visibility, size: 16), SizedBox(width: 6), Text("View")])),
+                                  PopupMenuItem(
+                                      value: 'Replace', child: Row(children: [Icon(Icons.edit, size: 16), SizedBox(width: 6), Text("Replace")])),
+                                  PopupMenuItem(
+                                      value: 'Unlock', child: Row(children: [Icon(Icons.lock_open, size: 16), SizedBox(width: 6), Text("Unlock")])),
+                                  PopupMenuItem(
+                                      value: 'Remove', child: Row(children: [Icon(Icons.close, size: 16), SizedBox(width: 6), Text("Remove")])),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+          ),
+        ),
+        SizedBox(height: 20),
+
+        /// Add Buttons
+        Row(
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                if (controller.selectedItems.contains("Code list")) {
+                  controller.removeItem("Code list");
+                } else {
+                  controller.addItem("Code list");
+                }
+              },
+              child: Text('+ Code list'),
+              style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+            ),
+            SizedBox(width: 10),
+            ElevatedButton(
+              onPressed: () {
+                if (controller.selectedItems.contains("Template")) {
+                  controller.removeItem("Template");
+                } else {
+                  controller.addItem("Template");
+                }
+              },
+              child: Text('+ Template'),
+              style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+            ),
+            SizedBox(width: 10),
+            ElevatedButton(
+              onPressed: () {
+                if (controller.selectedItems.contains("Other")) {
+                  controller.removeItem("Other");
+                } else {
+                  controller.addItem("Other");
+                }
+              },
+              child: Text('+ Other'),
+              style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+            ),
+          ],
+        ),
+
+        /// Conditional Upload Section
+        SizedBox(height: 20),
+        Obx(() {
+          final showCodeListUpload = controller.selectedItems.contains("Code list");
+          final showTemplateUpload = controller.selectedItems.contains("Template");
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (showCodeListUpload) ...[
+                Text("Upload Code list File:"),
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Get.bottomSheet(
+                          enableDrag: true,
+                          isScrollControlled: true,
+                          ImageSourceSelectionComponent(
+                            onSourceSelected: (imageSource) {
+                              hideKeyboard(context);
+                              controller.onSourceSelected(imageSource, "Code list");
+                            },
+                          ),
+                        );
+                      },
+                      child: Text('Choose File'),
+                      style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                    ),
+                    SizedBox(width: 10),
+                    Obx(() {
+                      final fileName = controller.selectedFileNames["Code list"];
+                      return Expanded( // or use Flexible
+                        child: Marquee(
+                          child: Text(
+                            (fileName?.isEmpty ?? true) ? "No file chosen" : fileName!,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            softWrap: false,
+                          ),
+                        ),
+                      );
+                    })
+
+                  ],
+                ),
+                SizedBox(height: 20),
+              ],
+              if (showTemplateUpload) ...[
+                Text("Upload Template File:"),
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        // Handle file pick for Template
+                      },
+                      child: Text('Choose File'),
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Text("No file chosen"),
+                  ],
+                ),
+                SizedBox(height: 20),
+              ],
+            ],
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget buildTaskSection() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Color(0xFFF6FAFF),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "Actions",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          ),
+          SizedBox(height: 12),
+          Icon(Icons.open_in_new, size: 28, color: Colors.black87),
+          SizedBox(height: 12),
+          Container(
+            height: 100,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: TextField(
+              controller: controller.actionController,
+              maxLines: null, // Allow infinite lines (multiline)
+              expands: true,  // Makes the TextField fill the container
+              decoration: InputDecoration(
+                contentPadding: const EdgeInsets.all(12),
+                border: InputBorder.none, // Remove the default border
+              ),
+              style: TextStyle(fontSize: 16),
+            ),
+          )
+
+        ],
+      ),
+    );
+  }
+
+  Widget buildVerifySection() {
+    return Column(
+      children: [
+        SizedBox(height: 20),
+        Text("Verify", style: TextStyle(fontSize: 20)),
+        ElevatedButton(
+          onPressed: () => controller.verifyText.value = "Verified",
+          child: Text("Verify Now"),
+        ),
+      ],
+    );
+  }
+
+  void showViewPopup(
+    BuildContext context,
+    String filename,
+  ) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.3), // slight background dim
+      builder: (context) => Dialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            3.width,
+            Expanded(
+              child: Text(
+                filename,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.close, size: 18, color: Colors.red),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              tooltip: "Close",
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void showReplacePopup(BuildContext context, String filename, VoidCallback onReplace, VoidCallback onRemove) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Replace File'),
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                child: Text(
+                  filename.isEmpty ? "No file chosen" : filename,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              // IconButton(
+              //   icon: Icon(Icons.close, color: Colors.red),
+              //   onPressed: () {
+              //     Navigator.pop(context);
+              //     onRemove();
+              //   },
+              //   tooltip: 'Remove',
+              // ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
+            ),
+            filename.isEmpty
+                ? SizedBox()
+                : ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      onReplace(); // Important: triggers picking new file
+                    },
+                    child: Text('Replace'),
+                  ),
+          ],
+        );
+      },
     );
   }
 }

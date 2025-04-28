@@ -4,8 +4,12 @@ import 'package:apps/modules/translation_memory/bindings/translation_memory_bind
 import 'package:apps/modules/translation_memory/controllers/translation_memory_controller.dart';
 import 'package:apps/modules/translation_memory/view/translation_memory_view.dart';
 
+import '../modules/engageAI/bindings/engageAI_binding.dart';
+import '../modules/engageAI/view/engageAI_view.dart';
 import '../modules/forgot_password/bindings/forgot_password_binding.dart';
 import '../modules/forgot_password/views/forgot_password_view.dart';
+import '../modules/genAI_pv/bindings/genAI_pv_binding.dart';
+import '../modules/genAI_pv/view/genAI_pv_view.dart';
 import '../modules/governAI/bindings/governAI_binding.dart';
 import '../modules/logout/bindings/logout_binding.dart';
 import '../modules/logout/views/logout_view.dart';
@@ -14,6 +18,8 @@ import '../modules/meta_phrase_pv/view/meta_phrase_pv_view.dart';
 import '../modules/prompt_admin/bindings/prompt_admin_binding.dart';
 import '../modules/prompt_admin/views/prompt_admin_view.dart';
 import '../modules/splash/bindings/splash_binding.dart';
+import '../modules/system_configuration/bindings/system_configuration_binding.dart';
+import '../modules/system_configuration/views/system_configuration_view.dart';
 import '../utils/library.dart';
 
 part 'app_routes.dart';
@@ -62,6 +68,18 @@ class AppPages {
       transition: Transition.downToUp,
     ),
     GetPage(
+      name: _Paths.GENAIPV,
+      page: () => GenAIPVScreen(),
+      binding: GenAIPVBinding(),
+      transition: Transition.downToUp,
+    ),
+    GetPage(
+      name: _Paths.ENGAGEAI,
+      page: () => EngageAIScreen(),
+      binding: EngageAIBinding(),
+      transition: Transition.downToUp,
+    ),
+    GetPage(
       name: _Paths.GOVERNAI,
       page: () => GovernAIScreen(),
       binding: GovernAIBinding(),
@@ -89,6 +107,12 @@ class AppPages {
       name: _Paths.TRANSLATIONMEMORY,
       page: () => TranslationMemoryView(),
       binding: TranslationMemoryBinding(), // if you have it
+      transition: Transition.downToUp,
+    ),
+    GetPage(
+      name: _Paths.SYSTEMCONFIGURATION,
+      page: () => SystemConfigurationScreen(),
+      binding: SystemConfigurationBinding(), // if you have it
       transition: Transition.downToUp,
     ),
   ];

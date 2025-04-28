@@ -4,6 +4,9 @@ import 'package:get/get.dart';
 import 'package:nb_utils/nb_utils.dart';
 import '../../../utils/app_scaffold.dart';
 import '../../../utils/common/colors.dart';
+import '../../../utils/component/image_source_selection_component.dart';
+import '../../../utils/constants.dart';
+import '../../../utils/shared_prefences.dart';
 import '../controllers/meta_phrase_pv_controller.dart';
 import '../model/open_worklist_model.dart';
 import '../model/transalted_model.dart';
@@ -57,19 +60,76 @@ class MetaPhraseScreen extends StatelessWidget {
     });
   }
 
-  Widget _buildHeaderRow() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.symmetric(horizontal: 8),
-      child: Row(
-        children: [
-          _headerButton("Identifier", SortColumn.id),
-          _headerButton("Language", SortColumn.sourceLanguage),
-          _headerButton("Original", SortColumn.originalCount),
-          _headerButton("Translated", SortColumn.translatedCount),
-          _headerButton("Score", SortColumn.score),
-        ],
-      ),
+  Widget _buildHeaderRow(BuildContext context) {
+    return Column(
+      children: [
+        // Top Fixed Row (Upload + Checkboxes)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            InkWell(
+              onTap: () {
+                Get.bottomSheet(
+                  enableDrag: true,
+                  isScrollControlled: true,
+                  ImageSourceSelectionComponent(
+                    onSourceSelected: (imageSource) {
+                      hideKeyboard(context);
+                      controller.onSourceSelected(imageSource);
+                    },
+                  ),
+                );
+              },
+              child: Icon(
+                Icons.cloud_upload,
+                size: 24,
+                color: appBackGroundColor,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Obx(() => Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Checkbox(
+                      fillColor: MaterialStateProperty.all(appBackGroundColor),
+                      value: controller.isPersonalSelected.value,
+                      onChanged: controller.togglePersonal,
+                    ),
+                    const Text('Personal'),
+                  ],
+                )),
+            const SizedBox(width: 10),
+            Obx(() => Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Checkbox(
+                      fillColor: MaterialStateProperty.all(appBackGroundColor),
+                      value: controller.isWorkGroupSelected.value,
+                      onChanged: controller.toggleWorkGroup,
+                    ),
+                    const Text('Work Group'),
+                    5.width,
+                  ],
+                )),
+          ],
+        ),
+        2.width,
+
+        // Scrollable Header Buttons Row
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            children: [
+              _headerButton("Identifier", SortColumn.id),
+              _headerButton("Language", SortColumn.sourceLanguage),
+              _headerButton("Original", SortColumn.originalCount),
+              _headerButton("Translated", SortColumn.translatedCount),
+              _headerButton("Score", SortColumn.score),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -113,8 +173,8 @@ class MetaPhraseScreen extends StatelessWidget {
               },
               child: Align(
                 alignment: Alignment.centerRight,
-                child: Icon(Icons.arrow_circle_up_rounded,color: appWhiteColor),
-              ).paddingOnly(right: 10,top: 5,bottom: 5),
+                child: Icon(Icons.arrow_circle_up_rounded, color: appWhiteColor),
+              ).paddingOnly(right: 10, top: 5, bottom: 5),
             ),
             Card(
               color: appDashBoardCardColor,
@@ -237,7 +297,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                     child: Text(
-                                      "Translated File",
+                                      controller.isReverse.value == false ? "Translated File" : "Reverse translate",
                                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                                     ),
                                   ),
@@ -245,31 +305,40 @@ class MetaPhraseScreen extends StatelessWidget {
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    controller.selectedMode.value == "Edit"
+                                    controller.selectedMode.value == "Edit" && controller.isReverse.value == false
                                         ? IconButton(
                                             iconSize: 20,
                                             visualDensity: VisualDensity.compact,
                                             padding: EdgeInsets.zero,
                                             icon: Icon(Icons.document_scanner),
-                                            onPressed: () {},
+                                            onPressed: () {
+                                              controller.isScoreHighlightMode.value = false;
+                                            },
                                           )
                                         : SizedBox(),
-                                    controller.selectedMode.value == "Edit"
+                                    controller.selectedMode.value == "Edit" && controller.isReverse.value == false
                                         ? IconButton(
                                             iconSize: 20,
                                             visualDensity: VisualDensity.compact,
                                             padding: EdgeInsets.zero,
                                             icon: Icon(Icons.score_outlined),
-                                            onPressed: () {},
+                                            onPressed: () {
+                                              controller.isScoreHighlightMode.value = true;
+
+                                              controller.selectedTranslationReport.value = controller.selectedTranslationReport.value;
+                                              // selectedTranslationReport.sentenceScore
+                                            },
                                           )
                                         : SizedBox(),
-                                    controller.selectedMode.value == "Edit"
+                                    controller.selectedMode.value == "Edit" && controller.isReverse.value == false
                                         ? IconButton(
                                             iconSize: 20,
                                             visualDensity: VisualDensity.compact,
                                             padding: EdgeInsets.zero,
                                             icon: Icon(Icons.screenshot_monitor_sharp),
-                                            onPressed: () {},
+                                            onPressed: () {
+                                              controller.isScoreHighlightMode.value = false;
+                                            },
                                           )
                                         : SizedBox(),
                                     (controller.selectedMode.value == "Review" || controller.selectedMode.value == "Edit")
@@ -281,6 +350,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                             onPressed: () async {
                                               final text = controller.selectedTranslationReport.value?.translatedFile ?? '';
                                               await controller.fetchReverseTranslation(text);
+                                              controller.isScoreHighlightMode.value = false;
                                               // _buildSelectedCard(context, controller.selectedTranslationReport.value,true);
                                             },
                                           )
@@ -292,22 +362,30 @@ class MetaPhraseScreen extends StatelessWidget {
                                             padding: EdgeInsets.zero,
                                             icon: Icon(Icons.fullscreen),
                                             onPressed: () {
+                                              controller.isScoreHighlightMode.value = false;
                                               showDialog(
                                                 context: context,
                                                 builder: (context) {
                                                   return Dialog(
                                                     insetPadding: EdgeInsets.zero,
                                                     backgroundColor: Colors.white,
-                                                    child: Scaffold(
-                                                      appBar: AppBar(
-                                                        title: Text("Translation Details"),
-                                                        actions: [
-                                                          IconButton(
-                                                            icon: Icon(Icons.close),
-                                                            onPressed: () => Navigator.of(context).pop(),
-                                                          )
-                                                        ],
+                                                    child: AppScaffold(
+                                                      automaticallyImplyLeading: false,
+                                                      appBarBackgroundColor: appBackGroundColor,
+                                                      appBarTitleText: "Translation Details",
+                                                      appBarTitleTextStyle: TextStyle(
+                                                        fontSize: 20,
+                                                        color: appWhiteColor,
                                                       ),
+                                                      actions: [
+                                                        IconButton(
+                                                          icon: Icon(
+                                                            Icons.close,
+                                                            color: appWhiteColor,
+                                                          ),
+                                                          onPressed: () => Navigator.of(context).pop(),
+                                                        )
+                                                      ],
                                                       body: Padding(
                                                         padding: const EdgeInsets.all(16),
                                                         child: Scrollbar(
@@ -324,7 +402,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                                                 Container(
                                                                   padding: const EdgeInsets.all(12),
                                                                   decoration: BoxDecoration(
-                                                                    color: Colors.grey.shade100,
+                                                                    color: appDashBoardCardColor,
                                                                     borderRadius: BorderRadius.circular(8),
                                                                     border: Border.all(color: Colors.grey.shade300),
                                                                   ),
@@ -342,7 +420,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                                                 Container(
                                                                   padding: const EdgeInsets.all(12),
                                                                   decoration: BoxDecoration(
-                                                                    color: Colors.grey.shade100,
+                                                                    color: appDashBoardCardColor,
                                                                     borderRadius: BorderRadius.circular(8),
                                                                     border: Border.all(color: Colors.grey.shade300),
                                                                   ),
@@ -367,29 +445,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            // Scrollable Content (non-fullscreen view)
-                            // Container(
-                            //   height: 150,
-                            //   padding: const EdgeInsets.all(16),
-                            //   child: Scrollbar(
-                            //     controller: controller.translatedScrollController1,
-                            //     thumbVisibility: true,
-                            //     child: SingleChildScrollView(
-                            //       controller: controller.translatedScrollController1,
-                            //       child: Column(
-                            //         crossAxisAlignment: CrossAxisAlignment.start,
-                            //         children: [
-                            //           Obx(() => Text(
-                            //                 controller.reverseTranslatedText.value.isNotEmpty
-                            //                     ? controller.reverseTranslatedText.value
-                            //                     : controller.selectedTranslationReport.value?.translatedFile ?? '',
-                            //                 style: TextStyle(fontSize: 16),
-                            //               ))
-                            //         ],
-                            //       ),
-                            //     ),
-                            //   ),
-                            // ),
+
                             Container(
                               height: 150,
                               padding: const EdgeInsets.all(16),
@@ -401,28 +457,154 @@ class MetaPhraseScreen extends StatelessWidget {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
+                                      // Obx(() {
+                                      //   final isEditingTranslatedFile =
+                                      //       controller.selectedMode.value == "Edit" && controller.isReverse.value == false;
+                                      //
+                                      //   if (isEditingTranslatedFile && controller.isEditing.value) {
+                                      //     return TextField(
+                                      //       controller: controller.translatedTextController,
+                                      //       autofocus: true,
+                                      //       maxLines: null,
+                                      //       style: const TextStyle(fontSize: 16),
+                                      //       decoration: const InputDecoration.collapsed(hintText: ''),
+                                      //       onEditingComplete: () {
+                                      //         controller.exitEditMode();
+                                      //         FocusScope.of(Get.context!).unfocus();
+                                      //       },
+                                      //       onSubmitted: (_) {
+                                      //         controller.exitEditMode();
+                                      //         FocusScope.of(Get.context!).unfocus();
+                                      //       },
+                                      //     );
+                                      //   }
+                                      //
+                                      //   final displayText = controller.isReverse.value
+                                      //       ? controller.reverseTranslatedText.value
+                                      //       : controller.selectedTranslationReport.value?.translatedFile ?? '';
+                                      //
+                                      //   return GestureDetector(
+                                      //     onTap: () {
+                                      //       if (controller.selectedMode.value == "Edit" && !controller.isReverse.value) {
+                                      //         controller.enterEditMode();
+                                      //       }
+                                      //     },
+                                      //     child: Text(
+                                      //       displayText,
+                                      //       style: const TextStyle(fontSize: 16),
+                                      //     ),
+                                      //   );
+                                      // })
+                                      // Obx(() {
+                                      //   final isScoreHighlight = controller.isScoreHighlightMode.value;
+                                      //   log("------------------isScoreHighlight $isScoreHighlight");
+                                      //
+                                      //   if (isScoreHighlight) {
+                                      //     final scoredTexts = controller.selectedTranslationReport.value?.sentenceScore ?? [];
+                                      //     log("------------------scoredTexts1 $scoredTexts");
+                                      //
+                                      //     if (scoredTexts.isEmpty) {
+                                      //       return Center(child: Text("No sentences available"));
+                                      //     }
+                                      //
+                                      //     return Wrap(
+                                      //       alignment: WrapAlignment.start,
+                                      //       children: scoredTexts.map<Widget>((sentenceScore) {
+                                      //         final sentence = sentenceScore.sentence;
+                                      //         final score = sentenceScore.score;
+                                      //
+                                      //         Color color = score <= 50 ? Colors.yellow : Colors.green;
+                                      //
+                                      //         return Text(
+                                      //           sentence,
+                                      //           style: TextStyle(fontSize: 16, color: color),
+                                      //         );
+                                      //       }).toList(),
+                                      //     );
+                                      //   }
+                                      //   // Default behavior if isScoreHighlight is false
+                                      //   final displayText = controller.isReverse.value
+                                      //       ? controller.reverseTranslatedText.value
+                                      //       : controller.selectedTranslationReport.value?.translatedFile ?? '';
+                                      //   log("------------------displaytext $displayText");
+                                      //
+                                      //   return GestureDetector(
+                                      //     onTap: () {
+                                      //       if (controller.selectedMode.value == "Edit" && !controller.isReverse.value) {
+                                      //         controller.enterEditMode();
+                                      //       }
+                                      //     },
+                                      //     child: Text(
+                                      //       displayText,
+                                      //       style: const TextStyle(fontSize: 16),
+                                      //     ),
+                                      //   );
+                                      // })
                                       Obx(() {
-                                        return (controller.isEditing.value || controller.selectedMode.value == "Edit")
-                                            ? TextField(
-                                                controller: controller.translatedTextController,
-                                                autofocus: true,
-                                                maxLines: null,
-                                                style: const TextStyle(fontSize: 16),
-                                                decoration: const InputDecoration.collapsed(hintText: 'Enter text...'),
-                                                onEditingComplete: () {
-                                                  controller.exitEditMode();
-                                                  FocusScope.of(Get.context!).unfocus();
-                                                },
-                                              )
-                                            : GestureDetector(
-                                                onTap: () => controller.enterEditMode(),
-                                                child: Text(
-                                                  controller.reverseTranslatedText.value.isNotEmpty
-                                                      ? controller.reverseTranslatedText.value
-                                                      : controller.selectedTranslationReport.value?.translatedFile ?? '',
-                                                  style: const TextStyle(fontSize: 16),
-                                                ),
+                                        final isScoreHighlight = controller.isScoreHighlightMode.value;
+
+                                        // Check if we need to show the scored sentences
+                                        if (isScoreHighlight) {
+                                          final scoredTexts = controller.selectedTranslationReport.value?.sentenceScore ?? [];
+
+                                          if (scoredTexts.isEmpty) {
+                                            return Center(child: Text("No sentences available"));
+                                          }
+
+                                          return Wrap(
+                                            alignment: WrapAlignment.start,
+                                            children: scoredTexts.map<Widget>((sentenceScore) {
+                                              final sentence = sentenceScore.sentence;
+                                              final score = sentenceScore.score;
+
+                                              Color color = score <= 50 ? Colors.yellow : Colors.green;
+
+                                              return Text(
+                                                sentence,
+                                                style: TextStyle(fontSize: 16, color: color),
                                               );
+                                            }).toList(),
+                                          );
+                                        }
+
+                                        // Default behavior if isScoreHighlight is false
+                                        final displayText = controller.isReverse.value
+                                            ? controller.reverseTranslatedText.value
+                                            : controller.selectedTranslationReport.value?.translatedFile ?? '';
+
+                                        // Check if we are in "Edit" mode
+                                        final isEditingTranslatedFile =
+                                            controller.selectedMode.value == "Edit" && controller.isReverse.value == false;
+                                        if (isEditingTranslatedFile && controller.isEditing.value) {
+                                          return TextField(
+                                            controller: controller.translatedTextController,
+                                            autofocus: true,
+                                            maxLines: null,
+                                            style: const TextStyle(fontSize: 16),
+                                            decoration: const InputDecoration.collapsed(hintText: ''),
+                                            onEditingComplete: () {
+                                              controller.exitEditMode();
+                                              FocusScope.of(Get.context!).unfocus();
+                                            },
+                                            onSubmitted: (_) {
+                                              controller.exitEditMode();
+                                              FocusScope.of(Get.context!).unfocus();
+                                            },
+                                          );
+                                        }
+
+                                        // Display text as normal if not in edit mode
+                                        return GestureDetector(
+                                          onTap: () {
+                                            if (controller.selectedMode.value == "Edit" && !controller.isReverse.value) {
+                                              controller.enterEditMode();
+                                            }
+                                          },
+                                          child: Text(
+                                            displayText,
+                                            style: const TextStyle(fontSize: 16),
+                                          ),
+                                        );
                                       })
                                     ],
                                   ),
@@ -439,7 +621,21 @@ class MetaPhraseScreen extends StatelessWidget {
                   Obx(() {
                     final selected = controller.selectedMode.value;
                     final certifyOptions = ['Finalize', 'Return', 'Reject'];
-
+                    if (selected == 'Peer Review') {
+                      Future.delayed(Duration.zero, () {
+                        showPeerReviewDialog(
+                          context,
+                          () {
+                            // Confirm action
+                            Get.back();
+                          },
+                          () {
+                            // Cancel action
+                            Get.back();
+                          },
+                        );
+                      });
+                    }
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -456,28 +652,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                     color: appBackGroundColor,
                                     border: Border.all(color: Colors.grey.shade400),
                                   ),
-                                  child:
-                                      // DropdownButtonHideUnderline(
-                                      //   child: DropdownButton<String>(
-                                      //     dropdownColor: appBackGroundColor,
-                                      //     value: selected,
-                                      //     icon: const Icon(Icons.arrow_drop_down, color: appWhiteColor),
-                                      //     style: const TextStyle(fontSize: 16, color: appWhiteColor),
-                                      //     isExpanded: true,
-                                      //     items: controller.modes.map((String value) {
-                                      //       return DropdownMenuItem<String>(
-                                      //         value: value,
-                                      //         child: Text(value),
-                                      //       );
-                                      //     }).toList(),
-                                      //     onChanged: (String? newValue) {
-                                      //       if (newValue != null) {
-                                      //         controller.updateSelectedMode(newValue);
-                                      //       }
-                                      //     },
-                                      //   ),
-                                      // ),
-                                      DropdownButtonHideUnderline(
+                                  child: DropdownButtonHideUnderline(
                                     child: DropdownButton<String>(
                                       dropdownColor: appBackGroundColor,
                                       value: selected,
@@ -502,6 +677,10 @@ class MetaPhraseScreen extends StatelessWidget {
                                         // Prevent null (disabled item) from being selected
                                         if (newValue != null) {
                                           controller.updateSelectedMode(newValue);
+                                          if (newValue == 'Edit') {
+                                            controller.startEditing();
+                                            controller.isReverse.value = false;
+                                          }
                                         }
                                       },
                                     ),
@@ -510,7 +689,6 @@ class MetaPhraseScreen extends StatelessWidget {
 
                                 // Only show this if 'Certify' is selected
                                 if (selected == 'Certify') const SizedBox(height: 8),
-
                                 if (selected == 'Certify')
                                   Container(
                                     width: 150,
@@ -529,13 +707,39 @@ class MetaPhraseScreen extends StatelessWidget {
                                       children: certifyOptions.map((option) {
                                         return InkWell(
                                           onTap: () {
+                                            if (option == "Finalize") {
+                                              showCredentialsDialog(
+                                                context,
+                                                () {
+                                                  Get.back();
+                                                },
+                                                () {
+                                                  Get.back();
+                                                },
+                                              );
+                                              controller.isReturnSelected.value = false;
+                                              controller.isRejectSelected.value = false;
+                                            } else if (option == "Return") {
+                                              controller.isReturnSelected.value = true;
+                                              controller.isRejectSelected.value = false;
+                                            } else if (option == "Reject") {
+                                              controller.isRejectSelected.value = true;
+                                              controller.isReturnSelected.value = false;
+                                            }
+
                                             print("Selected: $option");
                                           },
                                           child: Padding(
                                             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                                             child: Row(
                                               children: [
-                                                Icon(Icons.check_circle_outline, color: Colors.blue),
+                                                Icon(
+                                                    option == "Return"
+                                                        ? Icons.keyboard_return
+                                                        : option == "Reject"
+                                                            ? Icons.close
+                                                            : Icons.check_circle_outline,
+                                                    color: Colors.blue),
                                                 const SizedBox(width: 10),
                                                 Text(
                                                   option,
@@ -548,6 +752,74 @@ class MetaPhraseScreen extends StatelessWidget {
                                       }).toList(),
                                     ),
                                   ),
+                                if (selected == 'Certify' && controller.isRejectSelected.value)
+                                  // Obx(() => Column(
+                                  //   children: [
+                                  //     DropdownButtonFormField<String>(
+                                  //       decoration: const InputDecoration(
+                                  //         labelText: 'Select a reason',
+                                  //         border: OutlineInputBorder(),
+                                  //       ),
+                                  //       value: controller.selectedReason.value.isEmpty
+                                  //           ? null
+                                  //           : controller.selectedReason.value,
+                                  //       items: controller.reasons.map((reason) {
+                                  //         return DropdownMenuItem(
+                                  //           value: reason,
+                                  //           child: Text(reason),
+                                  //         );
+                                  //       }).toList(),
+                                  //       onChanged: (value) {
+                                  //         controller.updateSelectedReason(value);
+                                  //       },
+                                  //     ),
+                                  //     const SizedBox(height: 20),
+                                  //     TextField(
+                                  //       controller: controller.textRejectController,
+                                  //       decoration: const InputDecoration(
+                                  //         labelText: 'Or type your reason',
+                                  //         border: OutlineInputBorder(),
+                                  //       ),
+                                  //       onChanged: (text) {
+                                  //         controller.clearSelectedIfTyped(text);
+                                  //       },
+                                  //     ),
+                                  //   ],
+                                  // )),
+                                  Obx(() {
+                                    if (controller.isRejectSelected.value) {
+                                      return Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          // TextField(
+                                          //   controller: controller.textSearchController,
+                                          //   decoration: const InputDecoration(
+                                          //     labelText: 'Type or search reason',
+                                          //     border: OutlineInputBorder(),
+                                          //   ),
+                                          //   onChanged: controller.onSearchTextChanged,
+                                          // ),
+                                          const SizedBox(height: 10),
+                                          DropdownButtonFormField<String>(
+                                            value: controller.selectedReason.value.isEmpty ? null : controller.selectedReason.value,
+                                            decoration: const InputDecoration(
+                                              // labelText: 'Select a reason',
+                                              border: OutlineInputBorder(),
+                                            ),
+                                            items: controller.filteredReasons.map((reason) {
+                                              return DropdownMenuItem<String>(
+                                                value: reason,
+                                                child: Text(reason),
+                                              );
+                                            }).toList(),
+                                            onChanged: controller.onReasonSelected,
+                                          ),
+                                        ],
+                                      );
+                                    } else {
+                                      return const SizedBox();
+                                    }
+                                  })
                               ],
                             ),
                           ],
@@ -589,7 +861,7 @@ class MetaPhraseScreen extends StatelessWidget {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: ListTile(
               contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              title: Text(item.id, style: TextStyle(fontWeight: FontWeight.bold)),
+              title: Text(item.fileName, style: TextStyle(fontWeight: FontWeight.bold)),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -608,17 +880,18 @@ class MetaPhraseScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
+      resizeToAvoidBottomPadding: true,
       isLoading: controller.isLoading,
       appBarBackgroundColor: appBackGroundColor,
       appBarTitleText: "MetaPhrase Pv",
       appBarTitleTextStyle: TextStyle(fontSize: 20, color: appWhiteColor),
       body: Obx(() {
         return Container(
-          color: appBackGroundColor,
+          color: AppColors.appBackground,
           child: Column(
             children: [
               if (!controller.isCardSelected.value && controller.selectedTranslationReport.value == null) ...[
-                if (controller.filteredFiles.isNotEmpty) _buildHeaderRow(),
+                if (controller.filteredFiles.isNotEmpty) _buildHeaderRow(context),
                 Expanded(child: _buildFileList()),
               ],
               if (controller.isCardSelected.value && controller.selectedTranslationReport.value != null) ...[
@@ -630,4 +903,167 @@ class MetaPhraseScreen extends StatelessWidget {
       }),
     );
   }
+}
+
+void showPeerReviewDialog(BuildContext context, VoidCallback onConfirm, VoidCallback onCancel) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        backgroundColor: Color(0xFFF4F0FA), // Light purple background
+        child: Container(
+          width: 406, // as per your image resolution
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 48),
+              SizedBox(height: 16),
+              Text(
+                "Warning",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange,
+                ),
+              ),
+              SizedBox(height: 16),
+              Text(
+                "You haven't updated the\ntranslation memory yet.\n\nAre you sure you want to proceed?",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
+              ),
+              SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: onCancel,
+                    child: Text(
+                      "Cancel",
+                      style: TextStyle(color: Colors.blueGrey),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  ElevatedButton(
+                    onPressed: onConfirm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      "Confirm",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+void showCredentialsDialog(BuildContext context, VoidCallback onConfirm, VoidCallback onCancel) {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final ValueNotifier<bool> obscurePassword = ValueNotifier<bool>(true);
+  String storedEmail = getStringAsync(AppSharedPreferenceKeys.userEmail);
+  String storedPass = getStringAsync(ConstantKeys.passwordKey);
+  emailController.text = storedEmail.toString();
+  passwordController.text = storedPass.toString();
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Credentials",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 16),
+
+              // Email Field
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  hintText: "Enter your email",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 16),
+
+              // Password Field with visibility toggle
+              ValueListenableBuilder<bool>(
+                valueListenable: obscurePassword,
+                builder: (context, isObscure, child) {
+                  return TextField(
+                    controller: passwordController,
+                    obscureText: isObscure,
+                    decoration: InputDecoration(
+                      hintText: "Enter your password",
+                      border: OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          isObscure ? Icons.visibility_off : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          obscurePassword.value = !obscurePassword.value;
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
+              SizedBox(height: 24),
+
+              // Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: onCancel,
+                    child: Text("Cancel"),
+                  ),
+                  SizedBox(width: 12),
+                  ElevatedButton(
+                    onPressed: onConfirm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                    ),
+                    child: Text("Confirm"),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }

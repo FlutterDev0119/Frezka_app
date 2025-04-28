@@ -55,7 +55,7 @@ class DashboardController extends GetxController {
       "title": "Engage AI",
       "description": "A chatbot for patient and investigator engagement.",
       "icon": Icons.health_and_safety_rounded,
-      "route": null
+      "route": Routes.ENGAGEAI
     },
     {
       "title": "Metaphrase PV",
@@ -67,7 +67,7 @@ class DashboardController extends GetxController {
       "title": "GenAI PV",
       "description": "AI-powered tool transforming performance data into narratives.",
       "icon": Icons.bar_chart_rounded,
-      "route": ""
+      "route": Routes.GENAIPV
     },
     {
       "title": "GenAI Clinical",
@@ -98,7 +98,7 @@ class DashboardController extends GetxController {
       "title": "System Configuration",
       "description": "Streamlines system setup for real-time optimization.",
       "icon": Icons.settings_rounded,
-      "route": ""
+      "route": Routes.SYSTEMCONFIGURATION
     },
   ];
 }
