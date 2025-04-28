@@ -22,4 +22,7 @@ class APIEndPoints {
 
    /// Engage AI
   static const String chat = 'v1/chat';
+
+   /// Translation Memory
+  static const String translationMemory = 'v1/translation-memory';
 }

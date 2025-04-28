@@ -17,6 +17,7 @@ abstract class Routes {
   static const GOVERNAI = _Paths.GOVERNAI;
   static const TRANSLATIONMEMORY = _Paths.TRANSLATIONMEMORY;
   static const SYSTEMCONFIGURATION = _Paths.SYSTEMCONFIGURATION;
+  static const RECONAI = _Paths.RECONAI;
 
 }
 
@@ -35,4 +36,5 @@ abstract class _Paths {
   static const TRANSLATIONMEMORY = '/translation-memory';
   static const ENGAGEAI = '/engageAI';
   static const SYSTEMCONFIGURATION = '/system_configuration';
+  static const RECONAI = '/reconAI';
 }

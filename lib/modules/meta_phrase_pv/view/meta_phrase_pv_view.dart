@@ -17,6 +17,33 @@ class MetaPhraseScreen extends StatelessWidget {
   // Store the selected file locally
   var selectedTranslationReport = Rx<TranslationWork?>(null);
 
+  @override
+  Widget build(BuildContext context) {
+    return AppScaffold(
+      resizeToAvoidBottomPadding: true,
+      isLoading: controller.isLoading,
+      appBarBackgroundColor: appBackGroundColor,
+      appBarTitleText: "MetaPhrase Pv",
+      appBarTitleTextStyle: TextStyle(fontSize: 20, color: appWhiteColor),
+      body: Obx(() {
+        return Container(
+          color: AppColors.appBackground,
+          child: Column(
+            children: [
+              if (!controller.isCardSelected.value && controller.selectedTranslationReport.value == null) ...[
+                if (controller.filteredFiles.isNotEmpty) _buildHeaderRow(context),
+                Expanded(child: _buildFileList()),
+              ],
+              if (controller.isCardSelected.value && controller.selectedTranslationReport.value != null) ...[
+                Expanded(child: _buildSelectedCard(context, controller.selectedTranslationReport.value))
+              ],
+            ],
+          ),
+        );
+      }),
+    );
+  }
+
   Widget _headerButton(String title, SortColumn column) {
     return Obx(() {
       final isSelected = controller.sortColumn.value == column;
@@ -874,33 +901,6 @@ class MetaPhraseScreen extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AppScaffold(
-      resizeToAvoidBottomPadding: true,
-      isLoading: controller.isLoading,
-      appBarBackgroundColor: appBackGroundColor,
-      appBarTitleText: "MetaPhrase Pv",
-      appBarTitleTextStyle: TextStyle(fontSize: 20, color: appWhiteColor),
-      body: Obx(() {
-        return Container(
-          color: AppColors.appBackground,
-          child: Column(
-            children: [
-              if (!controller.isCardSelected.value && controller.selectedTranslationReport.value == null) ...[
-                if (controller.filteredFiles.isNotEmpty) _buildHeaderRow(context),
-                Expanded(child: _buildFileList()),
-              ],
-              if (controller.isCardSelected.value && controller.selectedTranslationReport.value != null) ...[
-                Expanded(child: _buildSelectedCard(context, controller.selectedTranslationReport.value))
-              ],
-            ],
-          ),
-        );
-      }),
     );
   }
 }

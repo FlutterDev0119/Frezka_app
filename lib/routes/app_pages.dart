@@ -17,6 +17,8 @@ import '../modules/meta_phrase_pv/bindings/meta_phrase_pv_binding.dart';
 import '../modules/meta_phrase_pv/view/meta_phrase_pv_view.dart';
 import '../modules/prompt_admin/bindings/prompt_admin_binding.dart';
 import '../modules/prompt_admin/views/prompt_admin_view.dart';
+import '../modules/reconAI/bindings/reconAI_binding.dart';
+import '../modules/reconAI/view/reconAI_view.dart';
 import '../modules/splash/bindings/splash_binding.dart';
 import '../modules/system_configuration/bindings/system_configuration_binding.dart';
 import '../modules/system_configuration/views/system_configuration_view.dart';
@@ -100,19 +102,25 @@ class AppPages {
     GetPage(
       name: _Paths.META_PHRASE_PV,
       page: () => MetaPhraseScreen(),
-      binding: MetaPhraseBinding(), // if you have it
+      binding: MetaPhraseBinding(),
       transition: Transition.downToUp,
     ),
     GetPage(
       name: _Paths.TRANSLATIONMEMORY,
-      page: () => TranslationMemoryView(),
-      binding: TranslationMemoryBinding(), // if you have it
+      page: () => TranslationMemoryScreen(),
+      binding: TranslationMemoryBinding(),
       transition: Transition.downToUp,
     ),
     GetPage(
       name: _Paths.SYSTEMCONFIGURATION,
       page: () => SystemConfigurationScreen(),
-      binding: SystemConfigurationBinding(), // if you have it
+      binding: SystemConfigurationBinding(),
+      transition: Transition.downToUp,
+    ),
+    GetPage(
+      name: _Paths.RECONAI,
+      page: () => ReconAIScreen(),
+      binding: ReconAIBinding(),
       transition: Transition.downToUp,
     ),
   ];

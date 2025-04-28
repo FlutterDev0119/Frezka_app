@@ -75,7 +75,12 @@ class DashboardController extends GetxController {
       "icon": Icons.local_hospital_rounded,
       "route": Routes.GENAICLINICAL
     },
-    {"title": "ReconAI", "description": "Ensures data consistency, detects anomalies & integrates data.", "icon": Icons.sync_rounded, "route": ""},
+    {
+      "title": "ReconAI",
+      "description": "Ensures data consistency, detects anomalies & integrates data.",
+      "icon": Icons.sync_rounded,
+      "route": Routes.RECONAI
+    },
     {
       "title": "GovernAI",
       "description": "Automates compliance & enhances risk management.",

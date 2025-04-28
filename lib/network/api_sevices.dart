@@ -37,7 +37,7 @@ class AuthServiceApis {
     setValue(AppSharedPreferenceKeys.isUserLoggedIn, true);
     setValue(AppSharedPreferenceKeys.currentUserData, loggedInUser.value.toJson());
     setValue(AppSharedPreferenceKeys.apiToken, loggedInUser.value.access);
-    setValue(AppSharedPreferenceKeys.userEmail, request['email'].toString());//userDataResponse.userModel?.email
+    setValue(AppSharedPreferenceKeys.userEmail, request['email'].toString()); //userDataResponse.userModel?.email
     setValue(AppSharedPreferenceKeys.userPassword, request[ConstantKeys.passwordKey]);
     return userDataResponse.refresh;
   }
@@ -82,6 +82,7 @@ class AuthServiceApis {
   static Future<void> clearData({bool isFromDeleteAcc = false}) async {}
 }
 
+//---------------------------------------------------------------------------------------------------------------
 /// PROMPT ADMIN
 class PromptAdminServiceApis {
   static Future<PromptInherit?> getPromptInherit() async {
@@ -102,6 +103,7 @@ class PromptAdminServiceApis {
       return null;
     }
   }
+
   static Future<RoleResponse> getRolePromptResponse({required Map request}) async {
     final response = await buildHttpResponse(
       endPoint: APIEndPoints.rolePromptResponse,
@@ -110,6 +112,7 @@ class PromptAdminServiceApis {
     );
     return RoleResponse.fromJson(response);
   }
+
   static Future<NewPromptInherit> createNewPrompt({required Map<String, dynamic> request}) async {
     final response = await buildHttpResponse(
       endPoint: APIEndPoints.newPrompt,
@@ -120,6 +123,7 @@ class PromptAdminServiceApis {
   }
 }
 
+//---------------------------------------------------------------------------------------------------------------
 /// META PHRASE PV
 class MetaPhrasePVServiceApis {
   static Future<List<TranslationWork>> fetchMetaPhraseList() async {
@@ -136,8 +140,6 @@ class MetaPhrasePVServiceApis {
     }
   }
 
-
-
   static Future<List<TranslationReport>> fetchMetaPhraseListById(String id) async {
     try {
       // Make the API call
@@ -171,23 +173,49 @@ class MetaPhrasePVServiceApis {
     return ReverseTranslateResponse.fromJson(response);
   }
 }
-class TranslationMemoryPVServiceApis {
-  static Future<List<TranslationItem>> fetchMetaPhraseList() async {
+
+//---------------------------------------------------------------------------------------------------------------
+/// Translation Memory PV
+class TranslationMemoryServiceApis {
+  static Future<List<TranslationMemory>> fetchTranslationMemoryList() async {
     final response = await buildHttpResponse(
-      endPoint: APIEndPoints.openWorklist,
+      endPoint: APIEndPoints.translationMemory,
       method: MethodType.get,
     );
-
-    // Ensure response is a List and map it properly
     if (response is List) {
-      return response.map((e) => TranslationItem(id: ).fromMap(e)).toList();
+      return response.map((e) => TranslationMemory.fromJson(e)).toList();
     } else {
       throw Exception('Unexpected response format: ${response.runtimeType}');
     }
   }
 
+  static Future<Map<String, dynamic>> updateTranslationMemory({required int id, required String en, required String es}) async {
+    final response = await buildHttpResponse(
+      endPoint: '${APIEndPoints.translationMemory}/$id',
+      method: MethodType.post,
+      request: {'en': en, 'es': es},
+    );
 
+    if (response is Map<String, dynamic>) {
+      return response;
+    } else {
+      throw Exception('Unexpected response format');
+    }
+  }
+  // DELETE method to remove a translation memory entry
+  static Future<Map<String, dynamic>> deleteTranslationMemory({required int id}) async {
+    final response = await buildHttpResponse(
+      endPoint: '${APIEndPoints.translationMemory}/$id',
+      method: MethodType.delete,
+    );
 
+    if (response is Map<String, dynamic>) {
+      return response;
+    } else {
+      throw Exception('Unexpected response format');
+    }
+  }
+//---------------------------------------------------------------------------------------------------------------
   static Future<List<TranslationReport>> fetchMetaPhraseListById(String id) async {
     try {
       // Make the API call
@@ -221,6 +249,8 @@ class TranslationMemoryPVServiceApis {
     return ReverseTranslateResponse.fromJson(response);
   }
 }
+
+//---------------------------------------------------------------------------------------------------------------
 /// GOVERN AI
 class GovernAIServiceApis {
   static Future<List<CountTracesModel>> fetchCountTracesList() async {
@@ -243,6 +273,7 @@ class GovernAIServiceApis {
       throw Exception('Error fetching CountTracesList: $e');
     }
   }
+
   static Future<List<Trace>> fetchTracesList() async {
     try {
       final response = await buildHttpResponse(
@@ -253,9 +284,7 @@ class GovernAIServiceApis {
       print("API Response: $response"); // <-- Add this line
 
       if (response is Map && response['traces'] is List) {
-        return (response['traces'] as List)
-            .map((data) => Trace.fromJson(Map<String, dynamic>.from(data)))
-            .toList();
+        return (response['traces'] as List).map((data) => Trace.fromJson(Map<String, dynamic>.from(data))).toList();
       } else {
         throw Exception('Failed to load Traces');
       }
@@ -263,9 +292,9 @@ class GovernAIServiceApis {
       throw Exception('Error fetching TracesList:----------- $e');
     }
   }
-
 }
 
+//---------------------------------------------------------------------------------------------------------------
 /// GenAI Clinical
 class ClinicalPromptServiceApis {
   static Future<FetchDocsClinical?> getDocsClinical() async {
@@ -288,6 +317,7 @@ class ClinicalPromptServiceApis {
   }
 }
 
+//---------------------------------------------------------------------------------------------------------------
 /// Engage AI
 class ChatServiceApi {
   static Future<String?> sendMessage({required String message, required String userName, required String userId}) async {
