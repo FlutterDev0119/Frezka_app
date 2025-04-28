@@ -100,7 +100,7 @@ class DashboardController extends GetxController {
       "title": "System Configuration",
       "description": "Streamlines system setup for real-time optimization.",
       "icon": Icons.settings_rounded,
-      "route": ""
+      "route": Routes.SYSTEMCONFIGURATION
     },
   ];
 }

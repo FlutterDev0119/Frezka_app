@@ -10,7 +10,6 @@ import '../../../utils/shared_prefences.dart';
 import '../controllers/meta_phrase_pv_controller.dart';
 import '../model/open_worklist_model.dart';
 import '../model/transalted_model.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 
 class MetaPhraseScreen extends StatelessWidget {
   final MetaPhraseController controller = Get.put(MetaPhraseController());

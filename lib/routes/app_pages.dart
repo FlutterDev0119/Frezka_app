@@ -15,6 +15,8 @@ import '../modules/meta_phrase_pv/view/meta_phrase_pv_view.dart';
 import '../modules/prompt_admin/bindings/prompt_admin_binding.dart';
 import '../modules/prompt_admin/views/prompt_admin_view.dart';
 import '../modules/splash/bindings/splash_binding.dart';
+import '../modules/system_configuration/bindings/system_configuration_binding.dart';
+import '../modules/system_configuration/views/system_configuration_view.dart';
 import '../utils/library.dart';
 
 part 'app_routes.dart';
@@ -96,6 +98,12 @@ class AppPages {
       name: _Paths.META_PHRASE_PV,
       page: () => MetaPhraseScreen(),
       binding: MetaPhraseBinding(), // if you have it
+      transition: Transition.downToUp,
+    ),
+    GetPage(
+      name: _Paths.SYSTEMCONFIGURATION,
+      page: () => SystemConfigurationScreen(),
+      binding: SystemConfigurationBinding(), // if you have it
       transition: Transition.downToUp,
     ),
 
