@@ -15,7 +15,9 @@ abstract class Routes {
   static const PROMPTADMIN = _Paths.PROMPTADMIN;
   static const META_PHRASE_PV = _Paths.META_PHRASE_PV;
   static const GOVERNAI = _Paths.GOVERNAI;
+  static const TRANSLATIONMEMORY = _Paths.TRANSLATIONMEMORY;
   static const SYSTEMCONFIGURATION = _Paths.SYSTEMCONFIGURATION;
+
 }
 
 abstract class _Paths {
@@ -30,6 +32,7 @@ abstract class _Paths {
   static const PROMPTADMIN = '/prompt_admin';
   static const META_PHRASE_PV = '/meta-phrase-pv';
   static const GOVERNAI = '/governAI';
+  static const TRANSLATIONMEMORY = '/translation-memory';
   static const ENGAGEAI = '/engageAI';
   static const SYSTEMCONFIGURATION = '/system_configuration';
 }

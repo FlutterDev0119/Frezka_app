@@ -1,5 +1,8 @@
 import 'package:apps/modules/governAI/view/governAI_view.dart';
 import 'package:apps/modules/splash/views/splash_screen.dart';
+import 'package:apps/modules/translation_memory/bindings/translation_memory_binding.dart';
+import 'package:apps/modules/translation_memory/controllers/translation_memory_controller.dart';
+import 'package:apps/modules/translation_memory/view/translation_memory_view.dart';
 
 import '../modules/engageAI/bindings/engageAI_binding.dart';
 import '../modules/engageAI/view/engageAI_view.dart';
@@ -101,11 +104,16 @@ class AppPages {
       transition: Transition.downToUp,
     ),
     GetPage(
+      name: _Paths.TRANSLATIONMEMORY,
+      page: () => TranslationMemoryView(),
+      binding: TranslationMemoryBinding(), // if you have it
+      transition: Transition.downToUp,
+    ),
+    GetPage(
       name: _Paths.SYSTEMCONFIGURATION,
       page: () => SystemConfigurationScreen(),
       binding: SystemConfigurationBinding(), // if you have it
       transition: Transition.downToUp,
     ),
-
   ];
 }

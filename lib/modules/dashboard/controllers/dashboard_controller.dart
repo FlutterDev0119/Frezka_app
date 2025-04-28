@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../../utils/library.dart';
@@ -94,7 +92,7 @@ class DashboardController extends GetxController {
       "title": "Translation Memory",
       "description": "Improves translation efficiency & cost-effectiveness.",
       "icon": Icons.language_rounded,
-      "route": ""
+      "route": Routes.TRANSLATIONMEMORY
     },
     {
       "title": "System Configuration",

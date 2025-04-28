@@ -1,3 +1,4 @@
+import 'package:apps/modules/translation_memory/model/translation_model.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import 'package:apps/utils/library.dart';
@@ -135,6 +136,8 @@ class MetaPhrasePVServiceApis {
     }
   }
 
+
+
   static Future<List<TranslationReport>> fetchMetaPhraseListById(String id) async {
     try {
       // Make the API call
@@ -168,7 +171,56 @@ class MetaPhrasePVServiceApis {
     return ReverseTranslateResponse.fromJson(response);
   }
 }
+class TranslationMemoryPVServiceApis {
+  static Future<List<TranslationItem>> fetchMetaPhraseList() async {
+    final response = await buildHttpResponse(
+      endPoint: APIEndPoints.openWorklist,
+      method: MethodType.get,
+    );
 
+    // Ensure response is a List and map it properly
+    if (response is List) {
+      return response.map((e) => TranslationItem(id: ).fromMap(e)).toList();
+    } else {
+      throw Exception('Unexpected response format: ${response.runtimeType}');
+    }
+  }
+
+
+
+  static Future<List<TranslationReport>> fetchMetaPhraseListById(String id) async {
+    try {
+      // Make the API call
+      final response = await buildHttpResponse(
+        endPoint: "${APIEndPoints.openWorklist}?Id=$id",
+        method: MethodType.get,
+      );
+
+      // Check if the response is a List of TranslationReport objects
+      if (response is List) {
+        // If the response is already a list, map it directly to TranslationReport
+        return response.map((e) => TranslationReport.fromJson(e as Map<String, dynamic>)).toList();
+      } else if (response is Map<String, dynamic>) {
+        // If the response is a Map, handle it accordingly
+        return [TranslationReport.fromJson(response)];
+      } else {
+        throw FormatException('Unexpected response type: ${response.runtimeType}');
+      }
+    } catch (e) {
+      print('Error fetching translation report for id $id: $e');
+      throw Exception('Failed to fetch translation report for id $id: $e');
+    }
+  }
+
+  static Future<ReverseTranslateResponse> reverseTranslate({required Map request}) async {
+    final response = await buildHttpResponse(
+      endPoint: APIEndPoints.reverseTranslate,
+      request: request,
+      method: MethodType.post,
+    );
+    return ReverseTranslateResponse.fromJson(response);
+  }
+}
 /// GOVERN AI
 class GovernAIServiceApis {
   static Future<List<CountTracesModel>> fetchCountTracesList() async {
