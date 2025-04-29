@@ -19,14 +19,16 @@ class SystemConfigurationController extends BaseController {
   RxBool refreshOnLogin = false.obs;
   TextEditingController apiKeyController = TextEditingController();
   RxList<TextEditingController> apiKeyControllers = <TextEditingController>[].obs;
+  RxList<String> genAILLMs = ["OpenAI", "Anthrotic", "DeepSeek","Gemini"].obs;
+  RxList<String> genAIModels = ["gpt-4o", "o1", "o3-mini","gpt-4o-mini"].obs;
 
   // Metaphrase-related variables
   RxString selectedMetaphraseLLM = "OpenAI".obs;
   RxString selectedMetaphraseModel = "gpt-4o".obs;
   RxBool refreshOnMetaphraseLogin = true.obs;
 
-  RxList<String> metaphraseLLMs = ["OpenAI", "Azure OpenAI", "Custom"].obs;
-  RxList<String> metaphraseModels = ["gpt-4o", "gpt-4", "claude-3-opus"].obs;
+  RxList<String> metaphraseLLMs = ["OpenAI", "Anthrotic", "DeepSeek","Gemini"].obs;
+  RxList<String> metaphraseModels = ["gpt-4o", "o1", "o3-mini","gpt-4o-mini"].obs;
 
   // S3 Path fields
   RxString inputFolderPath = "".obs;
@@ -44,7 +46,7 @@ class SystemConfigurationController extends BaseController {
   RxBool refreshOnGovernAILogin = true.obs;
 
   RxList<String> governAIDRF = ["Daily", "Weekly", "Monthly"].obs;
-  RxList<String> governAILLMs = ["OpenAI", "Azure OpenAI", "Custom"].obs;
+  RxList<String> governAILLMs = ["OpenAI", "Anthrotic", "DeepSeek","Gemini"].obs;
   RxList<String> governAIModels = ["gpt-4o", "o1", "o3-mini","gpt-4o-mini"].obs;
 
   RxString apiKeyGovernAI = "".obs;

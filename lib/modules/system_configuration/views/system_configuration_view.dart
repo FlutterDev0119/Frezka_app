@@ -344,7 +344,7 @@ class SystemConfigurationScreen extends StatelessWidget {
                                             ),
                                           ),
                                           value: controller.llmType.value,
-                                          items: ["OpenAI", "Azure OpenAI", "Custom"].map((String llm) {
+                                          items: controller.genAILLMs.map((String llm) {
                                             return DropdownMenuItem<String>(
                                               value: llm,
                                               child: Text(llm),
@@ -394,7 +394,7 @@ class SystemConfigurationScreen extends StatelessWidget {
                                             ),
                                           ),
                                           value: controller.modelType.value,
-                                          items: ["gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"].map((String model) {
+                                          items: controller.genAIModels.map((String model) {
                                             return DropdownMenuItem<String>(
                                               value: model,
                                               child: Text(model),

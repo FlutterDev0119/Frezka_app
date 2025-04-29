@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:apps/utils/library.dart';
@@ -12,15 +11,31 @@ import '../../../utils/component/app_dialogue_component.dart';
 class GenAIPVController extends GetxController {
   RxList<File> imageFiles = <File>[].obs;
   RxList<String> fileNames = <String>[].obs;
-
+  var genAIDropdownValue = 'Upload File'.obs;
   RxMap<String, List<String>> filteredClassificationMap = <String, List<String>>{}.obs;
   RxMap<String, List<String>> classificationMap = <String, List<String>>{}.obs;
   RxSet<String> selectedChips = <String>{}.obs;
   RxSet<String> selectedTags = <String>{}.obs;
   RxBool isLoading = false.obs;
   final TextEditingController searchController = TextEditingController();
+  List<String> tags = [
+    "Adverse Event Reporting",
+    "Aggregate Reporting",
+    "Investigator Analysis",
+    "PV Agreements",
+    "Quality Control",
+    "Reconciliation",
+    "Risk Management",
+    "Sampling",
+    "Site Analysis",
+    "System",
+    "Trial Analysis",
+  ];
   // Filtered data for displaying in the UI
   RxMap<String, List<String>> filteredAttributes = <String, List<String>>{}.obs;
+  final RxString selectedParentTag = ''.obs;
+
+
 
   @override
   void onInit() {
@@ -30,9 +45,18 @@ class GenAIPVController extends GetxController {
     searchController.addListener(() {
       filterAttributes(searchController.text);
     });
-
   }
-
+  void addTag(String tag) {
+    if (selectedParentTag.value == tag) {
+      // Deselect if the same tag is tapped again
+      selectedParentTag.value = '';
+      selectedTags.clear();
+    } else {
+      // Select the new tag and update list
+      selectedParentTag.value = tag;
+      selectedTags.assignAll([tag]);
+    }
+  }
   // Method to toggle selection for both chips and attributes (unified logic)
   void toggleSelection(String label) {
     if (selectedChips.contains(label)) {
@@ -93,6 +117,7 @@ class GenAIPVController extends GetxController {
   void removeAttribute(String attribute) {
     selectedTags.remove(attribute);
   }
+
   // Method to filter attributes based on the search query
   void filterAttributes(String query) {
     final trimmed = query.trim().toLowerCase();
