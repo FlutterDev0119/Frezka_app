@@ -19,6 +19,7 @@ class AppSharedPreferenceKeys {
 
   //region User Specific
   static const  String userEmail = 'User Email';
+  static const  String userModel = 'User Model';
   static const String  userPassword = 'User Password';
   static const String userLoginType = 'Login Type';
   static const  String currentUserData = 'Current User';

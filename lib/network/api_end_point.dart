@@ -9,6 +9,9 @@ class APIEndPoints {
   static const String rolePromptResponse = 'v1/role_select';
   static const String newPrompt = 'v1/new_prompt';
 
+  ///GenAI PV
+  static const String fetchGenerateSQL = 'v1/generate_sql';
+
   ///GenAI Clinical
   static const String fetchDocClinical = 'v1/fetch_docs_clinical';
 
@@ -17,12 +20,12 @@ class APIEndPoints {
   static const String reverseTranslate = 'v1/reverse_translate';
 
   ///GovernAI
-   static const String countTraces = 'v1/count_traces';
-   static const String fetchTrace = 'v1/fetch_trace';
+  static const String countTraces = 'v1/count_traces';
+  static const String fetchTrace = 'v1/fetch_trace';
 
-   /// Engage AI
+  /// Engage AI
   static const String chat = 'v1/chat';
 
-   /// Translation Memory
+  /// Translation Memory
   static const String translationMemory = 'v1/translation-memory';
 }

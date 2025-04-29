@@ -648,7 +648,7 @@ class MetaPhraseScreen extends StatelessWidget {
                   Obx(() {
                     final selected = controller.selectedMode.value;
                     final certifyOptions = ['Finalize', 'Return', 'Reject'];
-                    if (selected == 'Peer Review') {
+                    if (selected == 'Peer Review' && controller.isEditing.value==true) {
                       Future.delayed(Duration.zero, () {
                         showPeerReviewDialog(
                           context,
@@ -680,36 +680,63 @@ class MetaPhraseScreen extends StatelessWidget {
                                     border: Border.all(color: Colors.grey.shade400),
                                   ),
                                   child: DropdownButtonHideUnderline(
-                                    child: DropdownButton<String>(
-                                      dropdownColor: appBackGroundColor,
-                                      value: selected,
-                                      icon: const Icon(Icons.arrow_drop_down, color: appWhiteColor),
-                                      style: const TextStyle(fontSize: 16, color: appWhiteColor),
-                                      isExpanded: true,
-                                      items: controller.modes.map((String value) {
-                                        final isDisabled = selected == 'Review' && value == 'Peer Review';
+                                    child:
+                                    Obx(
+                                      () {
+                                        return DropdownButton<String>(
+                                          dropdownColor: appBackGroundColor,
+                                          value: controller.selected.value,
+                                          icon: const Icon(Icons.arrow_drop_down, color: appWhiteColor),
+                                          style: const TextStyle(fontSize: 16, color: appWhiteColor),
+                                          isExpanded: true,
+                                          items: controller.modes.map((String value) {
+                                            // final isDisabled = selected == 'Review' && value == 'Peer Review';
+                                            // // final isDisabled = selected == 'Review' && value == 'Peer Review' && controller.isEditing.value == true;
+                                            // // final isPeerReview = value == 'Peer Review' && value == "Edit";
+                                            // // final isDisabled = selected == 'Review'  && isPeerReview && !controller.isEditing.value;
+                                            //
+                                            // return DropdownMenuItem<String>(
+                                            //   value: isDisabled ? null : value,
+                                            //   enabled: !isDisabled,
+                                            //   child: Text(
+                                            //     value,
+                                            //     style: TextStyle(
+                                            //       color: isDisabled ? Colors.grey : appWhiteColor,
+                                            //     ),
+                                            //   ),
+                                            // );
+                                            final isPeerReview = value == 'Peer Review';
+                                            final isDisabled = (controller.selected == 'Review' && isPeerReview && !controller.isEditing.value);
 
-                                        return DropdownMenuItem<String>(
-                                          value: isDisabled ? null : value,
-                                          enabled: !isDisabled,
-                                          child: Text(
-                                            value,
-                                            style: TextStyle(
-                                              color: isDisabled ? Colors.grey : appWhiteColor,
-                                            ),
-                                          ),
+                                            return DropdownMenuItem<String>(
+                                              value: value,
+                                              child: IgnorePointer(
+                                                ignoring: isDisabled,
+                                                child: Text(
+                                                  value,
+                                                  style: TextStyle(
+                                                    color: isDisabled ? Colors.grey : appWhiteColor,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }).toList(),
+                                          onChanged: (String? newValue) {
+                                            if (newValue == 'Peer Review' && selected == 'Review' && !controller.isEditing.value) {
+                                              // Don't allow selection if not editable
+                                              return;
+                                            }
+                                            // Prevent null (disabled item) from being selected
+                                            if (newValue != null) {
+                                              controller.updateSelectedMode(newValue);
+                                              if (newValue == 'Edit') {
+                                                // controller.startEditing();
+                                                controller.isReverse.value = false;
+                                              }
+                                            }
+                                          },
                                         );
-                                      }).toList(),
-                                      onChanged: (String? newValue) {
-                                        // Prevent null (disabled item) from being selected
-                                        if (newValue != null) {
-                                          controller.updateSelectedMode(newValue);
-                                          if (newValue == 'Edit') {
-                                            controller.startEditing();
-                                            controller.isReverse.value = false;
-                                          }
-                                        }
-                                      },
+                                      }
                                     ),
                                   ),
                                 ),
@@ -779,6 +806,72 @@ class MetaPhraseScreen extends StatelessWidget {
                                       }).toList(),
                                     ),
                                   ),
+                                if (selected == 'Certify' && controller.isReturnSelected.value)
+                                  Obx(() {
+                                    if (controller.isReturnSelected.value) {
+                                      return Container(
+                                        margin: EdgeInsets.only(right: 8,top: 5),
+                                        padding: EdgeInsets.symmetric(horizontal: 8),
+                                        decoration: BoxDecoration(
+                                          color: appWhiteColor,
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            5.height,
+                                            Text(
+                                              "Return",
+                                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                            ),
+                                            const SizedBox(height: 10),
+                                            DropdownButtonFormField<String>(
+                                              isExpanded: true,
+                                              value: controller.selectedReturnReason.value.isEmpty ? null : controller.selectedReturnReason.value,
+                                              decoration: const InputDecoration(
+                                                hintText: "select a justification/ reasoan for returning",
+                                                // labelText: 'Select a reason',
+                                                border: OutlineInputBorder(),
+                                              ),
+                                              items: controller.filteredReturnReasons.map((reason) {
+                                                return DropdownMenuItem<String>(
+                                                  value: reason,
+                                                  child: Marquee(child: Text(reason)),
+                                                );
+                                              }).toList(),
+                                              onChanged: controller.onReturnReasonSelected,
+                                            ),
+                                            6.height,
+                                            TextField(
+                                              controller: controller.returnTextController,
+                                              maxLines: 4,
+                                              decoration: InputDecoration(
+                                                hintText: 'Provide your justification for Sentence Structure needs improvement',
+                                                border: OutlineInputBorder(),
+                                                contentPadding: const EdgeInsets.all(12.0),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 12),
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                // Handle submit action
+                                                print('Submitted: ${controller.rejectTextController.text}');
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: appBackGroundColor,
+                                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                elevation: 3,
+                                              ),
+                                              child: const Text('Submit',style: TextStyle(color: appWhiteColor),),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    } else {
+                                      return const SizedBox();
+                                    }
+                                  }),
                                 if (selected == 'Certify' && controller.isRejectSelected.value)
                                   // Obx(() => Column(
                                   //   children: [
@@ -815,33 +908,64 @@ class MetaPhraseScreen extends StatelessWidget {
                                   // )),
                                   Obx(() {
                                     if (controller.isRejectSelected.value) {
-                                      return Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          // TextField(
-                                          //   controller: controller.textSearchController,
-                                          //   decoration: const InputDecoration(
-                                          //     labelText: 'Type or search reason',
-                                          //     border: OutlineInputBorder(),
-                                          //   ),
-                                          //   onChanged: controller.onSearchTextChanged,
-                                          // ),
-                                          const SizedBox(height: 10),
-                                          DropdownButtonFormField<String>(
-                                            value: controller.selectedReason.value.isEmpty ? null : controller.selectedReason.value,
-                                            decoration: const InputDecoration(
-                                              // labelText: 'Select a reason',
-                                              border: OutlineInputBorder(),
+                                      return Container(
+                                        margin: EdgeInsets.only(right: 8,top: 5),
+                                        padding: EdgeInsets.symmetric(horizontal: 8),
+                                        decoration: BoxDecoration(
+                                          color: appWhiteColor,
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            5.height,
+                                            Text(
+                                              "Reject",
+                                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                                             ),
-                                            items: controller.filteredReasons.map((reason) {
-                                              return DropdownMenuItem<String>(
-                                                value: reason,
-                                                child: Text(reason),
-                                              );
-                                            }).toList(),
-                                            onChanged: controller.onReasonSelected,
-                                          ),
-                                        ],
+                                            const SizedBox(height: 10),
+                                            DropdownButtonFormField<String>(
+                                              isExpanded: true,
+                                              value: controller.selectedReason.value.isEmpty ? null : controller.selectedReason.value,
+                                              decoration: const InputDecoration(
+                                                hintText: "select a justification/ reasoan for rejecting",
+                                                // labelText: 'Select a reason',
+                                                border: OutlineInputBorder(),
+                                              ),
+                                              items: controller.filteredReasons.map((reason) {
+                                                return DropdownMenuItem<String>(
+                                                  value: reason,
+                                                  child: Marquee(child: Text(reason)),
+                                                );
+                                              }).toList(),
+                                              onChanged: controller.onReasonSelected,
+                                            ),
+                                            6.height,
+                                            TextField(
+                                              controller: controller.rejectTextController,
+                                              maxLines: 4,
+                                              decoration: InputDecoration(
+                                                hintText: 'Provide your justification for Sentence Structure needs improvement',
+                                                border: OutlineInputBorder(),
+                                                contentPadding: const EdgeInsets.all(12.0),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 12),
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                // Handle submit action
+                                                print('Submitted: ${controller.rejectTextController.text}');
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: appBackGroundColor,
+                                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                elevation: 3,
+                                              ),
+                                              child: const Text('Submit',style: TextStyle(color: appWhiteColor),),
+                                            ),
+                                          ],
+                                        ),
                                       );
                                     } else {
                                       return const SizedBox();
@@ -945,28 +1069,45 @@ void showPeerReviewDialog(BuildContext context, VoidCallback onConfirm, VoidCall
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TextButton(
-                    onPressed: onCancel,
-                    child: Text(
-                      "Cancel",
-                      style: TextStyle(color: Colors.blueGrey),
-                    ),
+                  AppButton(
+                    textStyle: TextStyle(color: appBackGroundColor),
+                    onTap: () {
+                      Get.back();
+                    },
+                    child: Text('Cancel'),
                   ),
-                  SizedBox(width: 16),
-                  ElevatedButton(
-                    onPressed: onConfirm,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      elevation: 0,
-                    ),
+                  AppButton(
+                    color: appBackGroundColor,
+                    onTap: ()  {
+                      Get.back();
+                    },
                     child: Text(
-                      "Confirm",
-                      style: TextStyle(color: Colors.black),
+                      'Confirm',
+                      style: TextStyle(color: white),
                     ),
-                  ),
+                  )
+                  // TextButton(
+                  //   onPressed: onCancel,
+                  //   child: Text(
+                  //     "Cancel",
+                  //     style: TextStyle(color: Colors.blueGrey),
+                  //   ),
+                  // ),
+                  // SizedBox(width: 16),
+                  // ElevatedButton(
+                  //   onPressed: onConfirm,
+                  //   style: ElevatedButton.styleFrom(
+                  //     backgroundColor: Colors.white,
+                  //     shape: RoundedRectangleBorder(
+                  //       borderRadius: BorderRadius.circular(30),
+                  //     ),
+                  //     elevation: 0,
+                  //   ),
+                  //   child: Text(
+                  //     "Confirm",
+                  //     style: TextStyle(color: Colors.black),
+                  //   ),
+                  // ),
                 ],
               ),
             ],
@@ -1046,18 +1187,32 @@ void showCredentialsDialog(BuildContext context, VoidCallback onConfirm, VoidCal
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
-                    onPressed: onCancel,
-                    child: Text("Cancel"),
+                  // TextButton(
+                  //   onPressed: onCancel,
+                  //   child: Text("Cancel"),
+                  // ),
+                  // SizedBox(width: 12),
+                  // ElevatedButton(
+                  //   onPressed: onConfirm,
+                  //   style: ElevatedButton.styleFrom(
+                  //     backgroundColor: Colors.blue,
+                  //   ),
+                  //   child: Text("Confirm"),
+                  // ),
+                  AppButton(
+                    textStyle: TextStyle(color: appBackGroundColor),
+                    onTap:onCancel,
+                    child: Text('Cancel'),
                   ),
-                  SizedBox(width: 12),
-                  ElevatedButton(
-                    onPressed: onConfirm,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
+                  5.width,
+                  AppButton(
+                    color: appBackGroundColor,
+                    onTap: onConfirm,
+                    child: Text(
+                      'Confirm',
+                      style: TextStyle(color: white),
                     ),
-                    child: Text("Confirm"),
-                  ),
+                  )
                 ],
               ),
             ],

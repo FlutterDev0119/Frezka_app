@@ -10,8 +10,6 @@ import '../../../utils/component/app_dialogue_component.dart';
 import '../model/open_worklist_model.dart';
 import '../model/transalted_model.dart';
 
-
-
 enum SortColumn {
   id,
   sourceLanguage,
@@ -48,6 +46,16 @@ class MetaPhraseController extends BaseController {
   RxBool isWorkGroupSelected = false.obs;
   RxList<File> imageFiles = <File>[].obs;
   var isScoreHighlightMode = false.obs;
+  var selected = 'Review'.obs;
+
+  ///Return
+  var returnReson = [
+    'Missing or untranslated sections',
+    'Incorrect or inconsistent term usage',
+    'Invalid TM Updates',
+    'Sentence Structure needs improvement',
+    'Other',
+  ].obs;
 
   /// reject
   var reasons = [
@@ -60,9 +68,13 @@ class MetaPhraseController extends BaseController {
   var filteredReasons = <String>[].obs;
   var selectedReason = ''.obs;
   var isRejectSelected = false.obs;
+  var selectedReturnReason = ''.obs;
+  var filteredReturnReasons = <String>[].obs;
 
   final TextEditingController textSearchController = TextEditingController();
-
+  final TextEditingController textReturnSearchController = TextEditingController();
+  final TextEditingController rejectTextController = TextEditingController();
+  final TextEditingController returnTextController = TextEditingController();
   RxBool isReturnSelected = false.obs;
 
   @override
@@ -73,7 +85,10 @@ class MetaPhraseController extends BaseController {
     translatedTextController = TextEditingController();
     fetchData();
     filteredReasons.assignAll(reasons);
+    filteredReturnReasons.assignAll(returnReson);
+    isEditing.value = false;
   }
+
   void onSearchTextChanged(String text) {
     if (text.isEmpty) {
       filteredReasons.assignAll(reasons);
@@ -91,16 +106,23 @@ class MetaPhraseController extends BaseController {
       textSearchController.text = value;
     }
   }
+  void onReturnReasonSelected(String? value) {
+    if (value != null) {
+      selectedReturnReason.value = value;
+      textReturnSearchController.text = value;
+    }
+  }
+
   void startEditing() {
     // Set the text in the controller based on the `translatedFile`
     translatedTextController.text = selectedTranslationReport.value?.translatedFile ?? '';
-    isEditing.value = true;  // Mark the edit mode as active
+    isEditing.value = true; // Mark the edit mode as active
   }
+
   void enterEditMode() {
     // Get the current value from wherever necessary
-    translatedTextController.text = reverseTranslatedText.value.isNotEmpty
-        ? reverseTranslatedText.value
-        : selectedTranslationReport.value?.translatedFile ?? '';
+    translatedTextController.text =
+        reverseTranslatedText.value.isNotEmpty ? reverseTranslatedText.value : selectedTranslationReport.value?.translatedFile ?? '';
     isEditing.value = true;
   }
 
@@ -108,6 +130,7 @@ class MetaPhraseController extends BaseController {
     isEditing.value = false;
     reverseTranslatedText.value = translatedTextController.text;
   }
+
   void updateSelectedMode(String mode) {
     selectedMode.value = mode;
   }
@@ -162,11 +185,9 @@ class MetaPhraseController extends BaseController {
   Future<void> fetchReverseTranslation(String translatedText) async {
     try {
       isLoading.value = true;
-      final response = await MetaPhrasePVServiceApis.reverseTranslate(request: {
-        "text": translatedText,
-        "source_language":selectedTranslationReport.value?.sourceLanguage.toString()
-      });
-      isReverse.value=true;
+      final response = await MetaPhrasePVServiceApis.reverseTranslate(
+          request: {"text": translatedText, "source_language": selectedTranslationReport.value?.sourceLanguage.toString()});
+      isReverse.value = true;
       reverseTranslatedText.value = response.reverseTranslated;
     } catch (e) {
       print('Reverse translation error: $e');
@@ -175,6 +196,7 @@ class MetaPhraseController extends BaseController {
       isLoading.value = false;
     }
   }
+
   /// Sort and filter list together
   void _applySortAndFilter() {
     List<TranslationWork> tempList = [...allFiles];
@@ -228,6 +250,7 @@ class MetaPhraseController extends BaseController {
   }
 
   RxList<String> fileNames = <String>[].obs;
+
   void togglePersonal(bool? value) {
     isPersonalSelected.value = value ?? false;
   }
@@ -253,6 +276,7 @@ class MetaPhraseController extends BaseController {
       );
     }
   }
+
   @override
   void dispose() {
     translatedScrollController.dispose();

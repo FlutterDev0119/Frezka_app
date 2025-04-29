@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:apps/modules/translation_memory/model/translation_model.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import 'package:apps/utils/library.dart';
 
 import '../modules/genAI_clinical/model/fetch_docs_clinical.dart';
+import '../modules/genAI_pv/model/generate_sql_model.dart';
 import '../modules/governAI/model/count_traces_model.dart';
 import '../modules/governAI/model/fetch_traces_model.dart';
 import '../modules/login/model/google_social_login_model.dart';
@@ -38,6 +41,7 @@ class AuthServiceApis {
     setValue(AppSharedPreferenceKeys.currentUserData, loggedInUser.value.toJson());
     setValue(AppSharedPreferenceKeys.apiToken, loggedInUser.value.access);
     setValue(AppSharedPreferenceKeys.userEmail, request['email'].toString()); //userDataResponse.userModel?.email
+    setValue(AppSharedPreferenceKeys.userModel, jsonEncode(userDataResponse.userModel)); //userDataResponse.userModel?.email
     setValue(AppSharedPreferenceKeys.userPassword, request[ConstantKeys.passwordKey]);
     return userDataResponse.refresh;
   }
@@ -291,6 +295,19 @@ class GovernAIServiceApis {
     } catch (e) {
       throw Exception('Error fetching TracesList:----------- $e');
     }
+  }
+}
+
+//---------------------------------------------------------------------------------------------------------------
+/// GenAI PV
+class GenAIPVServiceApis {
+  static Future<GenerateSQL> getGenerateSQL({required Map request}) async {
+    final response = await buildHttpResponse(
+      endPoint: APIEndPoints.fetchGenerateSQL,
+      request: request,
+      method: MethodType.post,
+    );
+    return GenerateSQL.fromJson(response);
   }
 }
 

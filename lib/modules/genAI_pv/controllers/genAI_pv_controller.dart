@@ -7,6 +7,7 @@ import 'package:nb_utils/nb_utils.dart';
 
 import '../../../utils/common/common_base.dart';
 import '../../../utils/component/app_dialogue_component.dart';
+import '../model/generate_sql_model.dart';
 
 class GenAIPVController extends GetxController {
   RxList<File> imageFiles = <File>[].obs;
@@ -17,6 +18,7 @@ class GenAIPVController extends GetxController {
   RxSet<String> selectedChips = <String>{}.obs;
   RxSet<String> selectedTags = <String>{}.obs;
   RxBool isLoading = false.obs;
+  RxBool isShowSqlIcon = false.obs;
   final TextEditingController searchController = TextEditingController();
   List<String> tags = [
     "Adverse Event Reporting",
@@ -36,12 +38,13 @@ class GenAIPVController extends GetxController {
   final RxString selectedParentTag = ''.obs;
 
 
-
+  var generateSQLResponse = Rxn<GenerateSQL>();
+  var errorMessage = ''.obs;
+  var dataLakeInput = ''.obs;
   @override
   void onInit() {
     super.onInit();
     getDocsClinical();
-    // Ensure chip list resets when search is cleared
     searchController.addListener(() {
       filterAttributes(searchController.text);
     });
@@ -136,5 +139,27 @@ class GenAIPVController extends GetxController {
     });
 
     filteredClassificationMap.assignAll(newFiltered);
+  }
+
+
+  Future<void> fetchGenerateSQL(String query, {String? userId, required String userName}) async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+
+      final request = {
+        "query": query,
+        "userId": userId,
+        "user_name": userName,
+      };
+
+      final response = await GenAIPVServiceApis.getGenerateSQL(request: request);
+      generateSQLResponse.value = response;
+    } catch (e) {
+      print('Error fetching GenerateSQL: $e');
+      errorMessage.value = 'Error occurred while fetching data.';
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

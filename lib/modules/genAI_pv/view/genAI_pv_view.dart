@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -6,6 +8,8 @@ import '../../../generated/assets.dart';
 import '../../../utils/common/colors.dart';
 import '../../../utils/app_scaffold.dart';
 import '../../../utils/component/image_source_selection_component.dart';
+import '../../../utils/shared_prefences.dart';
+import '../../forgot_password/model/forgot_password_model.dart';
 import '../controllers/genAI_pv_controller.dart';
 
 class GenAIPVScreen extends StatelessWidget {
@@ -56,115 +60,109 @@ class GenAIPVScreen extends StatelessWidget {
                         )),
                   ),
                   10.height,
-                  // Query Input
-                  // Container(
-                  //   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                  //   decoration: BoxDecoration(
-                  //     color: Colors.white,
-                  //     borderRadius: BorderRadius.circular(8),
-                  //   ),
-                  //   child: Row(
-                  //     children: [
-                  //       Expanded(
-                  //         child: Text(
-                  //           'Select File',
-                  //           style: primaryTextStyle(),
-                  //           overflow: TextOverflow.ellipsis,
-                  //         ),
-                  //       ),
-                  //       5.width,
-                  //       GestureDetector(
-                  //         onTap: () {
-                  //           Get.bottomSheet(
-                  //             enableDrag: true,
-                  //             isScrollControlled: true,
-                  //             ImageSourceSelectionComponent(
-                  //               onSourceSelected: (imageSource) {
-                  //                 hideKeyboard(context);
-                  //                 controller.onSourceSelected(imageSource);
-                  //               },
-                  //             ),
-                  //           );
-                  //         },
-                  //         child: Obx(() {
-                  //           // Dynamically change icon based on dropdown value
-                  //           IconData icon = controller.genAIDropdownValue.value == 'Upload File'
-                  //               ? Icons.attach_file
-                  //               : Icons.cloud;
-                  //           return Icon(icon, color:appBackGroundColor);
-                  //         }),
-                  //       ),
-                  //       5.width,
-                  //       Obx(() {
-                  //         return controller.genAIDropdownValue.value == 'Upload File'
-                  //             ? SizedBox()
-                  //             : GestureDetector(
-                  //           onTap: () {
-                  //             showDialog(
-                  //               context: Get.context!,
-                  //               builder: (_) => AlertDialog(
-                  //                 title: Text("Box"),
-                  //                 content: Text("Open Box"),
-                  //                 actions: [
-                  //                   TextButton(
-                  //                     onPressed: () => Get.back(),
-                  //                     child: Text("Close"),
-                  //                   ),
-                  //                 ],
-                  //               ),
-                  //             );
-                  //           },
-                  //           child: Icon(Icons.file_copy_rounded, color: appBackGroundColor),
-                  //         );
-                  //       }),
-                  //
-                  //     ],
-                  //   ),
-                  // ),
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Select File',
-                                style: primaryTextStyle(),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            5.width,
-                            GestureDetector(
-                              onTap: () {
-                                Get.bottomSheet(
-                                  enableDrag: true,
-                                  isScrollControlled: true,
-                                  ImageSourceSelectionComponent(
-                                    onSourceSelected: (imageSource) {
-                                      hideKeyboard(context);
-                                      controller.onSourceSelected(imageSource);
+                    child: Obx(() {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                  child: controller.genAIDropdownValue.value == 'Upload File'
+                                      ? Text(
+                                          'Select File',
+                                          style: primaryTextStyle(),
+                                          overflow: TextOverflow.ellipsis,
+                                        )
+                                      : TextField(
+                                          decoration: InputDecoration(
+                                            hintText: 'Include your query',
+                                            border: OutlineInputBorder(),
+                                          ),
+                                          onChanged: (value) => controller.dataLakeInput.value = value,
+                                        )),
+                              5.width,
+                              GestureDetector(
+                                onTap: () {
+                                  Get.bottomSheet(
+                                    enableDrag: true,
+                                    isScrollControlled: true,
+                                    ImageSourceSelectionComponent(
+                                      onSourceSelected: (imageSource) {
+                                        hideKeyboard(context);
+                                        controller.onSourceSelected(imageSource);
+                                      },
+                                    ),
+                                  );
+                                },
+                                child: Obx(() {
+                                  // Icon changes dynamically
+                                  IconData icon = controller.genAIDropdownValue.value == 'Upload File' ? Icons.attach_file : Icons.logout;
+                                  return GestureDetector(
+                                    onTap: () {
+                                      log("------");
                                     },
-                                  ),
-                                );
-                              },
-                              child: Obx(() {
-                                // Icon changes dynamically
-                                IconData icon = controller.genAIDropdownValue.value == 'Upload File' ? Icons.attach_file : Icons.cloud;
-                                return Icon(icon, color: appBackGroundColor);
-                              }),
-                            ),
-                            5.width,
-                            Obx(() {
-                              return controller.genAIDropdownValue.value == 'Upload File'
-                                  ? SizedBox()
-                                  : GestureDetector(
-                                      onTap: () {
+                                    child: icon == Icons.logout
+                                        ? Container(
+                                            margin: EdgeInsets.only(top: 5, bottom: 5),
+                                            width: 40,
+                                            height: 40,
+                                            decoration: BoxDecoration(
+                                              color: appBackGroundColor,
+                                              borderRadius: BorderRadius.circular(8), // rounded square
+                                            ),
+                                            child: IconButton(
+                                              icon: Icon(Icons.logout, color: appWhiteColor, size: 20),
+                                              onPressed: () {
+                                                log("----1--");
+                                                String? userJson = getStringAsync(AppSharedPreferenceKeys.userModel);
+                                                String Fullname = '';
+                                                String id = '';
+                                                if (userJson.isNotEmpty) {
+                                                  var userMap = jsonDecode(userJson);
+                                                  var userModel = UserModel.fromJson(userMap); // Replace with your actual model
+                                                  Fullname = "${userModel.firstName} ${userModel.lastName}";
+                                                  id = userModel.id.toString();
+                                                }
+                                                if (controller.genAIDropdownValue.value != 'Upload File') {
+                                                  log(controller.dataLakeInput.value);
+                                                  if (controller.dataLakeInput.value.isEmpty) {
+                                                    toast("Please Include your query.");
+                                                    return;
+                                                  }
+
+                                                  if (controller.dataLakeInput.value.isNotEmpty) {
+                                                    controller
+                                                        .fetchGenerateSQL(
+                                                      controller.dataLakeInput.value,
+                                                      userId: id,
+                                                      userName: Fullname,
+                                                    )
+                                                        .then(
+                                                      (value) {
+                                                        controller.isShowSqlIcon.value = true;
+                                                      },
+                                                    );
+                                                  }
+                                                }
+                                                // Handle translation
+                                              },
+                                            ),
+                                          )
+                                        : Icon(icon, color: appBackGroundColor),
+                                  );
+                                }),
+                              ),
+                              5.width,
+                              Obx(() {
+                                return controller.genAIDropdownValue.value == 'Upload File'
+                                    ? SizedBox()
+                                    : GestureDetector(onTap: () {
                                         showDialog(
                                           context: Get.context!,
                                           builder: (_) => AlertDialog(
@@ -178,101 +176,138 @@ class GenAIPVScreen extends StatelessWidget {
                                             ],
                                           ),
                                         );
-                                      },
-                                      child: Icon(Icons.file_copy_rounded, color: appBackGroundColor),
-                                    );
-                            }),
-                          ],
-                        ),
+                                      }, child: Obx(() {
+                                        return controller.genAIDropdownValue.value == 'Upload File'
+                                            ? SizedBox()
+                                            : GestureDetector(
+                                                onTap: () {},
+                                                child: controller.isShowSqlIcon.value
+                                                    ? Container(
+                                                        margin: EdgeInsets.only(top: 5, bottom: 5),
+                                                        width: 40,
+                                                        height: 40,
+                                                        decoration: BoxDecoration(
+                                                          color: appBackGroundColor,
+                                                          borderRadius: BorderRadius.circular(8), // rounded square
+                                                        ),
+                                                        child: IconButton(
+                                                          icon: Icon(Icons.file_copy_rounded, color: appWhiteColor, size: 20),
+                                                          onPressed: () {
+                                                            final sqlText = controller.generateSQLResponse.value?.sqlQuery ?? 'No SQL generated';
 
-                        /// 👇 File list shown only if dropdown is 'Upload File'
-                        Obx(() {
-                          if (controller.genAIDropdownValue.value != 'Upload File') {
-                            return SizedBox();
-                          }
+                                                            showDialog(
+                                                              context: Get.context!,
+                                                              builder: (_) => AlertDialog(
+                                                                title: Text("Generated SQL"),
+                                                                content: SingleChildScrollView(
+                                                                  child: Text(sqlText),
+                                                                ),
+                                                                actions: [
+                                                                  AppButton(
+                                                                    color: appBackGroundColor,
+                                                                    onTap:  () => Get.back(),
+                                                                    child: Text(
+                                                                      'Close',
+                                                                      style: TextStyle(color: white),
+                                                                    ),
+                                                                  )
+                                                                ],
+                                                              ),
+                                                            );
+                                                          },
+                                                        ),
+                                                      )
+                                                    : SizedBox(),
 
-                          if (controller.fileNames.isEmpty) {
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 12),
-                              child: Text('No files selected'),
-                            );
-                          }
+                                                // Icon(Icons.file_copy_rounded, color: appBackGroundColor),
+                                              );
+                                      }));
+                              }),
+                            ],
+                          ),
 
-                          return Container(
-                            margin: EdgeInsets.only(top: 12),
-                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: appBackGroundColor),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: controller.fileNames.asMap().entries.map((entry) {
-                                  final index = entry.key;
-                                  final fileName = entry.value;
+                          /// 👇 File list shown only if dropdown is 'Upload File'
+                          Obx(() {
+                            if (controller.genAIDropdownValue.value != 'Upload File' || controller.fileNames.isEmpty) {
+                              return SizedBox();
+                            }
 
-                                  return Container(
-                                    margin: EdgeInsets.only(right: 8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue.shade100,
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Padding(
-                                          padding: EdgeInsets.only(left: 8),
-                                          child: Text(
-                                            fileName,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(color: Colors.black),
-                                          ),
-                                        ),
-                                        PopupMenuButton<String>(
-                                          padding: EdgeInsets.zero,
-                                          onSelected: (value) {
-                                            if (value == 'view') {
-                                              toast('Viewing ${controller.fileNames[index]}');
-                                            } else if (value == 'remove') {
-                                              controller.fileNames.removeAt(index);
-                                              controller.imageFiles.removeAt(index);
-                                            }
-                                          },
-                                          icon: Icon(Icons.menu, size: 18),
-                                          itemBuilder: (context) => [
-                                            PopupMenuItem(
-                                              value: 'view',
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.remove_red_eye, size: 18),
-                                                  SizedBox(width: 8),
-                                                  Text('View'),
-                                                ],
-                                              ),
-                                            ),
-                                            PopupMenuItem(
-                                              value: 'remove',
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.close, size: 18, color: Colors.red),
-                                                  SizedBox(width: 8),
-                                                  Text('Remove', style: TextStyle(color: Colors.red)),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }).toList(),
+                            return Container(
+                              margin: EdgeInsets.only(top: 12),
+                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: appBackGroundColor),
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                            ),
-                          );
-                        }),
-                      ],
-                    ),
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: controller.fileNames.asMap().entries.map((entry) {
+                                    final index = entry.key;
+                                    final fileName = entry.value;
+
+                                    return Container(
+                                      margin: EdgeInsets.only(right: 8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.shade100,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Padding(
+                                            padding: EdgeInsets.only(left: 8),
+                                            child: Text(
+                                              fileName,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(color: Colors.black),
+                                            ),
+                                          ),
+                                          PopupMenuButton<String>(
+                                            padding: EdgeInsets.zero,
+                                            onSelected: (value) {
+                                              if (value == 'view') {
+                                                toast('Viewing ${controller.fileNames[index]}');
+                                              } else if (value == 'remove') {
+                                                controller.fileNames.removeAt(index);
+                                                controller.imageFiles.removeAt(index);
+                                              }
+                                            },
+                                            icon: Icon(Icons.menu, size: 18),
+                                            itemBuilder: (context) => [
+                                              PopupMenuItem(
+                                                value: 'view',
+                                                child: Row(
+                                                  children: [
+                                                    Icon(Icons.remove_red_eye, size: 18),
+                                                    SizedBox(width: 8),
+                                                    Text('View'),
+                                                  ],
+                                                ),
+                                              ),
+                                              PopupMenuItem(
+                                                value: 'remove',
+                                                child: Row(
+                                                  children: [
+                                                    Icon(Icons.close, size: 18, color: Colors.red),
+                                                    SizedBox(width: 8),
+                                                    Text('Remove', style: TextStyle(color: Colors.red)),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
+                      );
+                    }),
                   ),
                 ],
               ),
