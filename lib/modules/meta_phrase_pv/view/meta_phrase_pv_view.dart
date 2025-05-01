@@ -217,8 +217,8 @@ class MetaPhraseScreen extends StatelessWidget {
                       int currentIndex = controller.modes.indexOf(mode);
                       int labelIndex = controller.modes.indexOf(label);
 
-                      if (label == mode) return Colors.blue;
-                      if (labelIndex < currentIndex) return Colors.green;
+                      if (label == mode) return appBackGroundColor;
+                      if (labelIndex < currentIndex) return appGreenColor;
 
                       return Colors.grey.shade300;
                     }
@@ -243,7 +243,8 @@ class MetaPhraseScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: displayModes.map((label) {
                           return Expanded(
-                            child: Container(
+                            child:
+                            Container(
                               child: Card(
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                                 color: getColor(label),
@@ -584,7 +585,18 @@ class MetaPhraseScreen extends StatelessWidget {
                                               final sentence = sentenceScore.sentence;
                                               final score = sentenceScore.score;
 
-                                              Color color = score <= 50 ? Colors.yellow : Colors.green;
+                                              // Color color = score <= 50 ? Colors.yellow : Colors.green;
+                                              Color color;
+
+                                              if (score >= 0 && score <= 39) {
+                                                color = appScore0To39Color;
+                                              } else if (score >= 40 && score <= 64) {
+                                                color = appScore40To64Color;
+                                              } else if (score >= 65 && score <= 100) {
+                                                color = appScore65To100Color;
+                                              } else {
+                                                color = appGreyColor;
+                                              }
 
                                               return Text(
                                                 sentence,

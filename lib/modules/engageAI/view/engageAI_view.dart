@@ -15,7 +15,7 @@ class EngageAIScreen extends StatelessWidget {
     return AppScaffold(
       isLoading: controller.isLoading,
       appBarBackgroundColor: appBackGroundColor,
-      appBarTitleText: "GenAI PV",
+      appBarTitleText: "Engage AI",
       appBarTitleTextStyle: TextStyle(
         fontSize: 20,
         color: appWhiteColor,

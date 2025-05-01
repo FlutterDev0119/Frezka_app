@@ -665,20 +665,24 @@ class GenAIPVScreen extends StatelessWidget {
                                               () => SingleChildScrollView(
                                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                                 child: Column(
+                                                  mainAxisAlignment: MainAxisAlignment.start,
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: controller.filteredClassificationMap.entries.map((entry) {
-                                                    final category = entry.key; // Investigator Analysis or Site Analysis
+                                                    final category = entry.key;
                                                     final attributes = entry.value;
 
                                                     return Column(
                                                       crossAxisAlignment: CrossAxisAlignment.start,
                                                       children: [
-                                                        Text(
-                                                          category,
-                                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                                        Center(
+                                                          child: Text(
+                                                            category,
+                                                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16,color: appWhiteColor),
+                                                          ),
                                                         ),
                                                         const SizedBox(height: 8),
                                                         Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
                                                           children: attributes.map((attribute) {
                                                             final isSelected = controller.selectedTags.contains(attribute);
 

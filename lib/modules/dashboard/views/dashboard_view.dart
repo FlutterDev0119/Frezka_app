@@ -28,9 +28,10 @@ class DashboardScreen extends StatelessWidget {
           () {
             if (controller.email.value.isEmpty) {
               return Center(child: LoaderWidget());
-            }else{
-            return buildBody(context);
-          }},
+            } else {
+              return buildBody(context);
+            }
+          },
         ));
   }
 
@@ -286,16 +287,38 @@ class DashboardScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  item['title'],
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.roboto(
-                    fontSize: 21,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textColor,
-                    letterSpacing: 0.8,
-                  ),
-                ),
+                // Text(
+                //   item['title'],
+                //   textAlign: TextAlign.center,
+                //   style: GoogleFonts.roboto(
+                //     fontSize: 21,
+                //     fontWeight: FontWeight.bold,
+                //     color: AppColors.textColor,
+                //     letterSpacing: 0.8,
+                //   ),
+                // ),
+                _buildTitle(item['title']),
+                // RichText(
+                //   textAlign: TextAlign.center,
+                //   text: TextSpan(
+                //     style: GoogleFonts.roboto(
+                //       fontSize: 21,
+                //       fontWeight: FontWeight.bold,
+                //       color: AppColors.textColor,
+                //       letterSpacing: 0.8,
+                //     ),
+                //     children: [
+                //       TextSpan(
+                //         text: item['title'],
+                //         style: TextStyle(
+                //           fontWeight: FontWeight.bold,
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                //   softWrap: true, // This forces wrapping at spaces
+                // ),
+
                 const SizedBox(height: 8),
                 Text(
                   item['description'],
@@ -311,5 +334,41 @@ class DashboardScreen extends StatelessWidget {
             ),
           ),
         ));
+  }
+
+  Widget _buildTitle(String title) {
+    // Split the title into two words if possible
+    final words = title.split(" ");
+    final firstWord = words.isNotEmpty ? words[0] : '';
+    final secondWord = words.length > 1 ? words[1] : '';
+
+    return Column(
+      children: [
+        // First word (larger font)
+        Text(
+          firstWord,
+          style: GoogleFonts.roboto(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textColor,
+            letterSpacing: 0.8,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        if (secondWord.isNotEmpty)
+          Marquee(
+            child: Text(
+              style: GoogleFonts.roboto(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textColor,
+                letterSpacing: 0.8,
+              ),
+              secondWord,
+              textAlign: TextAlign.center, // Center the marquee text
+            ),
+          ),
+      ],
+    );
   }
 }

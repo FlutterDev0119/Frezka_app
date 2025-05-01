@@ -5,6 +5,7 @@ import 'package:nb_utils/nb_utils.dart';
 
 import '../../../utils/app_scaffold.dart';
 import '../../../utils/common/colors.dart';
+import '../../meta_phrase_pv/controllers/meta_phrase_pv_controller.dart';
 import '../controllers/governAI_controller.dart';
 
 class GovernAIScreen extends StatefulWidget {
@@ -72,6 +73,7 @@ class _GovernAIScreenState extends State<GovernAIScreen> {
                           }),
                           barsSpace: 2,
                         );
+
                       }),
                       titlesData: FlTitlesData(
                         bottomTitles: AxisTitles(
@@ -126,8 +128,22 @@ class _GovernAIScreenState extends State<GovernAIScreen> {
                             );
                           },
                         ),
+
+                        touchCallback: (event, response) {
+                          if (event.isInterestedForInteractions && response != null && response.spot != null) {
+                            final groupIndex = response.spot!.touchedBarGroupIndex;
+                            final rodIndex = response.spot!.touchedRodDataIndex;
+
+                            final tappedCategory = categories[rodIndex];
+                            final tappedValue = data[groupIndex].values[tappedCategory] ?? 0;
+
+                            log('Tapped on: Category=$tappedCategory, Value=$tappedValue');
+                            print(true); // 👈 This prints true on tap
+                          }
+                        },
                       ),
                     ),
+
                   ),
                 ),
               ),
@@ -178,6 +194,113 @@ class _GovernAIScreenState extends State<GovernAIScreen> {
         }
         return SizedBox();
       }),
+    );
+  }
+  Widget _buildHeaderRow(BuildContext context) {
+    return Column(
+      children: [
+        // Top Fixed Row (Upload + Checkboxes)
+        // Scrollable Header Buttons Row
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            children: [
+              _headerButton("Event ID", SortGovernColumn.id),
+              _headerButton("Prompt", SortGovernColumn.name),
+              _headerButton("Execution Time", SortGovernColumn.executionTime),
+              _headerButton("Cost (\$)", SortGovernColumn.totalCost),
+              _headerButton("Latency", SortGovernColumn.latency),
+              _headerButton("Tokens", SortGovernColumn.tokens),
+              _headerButton("User", SortGovernColumn.user),
+              _headerButton("Remarks", SortGovernColumn.recommendedAction),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+  Widget _headerButton(String title, SortGovernColumn column) {
+    return Obx(() {
+      final isSelected = controller.sortGovernColumn.value == column;
+      final icon = isSelected ? (controller.isAscending.value ? Icons.arrow_upward : Icons.arrow_downward) : Icons.unfold_more;
+
+      return InkWell(
+        onTap: () => controller.toggleSort(column),
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          width: 120,
+          margin: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected ? appDashBoardCardColor : appWhiteColor,
+            border: Border.all(color: Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 2,
+                offset: Offset(1, 1),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Text(
+                  title,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                ),
+              ),
+              SizedBox(width: 4),
+              Icon(icon, size: 16),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+  Widget _buildFileList() {
+    return ListView.builder(
+      itemCount: controller.filteredFiles.length,
+      itemBuilder: (_, index) {
+        final item = controller.filteredFiles[index];
+        return GestureDetector(
+          onTap: () {
+            // controller.fetchMetaDataById(item.id);
+            // // Set the selected translation report and toggle visibility
+            // selectedTranslationReport.value = item;
+            // controller.isCardSelected.value = true;
+            // setValue("setid", item.id.toString());
+            // setValue("setfileName", item.fileName.toString());
+            // setValue("setsourceLanguage", item.sourceLanguage.toString());
+            // setValue("setscore", item.score.toString());
+            // setValue("setoriginalCount", item.originalCount.toString());
+            // setValue("settranslatedCount", item.translatedCount.toString());
+          },
+          child: Card(
+            color: appDashBoardCardColor,
+            margin: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            elevation: 2,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: ListTile(
+              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              title: Text(item.name, style: TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("executionTime: ${item.executionTime}"),
+                  Text("totalCost: ${item.totalCost}"),
+                  Text("latency: ${item.latency}"),
+                ],
+              ),
+              trailing: Text("Score\n${item.recommendedAction}", textAlign: TextAlign.center),
+            ),
+          ),
+        );
+      },
     );
   }
 }

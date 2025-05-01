@@ -201,8 +201,10 @@ class PromptAdminScreen extends StatelessWidget {
                                   // ),
                                   Expanded(
                                     child: SingleChildScrollView(
+                                      scrollDirection: Axis.vertical,
                                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                       child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.start,
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: controller.tags.map((category) {
                                           final isSelected = controller.selectedTags.contains(category);
@@ -332,9 +334,10 @@ class PromptAdminScreen extends StatelessWidget {
                                                 ),
 
                                                 // Prompt Chips
-                                                Wrap(
-                                                  spacing: 8,
-                                                  runSpacing: 8,
+                                                Column(
+                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+
                                                   children: prompts.map((prompt) {
                                                     final isSelected = controller.selectedTags.contains(prompt);
                                                     return GestureDetector(
@@ -480,7 +483,7 @@ class PromptAdminScreen extends StatelessWidget {
                       runSpacing: 8,
                       children: [
                         _buildOption("Role", Icons.person, 0),
-                        _buildOption("Choose Image", Icons.folder, 1),
+                        _buildOption("Source Type", Icons.folder, 1),
                         _buildOption("Metadata", Icons.info_outline_rounded, 2),
                         _buildOption("Task", Icons.list_rounded, 3),
                         _buildOption("Verify", Icons.verified, 4),
@@ -578,13 +581,53 @@ class PromptAdminScreen extends StatelessWidget {
       ),
     );
   }
+  // Widget _buildOption(String label, IconData icon, int index) {
+  //   return Obx(() {
+  //     bool isSelected = controller.currentIndex.value == index;
+  //
+  //     return Expanded(
+  //       child: GestureDetector(
+  //         onTap: () => controller.currentIndex.value = index,
+  //         child: Card(
+  //           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  //           color: isSelected ? appBackGroundColor : Colors.grey.shade200,
+  //           elevation: 4,
+  //           // margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+  //           child: Padding(
+  //             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+  //             child: Column(
+  //               mainAxisAlignment: MainAxisAlignment.center,
+  //               children: [
+  //                 Icon(icon, color: isSelected ? Colors.white : appBackGroundColor),
+  //                 const SizedBox(height: 6),
+  //                 Text(
+  //                   label,
+  //                   maxLines: 1,
+  //                   overflow: TextOverflow.ellipsis,
+  //                   style: TextStyle(
+  //                     color: isSelected ? Colors.white : appBackGroundColor,
+  //                     fontWeight: FontWeight.bold,
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //     );
+  //   });
+  // }
 
   Widget _buildOption(String label, IconData icon, int index) {
     return Obx(() {
       bool isSelected = controller.currentIndex.value == index;
-      return GestureDetector(
+      return
+        GestureDetector(
         onTap: () => controller.currentIndex.value = index,
-        child: Container(
+        child:
+
+
+        Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           margin: const EdgeInsets.symmetric(horizontal: 4),
           decoration: BoxDecoration(

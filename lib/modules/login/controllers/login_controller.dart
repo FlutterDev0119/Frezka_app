@@ -37,7 +37,7 @@ class LoginController extends BaseController {
         toast("Logged in successfully!");
         Get.offAllNamed(Routes.DASHBOARD);
         await setValue(AppSharedPreferenceKeys.isUserLoggedIn, true);
-        await setValue(ConstantKeys.passwordKey, "Pvana@123");
+        // await setValue(ConstantKeys.passwordKey, "Pvana@123");
       } else {
         toast("Login failed");
       }

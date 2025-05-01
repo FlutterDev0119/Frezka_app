@@ -726,12 +726,15 @@ class GenAIClinicalScreen extends StatelessWidget {
                                             return Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                Text(
-                                                  category,
-                                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                                Center(
+                                                  child: Text(
+                                                    category,
+                                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16,color: appWhiteColor),
+                                                  ),
                                                 ),
                                                 const SizedBox(height: 8),
                                                 Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: attributes.map((attribute) {
                                                     final isSelected = controller.selectedTags.contains(attribute);
 

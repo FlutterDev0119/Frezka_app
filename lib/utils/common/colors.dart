@@ -26,6 +26,10 @@ const Color appTextColor = Colors.black87;
 const Color appWhiteColor = Colors.white;
 const Color appGreyColor = Colors.grey;
 const Color appRedColor = Colors.red;
+const Color appGreenColor = Color(0xFFC8E6E9);
+const Color appScore0To39Color = Color(0xFFC8E6C9);
+const Color appScore40To64Color = Color(0xFFFFF3C4);
+const Color appScore65To100Color = Color(0xFFC8E6C5);
 
 ///Extra
 const lightIconColor = Color(0xFFD8D9D9);

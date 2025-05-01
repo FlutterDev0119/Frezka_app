@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:apps/modules/login/model/login_model.dart';
 import 'package:get/get.dart' as get_state;
 import 'package:http/http.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -8,6 +9,7 @@ import '../utils/common/common.dart';
 import '../utils/common/common_base.dart';
 import '../utils/constants.dart';
 import '../utils/shared_prefences.dart';
+import 'api_sevices.dart';
 import 'config.dart';
 
 Map<String, String> defaultHeaders() {
@@ -80,18 +82,18 @@ Future buildHttpResponse({
     );
 
     if (response.statusCode == 401) {//isLoggedIn.value &&
-      // bool tokenRegenerated = await reGenerateToken();
-      //
-      // if (tokenRegenerated) {
-      //   return await handleResponse(
-      //     await buildHttpResponse(
-      //       endPoint: endPoint,
-      //       method: method,
-      //       request: request,
-      //       header: header,
-      //     ),
-      //   );
-      // }
+      bool tokenRegenerated = await reGenerateToken();
+
+      if (tokenRegenerated) {
+        return await handleResponse(
+          await buildHttpResponse(
+            endPoint: endPoint,
+            method: method,
+            request: request,
+            header: header,
+          ),
+        );
+      }
     } else {
       return await handleResponse(response);
     }
@@ -161,6 +163,33 @@ Future buildMultiPartResponse({
     log(e.toString());
   }
 }
+Future<bool> reGenerateToken() async {
+  log('Regenerating Token');
+
+  Map<String, dynamic> req = {
+    ConstantKeys.emailKey: getStringAsync(AppSharedPreferenceKeys.userEmail),
+    ConstantKeys.passwordKey: getStringAsync(AppSharedPreferenceKeys.userPassword),
+    // ConstantKeys.loginTypeKey: getStringAsync(AppSharedPreferenceKeys.userLoginType),
+  };
+  try {
+    // final value = await AuthServiceApis.login(request: req).then((value) async{
+    //   await setValue(AppSharedPreferenceKeys.apiToken, value.);
+    // },);
+    // loggedInUser.value = ;
+    String? refreshToken = await AuthServiceApis.login(
+      request: req,
+    );
+    if (refreshToken != null) {
+      await setValue(AppSharedPreferenceKeys.isUserLoggedIn, true);
+    } else {
+      handleFailRegenerateToken();
+    }
+    return true;
+  } catch (e) {
+    log('Token regeneration failed: $e');
+    return false;
+  }
+}
 
 // Future<bool> reGenerateToken() async {
 //   bool result = false;
@@ -211,21 +240,42 @@ Future buildMultiPartResponse({
 //
 //   return result;
 // }
-
-// Future<void> handleFailRegenerateToken() async {
-//   // await SocialLoginService.deleteCurrentFirebaseUser();
-//   isLoggedIn(false);
-//   loggedInUser(UserDataResponseModel());
+// Future<void> reGenerateToken() async {
+//   bool result = false;
+//   log('Regenerating Token');
+//   Map<String, dynamic> req = {
+//     ConstantKeys.emailKey: getStringAsync(AppSharedPreferenceKeys.userEmail),
+//     ConstantKeys.passwordKey: getStringAsync(AppSharedPreferenceKeys.userPassword),
+//     // ConstantKeys.loginTypeKey: getStringAsync(AppSharedPreferenceKeys.userLoginType),
+//   };
 //
-//   setValue(AppSharedPreferenceKeys.isUserLoggedIn, false);
-//   setValue(AppSharedPreferenceKeys.currentUserData, loggedInUser.value.toJson());
-//   setValue(AppSharedPreferenceKeys.userEmail, '');
-//   setValue(AppSharedPreferenceKeys.userPassword, '');
-//   setValue(AppSharedPreferenceKeys.apiToken, '');
-//   // setValue(AppSharedPreferenceKeys.cachedDashboardData, '');
-//
-//   get_state.Get.offAll(() => ());
+//   return await AuthServiceApis.login(request: req).then((value) async {
+//     await setValue(AppSharedPreferenceKeys.apiToken, loggedInUser.value.access);
+//     if(req ==null){
+//       handleFailRegenerateToken();
+//     }
+//     // controller.setLoading(false);
+//   }).catchError((e) {
+//     log(e);
+//     throw e;
+//   });
+//   return result;
 // }
+
+Future<void> handleFailRegenerateToken() async {
+  // await SocialLoginService.deleteCurrentFirebaseUser();
+  isLoggedIn(false);
+  loggedInUser(UserDataResponseModel());
+
+  setValue(AppSharedPreferenceKeys.isUserLoggedIn, false);
+  setValue(AppSharedPreferenceKeys.currentUserData, loggedInUser.value.toJson());
+  setValue(AppSharedPreferenceKeys.userEmail, '');
+  setValue(AppSharedPreferenceKeys.userPassword, '');
+  setValue(AppSharedPreferenceKeys.apiToken, '');
+  // setValue(AppSharedPreferenceKeys.cachedDashboardData, '');
+
+  get_state.Get.offAll(() => ());
+}
 
 Future handleResponse(Response response, {HttpResponseType httpResponseType = HttpResponseType.JSON}) async {
   if (!await isNetworkAvailable()) {
