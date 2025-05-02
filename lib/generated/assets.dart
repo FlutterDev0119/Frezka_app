@@ -2,6 +2,9 @@
 class Assets {
   Assets._();
 
+  static const String flagEnglish = 'assets/images/flag/english.png';
+  static const String flagJapanese = 'assets/images/flag/japanese.png';
+  static const String flagSpamish = 'assets/images/flag/spanish.png';
   static const String fontInterTightRegular = 'assets/font/InterTight-Regular.ttf';
   static const String iconsFilterDownArrow = 'assets/icons/filter_down_arrow.png';
   static const String iconsIcFile = 'assets/icons/ic_file.png';

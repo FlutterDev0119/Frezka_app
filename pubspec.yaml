@@ -63,6 +63,7 @@ flutter:
     - assets/logos/
     - assets/lotties/
     - assets/images/
+    - assets/images/flag/
     - assets/font/
 
   uses-material-design: true

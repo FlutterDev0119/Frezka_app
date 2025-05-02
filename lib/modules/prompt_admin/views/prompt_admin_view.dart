@@ -30,553 +30,587 @@ class PromptAdminScreen extends StatelessWidget {
         color: appWhiteColor,
       ),
       isLoading: controller.isLoading,
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(8.0),
-          children: [
-            Text("Prompt Name", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: appBackGroundColor)),
-            10.height,
-            TextField(
-              controller: controller.inputController,
-              // onEditingComplete: controller.userSubmittedData,
-              readOnly: true,
-              decoration: appInputDecoration(
-                context: context,
-                hintText: "Enter Prompt Name",
-                hintStyle: TextStyle(color: appGreyColor),
-                filled: true,
-                fillColor: appWhiteColor,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      body: Container(
+        color: appDashBoardCardColor,
+        child: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.all(8.0),
+            children: [
+              Text("Prompt Name", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: appBackGroundColor)),
+              10.height,
+              TextField(
+                controller: controller.inputController,
+                // onEditingComplete: controller.userSubmittedData,
+                readOnly: true,
+                decoration: appInputDecoration(
+                  context: context,
+                  hintText: "Enter Prompt Name",
+                  hintStyle: TextStyle(color: appGreyColor),
+                  filled: true,
+                  fillColor: appWhiteColor,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
               ),
-            ),
-            10.height,
+              10.height,
 
-            /// Selected Tags View + Filter Icon on Right
-            Obx(() => Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    /// Tags Section
-                    // Expanded(
-                    //   child: SingleChildScrollView(
-                    //     scrollDirection: Axis.horizontal, // Make it scrollable horizontally
-                    //     child: Row(
-                    //       children: controller.classificationMap.keys.map((tag) {
-                    //         final isSelected = controller.selectedParentTag.value == tag;
-                    //
-                    //         return GestureDetector(
-                    //           onTap: () => controller.addTag(tag),
-                    //           child: Padding(
-                    //             padding: const EdgeInsets.symmetric(horizontal: 4.0), // Add spacing between chips
-                    //             child: Chip(
-                    //               label: Text(
-                    //                 "# $tag",
-                    //                 style: TextStyle(
-                    //                   fontWeight: FontWeight.w500,
-                    //                   color: isSelected ? Colors.white : Colors.black87,
-                    //                 ),
-                    //               ),
-                    //               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    //               backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.4) : appBackGroundColor.withOpacity(0.1),
-                    //             ),
-                    //           ),
-                    //         );
-                    //       }).toList(),
-                    //     ),
-                    //   ),
-                    // ),
+              /// Selected Tags View + Filter Icon on Right
+              Obx(() => Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      /// Tags Section
+                      // Expanded(
+                      //   child: SingleChildScrollView(
+                      //     scrollDirection: Axis.horizontal, // Make it scrollable horizontally
+                      //     child: Row(
+                      //       children: controller.classificationMap.keys.map((tag) {
+                      //         final isSelected = controller.selectedParentTag.value == tag;
+                      //
+                      //         return GestureDetector(
+                      //           onTap: () => controller.addTag(tag),
+                      //           child: Padding(
+                      //             padding: const EdgeInsets.symmetric(horizontal: 4.0), // Add spacing between chips
+                      //             child: Chip(
+                      //               label: Text(
+                      //                 "# $tag",
+                      //                 style: TextStyle(
+                      //                   fontWeight: FontWeight.w500,
+                      //                   color: isSelected ? Colors.white : Colors.black87,
+                      //                 ),
+                      //               ),
+                      //               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      //               backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.4) : appBackGroundColor.withOpacity(0.1),
+                      //             ),
+                      //           ),
+                      //         );
+                      //       }).toList(),
+                      //     ),
+                      //   ),
+                      // ),
 
-                    Expanded(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal, // Make it scrollable horizontally
-                        child: Row(
-                          children: controller.tags.map((tag) {
-                            final isSelected = controller.selectedParentTag.value == tag;
+                      Expanded(
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal, // Make it scrollable horizontally
+                          child: Row(
+                            children: controller.tags.map((tag) {
+                              final isSelected = controller.selectedParentTag.value == tag;
 
-                            return GestureDetector(
-                              onTap: () async {
-                                controller.addTag(tag);
-                                await setValue("group", tag);
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 4.0), // Add spacing between chips
-                                child: Chip(
-                                  label: Text(
-                                    "# $tag",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      color: isSelected ? appBackGroundColor : Colors.black87,
-                                    ),
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8), // adjust the roundness
-                                    side: BorderSide(
-                                      color: isSelected ? Colors.blueAccent : Colors.transparent,
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  backgroundColor: isSelected ? appDashBoardCardColor : appWhiteColor,
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-
-                    /// Spacer to push icon to right
-                    8.width,
-
-                    /// Filter Icon (Dropdown)
-                    GestureDetector(
-                      onTap: () {
-                        Get.dialog(
-                          Dialog(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            child: Container(
-                              constraints: const BoxConstraints(maxHeight: 500, minWidth: 300),
-                              decoration: BoxDecoration(
-                                color: appBackGroundColor,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  /// Title Row with background color
-                                  Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                    decoration: BoxDecoration(
-                                      color: appBackGroundColor,
-                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        const Text(
-                                          "Classification",
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.close, color: Colors.white),
-                                          onPressed: () => Get.back(),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-
-                                  const Divider(height: 1, thickness: 1),
-
-                                  /// Chip List Section (Full Width)
-                                  // Expanded(
-                                  //   child: Obx(() => SingleChildScrollView(
-                                  //         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                  //         child: Column(
-                                  //           crossAxisAlignment: CrossAxisAlignment.start,
-                                  //           children: controller.classificationMap.entries.map((entry) {
-                                  //             final category = entry.key;
-                                  //             final isSelected = controller.selectedTags.contains(category);
-                                  //
-                                  //             return GestureDetector(
-                                  //               onTap: () => controller.addTag(category),
-                                  //               child: Chip(
-                                  //                 label: Text(
-                                  //                   category,
-                                  //                   style: TextStyle(
-                                  //                     fontWeight: FontWeight.w500,
-                                  //                     color: isSelected ? appBackGroundColor : Colors.black87,
-                                  //                   ),
-                                  //                 ),
-                                  //                 backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
-                                  //               ),
-                                  //             );
-                                  //           }).toList(),
-                                  //         ),
-                                  //       )),
-                                  // ),
-                                  Expanded(
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.vertical,
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: controller.tags.map((category) {
-                                          final isSelected = controller.selectedTags.contains(category);
-
-                                          return GestureDetector(
-                                            onTap: () => controller.addTag(category),
-                                            child: Padding(
-                                              padding: const EdgeInsets.symmetric(vertical: 4.0), // optional: adds spacing between chips
-                                              child: Chip(
-                                                label: Text(
-                                                  "# $category",
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.w500,
-                                                    color: isSelected ? appBackGroundColor : Colors.black87,
-                                                  ),
-                                                ),
-                                                backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
-                                              ),
-                                            ),
-                                          );
-                                        }).toList(),
+                              return GestureDetector(
+                                onTap: () async {
+                                  controller.addTag(tag);
+                                  await setValue("group", tag);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4.0), // Add spacing between chips
+                                  child: Chip(
+                                    label: Text(
+                                      "# $tag",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: isSelected ? appBackGroundColor : Colors.black87,
                                       ),
                                     ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8), // adjust the roundness
+                                      side: BorderSide(
+                                        color: isSelected ? Colors.blueAccent : Colors.transparent,
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    backgroundColor: isSelected ? appDashBoardCardColor : appWhiteColor,
                                   ),
-                                ],
-                              ),
-                            ),
+                                ),
+                              );
+                            }).toList(),
                           ),
-                        );
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: Image.asset(
-                          Assets.iconsFilterDownArrow,
-                          width: 25,
-                          height: 25,
-                          color: appBackGroundColor,
                         ),
                       ),
-                    ),
-                  ],
-                )),
 
-            10.height,
+                      /// Spacer to push icon to right
+                      8.width,
 
-            /// Inherit Checkbox
-            Obx(() => Row(
-                  children: [
-                    Text("Inherit", style: TextStyle(fontSize: 18, color: appBackGroundColor)),
-                    IconButton(
-                      color: appBackGroundColor,
-                      icon: Icon(controller.isChecked.value ? Icons.check_box : Icons.check_box_outline_blank),
-                      onPressed: controller.toggleIcon,
-                    ),
-                    Spacer(),
-
-                    /// Filter Icon (Dropdown)
-                    GestureDetector(
-                      onTap: () {
-                        Get.dialog(
-                          Dialog(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            child: Container(
-                              constraints: const BoxConstraints(maxHeight: 500, minWidth: 300),
-                              decoration: BoxDecoration(
-                                color: appBackGroundColor,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  /// Title Row with background color
-                                  Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                    decoration: BoxDecoration(
-                                      color: appBackGroundColor,
-                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        const Text(
-                                          "Select Prompt",
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
+                      /// Filter Icon (Dropdown)
+                      GestureDetector(
+                        onTap: () {
+                          Get.dialog(
+                            Dialog(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              child: Container(
+                                constraints: const BoxConstraints(maxHeight: 500, minWidth: 300),
+                                decoration: BoxDecoration(
+                                  color: appBackGroundColor,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    /// Title Row with background color
+                                    Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                      decoration: BoxDecoration(
+                                        color: appBackGroundColor,
+                                        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const Text(
+                                            "Classification",
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
                                           ),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.close, color: Colors.white),
-                                          onPressed: () => Get.back(),
-                                        ),
-                                      ],
+                                          IconButton(
+                                            icon: const Icon(Icons.close, color: Colors.white),
+                                            onPressed: () => Get.back(),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
 
-                                  const Divider(height: 1, thickness: 1),
+                                    const Divider(height: 1, thickness: 1),
 
-                                  /// Chip List Section (Full Width)
-                                  Expanded(
-                                    child: Obx(
-                                      () => SingleChildScrollView(
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    /// Chip List Section (Full Width)
+                                    // Expanded(
+                                    //   child: Obx(() => SingleChildScrollView(
+                                    //         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    //         child: Column(
+                                    //           crossAxisAlignment: CrossAxisAlignment.start,
+                                    //           children: controller.classificationMap.entries.map((entry) {
+                                    //             final category = entry.key;
+                                    //             final isSelected = controller.selectedTags.contains(category);
+                                    //
+                                    //             return GestureDetector(
+                                    //               onTap: () => controller.addTag(category),
+                                    //               child: Chip(
+                                    //                 label: Text(
+                                    //                   category,
+                                    //                   style: TextStyle(
+                                    //                     fontWeight: FontWeight.w500,
+                                    //                     color: isSelected ? appBackGroundColor : Colors.black87,
+                                    //                   ),
+                                    //                 ),
+                                    //                 backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
+                                    //               ),
+                                    //             );
+                                    //           }).toList(),
+                                    //         ),
+                                    //       )),
+                                    // ),
+                                    // Expanded(
+                                    //   child: SingleChildScrollView(
+                                    //     scrollDirection: Axis.vertical,
+                                    //     padding: const EdgeInsets.only(right: 16, left: 10,top: 5, bottom: 1),
+                                    //     child: Wrap(
+                                    //       children: controller.tags.map((category) {
+                                    //         final isSelected = controller.selectedTags.contains(category);
+                                    //
+                                    //         return GestureDetector(
+                                    //           onTap: () => controller.addTag(category),
+                                    //           child: Padding(
+                                    //             padding: const EdgeInsets.symmetric(vertical: 2.0), // optional: adds spacing between chips
+                                    //             child: Chip(
+                                    //               label: Text(
+                                    //                 "# $category",
+                                    //                 style: TextStyle(
+                                    //                   fontWeight: FontWeight.w500,
+                                    //                   color: isSelected ? appBackGroundColor : Colors.black87,
+                                    //                 ),
+                                    //               ),
+                                    //               backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
+                                    //             ),
+                                    //           ),
+                                    //         );
+                                    //       }).toList(),
+                                    //     ),
+                                    //   ),
+                                    // ),
+                                    Expanded(
+                                      child: SingleChildScrollView(
+                                        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: controller.classificationMap.entries.map((entry) {
-                                            final category = entry.key;
-                                            final prompts = entry.value;
+                                          children: controller.tags.map((category) {
+                                            final isSelected = controller.selectedTags.contains(category);
 
-                                            return Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                // Section Title
-                                                Padding(
-                                                  padding: const EdgeInsets.symmetric(vertical: 8),
-                                                  child: Text(
-                                                    "#$category",
-                                                    style: const TextStyle(
-                                                      fontSize: 16,
-                                                      fontWeight: FontWeight.bold,
-                                                      color: Colors.black87,
+                                            return GestureDetector(
+                                              onTap: () => controller.addTag(category),
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(), // spacing between chips
+                                                child: Chip(
+                                                  label: Text(
+                                                    "# $category",
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.w500,
+                                                      color: isSelected ? appBackGroundColor : Colors.black87,
                                                     ),
                                                   ),
+                                                  backgroundColor: isSelected
+                                                      ? appBackGroundColor.withOpacity(0.2)
+                                                      : Colors.grey.shade200,
                                                 ),
-
-                                                // Prompt Chips
-                                                Column(
-                                                  mainAxisAlignment: MainAxisAlignment.start,
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-
-                                                  children: prompts.map((prompt) {
-                                                    final isSelected = controller.selectedTags.contains(prompt);
-                                                    return GestureDetector(
-                                                      onTap: () {
-                                                        controller.addTagInherit(prompt);
-                                                      },
-                                                      child: Chip(
-                                                        label: Text(
-                                                          prompt,
-                                                          style: TextStyle(
-                                                            fontWeight: FontWeight.w500,
-                                                            color: isSelected ? appBackGroundColor : Colors.black87,
-                                                          ),
-                                                        ),
-                                                        backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
-                                                      ),
-                                                    );
-                                                  }).toList(),
-                                                ),
-                                              ],
+                                              ),
                                             );
                                           }).toList(),
                                         ),
                                       ),
+                                    )
+
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Image.asset(
+                            Assets.iconsFilterDownArrow,
+                            width: 25,
+                            height: 25,
+                            color: appBackGroundColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )),
+
+              10.height,
+
+              /// Inherit Checkbox
+              Obx(() => Row(
+                    children: [
+                      Text("Inherit", style: TextStyle(fontSize: 18, color: appBackGroundColor)),
+                      IconButton(
+                        color: appBackGroundColor,
+                        icon: Icon(controller.isChecked.value ? Icons.check_box : Icons.check_box_outline_blank),
+                        onPressed: controller.toggleIcon,
+                      ),
+                      Spacer(),
+
+                      /// Filter Icon (Dropdown)
+                      GestureDetector(
+                        onTap: () {
+                          Get.dialog(
+                            Dialog(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              child: Container(
+                                constraints: const BoxConstraints(maxHeight: 500, minWidth: 300),
+                                decoration: BoxDecoration(
+                                  color: appBackGroundColor,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    /// Title Row with background color
+                                    Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                      decoration: BoxDecoration(
+                                        color: appBackGroundColor,
+                                        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const Text(
+                                            "Select Prompt",
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.close, color: Colors.white),
+                                            onPressed: () => Get.back(),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
+
+                                    const Divider(height: 1, thickness: 1),
+
+                                    /// Chip List Section (Full Width)
+                                    Expanded(
+                                      child: Obx(
+                                        () => SingleChildScrollView(
+                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: controller.classificationMap.entries.map((entry) {
+                                              final category = entry.key;
+                                              final prompts = entry.value;
+
+                                              return Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  // Section Title
+                                                  Padding(
+                                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                                    child: Text(
+                                                      "#$category",
+                                                      style: const TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: appWhiteColor,
+                                                      ),
+                                                    ),
+                                                  ),
+
+                                                  // Prompt Chips
+                                                  Column(
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+
+                                                    children: prompts.map((prompt) {
+                                                      final isSelected = controller.selectedTags.contains(prompt);
+                                                      return Padding(
+                                                        padding: const EdgeInsets.only(left: 14),
+                                                        child: GestureDetector(
+                                                          onTap: () {
+                                                            controller.addTagInherit(prompt);
+                                                          },
+                                                          child: Chip(
+                                                            label: Text(
+                                                              prompt,
+                                                              style: TextStyle(
+                                                                fontWeight: FontWeight.w500,
+                                                                color: isSelected ? appBackGroundColor : Colors.black87,
+                                                              ),
+                                                            ),
+                                                            backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }).toList(),
+                                                  ),
+                                                ],
+                                              );
+                                            }).toList(),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Image.asset(
+                            Assets.iconsFilterDownArrow,
+                            width: 25,
+                            height: 25,
+                            color: appBackGroundColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )),
+              10.height,
+
+              /// Conditionally Show Chips If Inherit Checked
+              Obx(() {
+                if (!controller.isChecked.value) {
+                  return SizedBox.shrink(); // If not checked, show nothing
+                }
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: -8,
+                      children: controller.subTags.map((subTag) {
+                        final isSelected = controller.selectedTags.contains(subTag);
+
+                        return GestureDetector(
+                          onTap: () async {
+                            controller.toggleSubTag(subTag);
+
+                            await setValue("promptName", subTag);
+                          },
+                          child: Chip(
+                            label: Text(
+                              "+ $subTag",
+                              style: TextStyle(
+                                color: isSelected ? Colors.blueAccent : Colors.black,
+                              ),
+                            ),
+                            backgroundColor: isSelected ? appDashBoardCardColor : appWhiteColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              side: BorderSide(
+                                color: isSelected ? Colors.blueAccent : Colors.transparent,
+                                width: 1.5,
                               ),
                             ),
                           ),
                         );
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: Image.asset(
-                          Assets.iconsFilterDownArrow,
-                          width: 25,
-                          height: 25,
-                          color: appBackGroundColor,
-                        ),
-                      ),
+                      }).toList(),
                     ),
+                    const SizedBox(height: 12),
                   ],
-                )),
-            10.height,
+                );
+              }),
 
-            /// Conditionally Show Chips If Inherit Checked
-            Obx(() {
-              if (!controller.isChecked.value) {
-                return SizedBox.shrink(); // If not checked, show nothing
-              }
+              // Obx(() {
+              //   if (!controller.isChecked.value || controller.selectedParentTag.value.isEmpty) {
+              //     return const SizedBox.shrink();
+              //   }
+              //
+              //   final tag = controller.selectedParentTag.value;
+              //   final items = controller.classificationMap[tag] ?? [];
+              //
+              //   return Column(
+              //     crossAxisAlignment: CrossAxisAlignment.start,
+              //     children: [
+              //       Wrap(
+              //         spacing: 6,
+              //         runSpacing: -8,
+              //         children: items.map((subTag) {
+              //           final isSelected = controller.selectedTags.contains(subTag);
+              //           return GestureDetector(
+              //             onTap: () {
+              //               controller.toggleSubTag(subTag);
+              //             },
+              //             child: Chip(
+              //               label: Text(
+              //                 subTag,
+              //                 style: TextStyle(
+              //                   color: isSelected ? Colors.blueAccent : Colors.black,
+              //                 ),
+              //               ),
+              //               backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
+              //             ),
+              //           );
+              //         }).toList(),
+              //       ),
+              //       12.height,
+              //     ],
+              //   );
+              // }),
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: -8,
-                    children: controller.subTags.map((subTag) {
-                      final isSelected = controller.selectedTags.contains(subTag);
-
-                      return GestureDetector(
-                        onTap: () async {
-                          controller.toggleSubTag(subTag);
-
-                          await setValue("promptName", subTag);
-                        },
-                        child: Chip(
-                          label: Text(
-                            "+ $subTag",
-                            style: TextStyle(
-                              color: isSelected ? Colors.blueAccent : Colors.black,
-                            ),
-                          ),
-                          backgroundColor: isSelected ? appDashBoardCardColor : appWhiteColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(
-                              color: isSelected ? Colors.blueAccent : Colors.transparent,
-                              width: 1.5,
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 12),
-                ],
-              );
-            }),
-
-            // Obx(() {
-            //   if (!controller.isChecked.value || controller.selectedParentTag.value.isEmpty) {
-            //     return const SizedBox.shrink();
-            //   }
-            //
-            //   final tag = controller.selectedParentTag.value;
-            //   final items = controller.classificationMap[tag] ?? [];
-            //
-            //   return Column(
-            //     crossAxisAlignment: CrossAxisAlignment.start,
-            //     children: [
-            //       Wrap(
-            //         spacing: 6,
-            //         runSpacing: -8,
-            //         children: items.map((subTag) {
-            //           final isSelected = controller.selectedTags.contains(subTag);
-            //           return GestureDetector(
-            //             onTap: () {
-            //               controller.toggleSubTag(subTag);
-            //             },
-            //             child: Chip(
-            //               label: Text(
-            //                 subTag,
-            //                 style: TextStyle(
-            //                   color: isSelected ? Colors.blueAccent : Colors.black,
-            //                 ),
-            //               ),
-            //               backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
-            //             ),
-            //           );
-            //         }).toList(),
-            //       ),
-            //       12.height,
-            //     ],
-            //   );
-            // }),
-
-            10.height,
-            Container(
-              decoration: BoxDecoration(
-                color: appBackGroundColor.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    10.height,
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 8,
-                      children: [
-                        _buildOption("Role", Icons.person, 0),
-                        _buildOption("Source Type", Icons.folder, 1),
-                        _buildOption("Metadata", Icons.info_outline_rounded, 2),
-                        _buildOption("Task", Icons.list_rounded, 3),
-                        _buildOption("Verify", Icons.verified, 4),
-                      ],
-                    ),
-                    10.height,
-                    Obx(() {
-                      int index = controller.currentIndex.value;
-
-                      Widget content;
-                      switch (index) {
-                        case 0:
-                          content = buildRoleSection();
-                          break;
-                        case 1:
-                          content = buildChooseImageSection();
-                          break;
-                        case 2:
-                          content = buildClickSection(context);
-                          break;
-                        case 3:
-                          content = buildTaskSection();
-                          break;
-                        case 4:
-                          content = buildVerifySection();
-                          break;
-                        default:
-                          content = SizedBox.shrink();
-                      }
-
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10.0),
-                        child: content,
-                      );
-                    }),
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: ElevatedButton(
-                        onPressed: () async{
-                          // controller.createNewPrompt();
-                          if (controller.currentIndex.value < 4) {
-                            controller.currentIndex.value++;
-                          } else {
-                            controller.currentIndex.value = 0;
-                          }
-                          // if (controller.currentIndex.value == 4) {
-
-                          //  String promptName = getStringAsync("promptName");
-                          //  String Role = getStringAsync("Role");
-                          //
-                          //  List<String> Sources =  controller.selectedSources.toList();
-                          //  String action =  controller.actionController.text;
-                          // String group = getStringAsync("group");
-                           // log("promptName---------------$promptName");
-                           // log("Role---------------$Role");
-                           // log("Sources---------------$Sources");
-                           // log("action---------------$action");
-                           // log("group---------------$group");
-                          String promptName = getStringAsync("promptName").trim();
-                          String role = getStringAsync("Role").trim();
-                          List<String> sources = controller.selectedSources.toList();
-                          String action = controller.actionController.text.trim();
-                          String group = getStringAsync("group").trim();
-
-                          Map<String, dynamic> payload = {
-                            "prompt_name": promptName.isNotEmpty ? promptName : "",
-                            "role": {
-                              "user_role": role.isNotEmpty ? role : "",
-                            },
-                            "group": group.isNotEmpty ? group : "",
-                            "source": sources.isNotEmpty ? sources : [],
-                            "metadata": {},
-                            "task": action.isNotEmpty ? action : "",
-                          };
-
-// Now you can log it or send it to API
-                          log("Payload: ${jsonEncode(payload)}");
-                          await controller.createNewPrompt(payload);
-
-                          // }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: appBackGroundColor,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
-                        child: Text("Next", style: TextStyle(color: appWhiteColor)),
-                      ),
-                    ),
-                  ],
+              10.height,
+              Container(
+                decoration: BoxDecoration(
+                  color: appBackGroundColor.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(15),
                 ),
-              ),
-            )
-          ],
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.all(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      10.height,
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 8,
+                        children: [
+                          _buildOption("Role", Icons.person, 0),
+                          _buildOption("Source Type", Icons.folder, 1),
+                          _buildOption("Metadata", Icons.info_outline_rounded, 2),
+                          _buildOption("Task", Icons.list_rounded, 3),
+                          _buildOption("Verify", Icons.verified, 4),
+                        ],
+                      ),
+                      10.height,
+                      Obx(() {
+                        int index = controller.currentIndex.value;
+
+                        Widget content;
+                        switch (index) {
+                          case 0:
+                            content = buildRoleSection();
+                            break;
+                          case 1:
+                            content = buildChooseImageSection();
+                            break;
+                          case 2:
+                            content = buildClickSection(context);
+                            break;
+                          case 3:
+                            content = buildTaskSection();
+                            break;
+                          case 4:
+                            content = buildVerifySection();
+                            break;
+                          default:
+                            content = SizedBox.shrink();
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          child: content,
+                        );
+                      }),
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: ElevatedButton(
+                          onPressed: () async{
+                            // controller.createNewPrompt();
+                            if (controller.currentIndex.value < 4) {
+                              controller.currentIndex.value++;
+                            } else {
+                              controller.currentIndex.value = 0;
+                            }
+                            if (controller.currentIndex.value == 4) {
+
+                            //  String promptName = getStringAsync("promptName");
+                            //  String Role = getStringAsync("Role");
+                            //
+                            //  List<String> Sources =  controller.selectedSources.toList();
+                            //  String action =  controller.actionController.text;
+                            // String group = getStringAsync("group");
+                             // log("promptName---------------$promptName");
+                             // log("Role---------------$Role");
+                             // log("Sources---------------$Sources");
+                             // log("action---------------$action");
+                             // log("group---------------$group");
+                            String promptName = getStringAsync("promptName").trim();
+                            String role = getStringAsync("Role").trim();
+                            List<String> sources = controller.selectedSources.toList();
+                            String action = controller.actionController.text.trim();
+                            String group = getStringAsync("group").trim();
+
+                            Map<String, dynamic> payload = {
+                              "prompt_name": promptName.isNotEmpty ? promptName : "",
+                              "role": {
+                                "user_role": role.isNotEmpty ? role : "",
+                              },
+                              "group": group.isNotEmpty ? group : "",
+                              "source": sources.isNotEmpty ? sources : [],
+                              "metadata": {},
+                              "task": action.isNotEmpty ? action : "",
+                            };
+
+                            log("Payload: ${jsonEncode(payload)}");
+                            await controller.createNewPrompt(payload);
+
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: appBackGroundColor,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: Text("Next", style: TextStyle(color: appWhiteColor)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

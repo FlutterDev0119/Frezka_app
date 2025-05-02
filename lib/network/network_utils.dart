@@ -182,7 +182,7 @@ Future<bool> reGenerateToken() async {
     if (refreshToken != null) {
       await setValue(AppSharedPreferenceKeys.isUserLoggedIn, true);
     } else {
-      handleFailRegenerateToken();
+      // handleFailRegenerateToken();
     }
     return true;
   } catch (e) {

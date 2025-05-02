@@ -28,6 +28,7 @@ class LoginController extends BaseController {
       ConstantKeys.passwordKey: "Pvana@123", //passwordCont.text.trim(),//
     };
     print(request);
+    print(request[ConstantKeys.passwordKey]);
     try {
       String? refreshToken = await AuthServiceApis.login(
         request: request,
@@ -36,6 +37,7 @@ class LoginController extends BaseController {
       if (refreshToken != null) {
         toast("Logged in successfully!");
         Get.offAllNamed(Routes.DASHBOARD);
+        await setValue(AppSharedPreferenceKeys.userPassword, request[ConstantKeys.passwordKey]);
         await setValue(AppSharedPreferenceKeys.isUserLoggedIn, true);
         // await setValue(ConstantKeys.passwordKey, "Pvana@123");
       } else {

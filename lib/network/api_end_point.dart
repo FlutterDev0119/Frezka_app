@@ -11,9 +11,10 @@ class APIEndPoints {
 
   ///GenAI PV
   static const String fetchGenerateSQL = 'v1/generate_sql';
+  static const String fetchDocsLanguage = 'v1/fetch_docs_language';
 
   ///GenAI Clinical
-  static const String fetchDocClinical = 'v1/fetch_docs_clinical';
+  static const String fetchDocClinical = 'v1/fetch_docs';//_clinical
 
   ///Meta Phrase Pv
   static const String openWorklist = 'v1/open_worklist';

@@ -32,8 +32,6 @@ class EngageAIController extends GetxController {
 // Access the user ID
      userId = data['user_serializer']['id'];
 
-    log('User ID: $userId');
-    log('------id2-----${loggedInUser.value.userModel?.id}');
     if (storedEmail.isNotEmpty) {
       _formatNameFromEmail(storedEmail);
       // Show greeting after formatting name

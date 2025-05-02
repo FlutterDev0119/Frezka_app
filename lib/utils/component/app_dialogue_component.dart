@@ -77,11 +77,12 @@ class AppDialogueComponent extends StatelessWidget {
               children: [
                 AppButtonWidget(
                   text: cancelText,
-                  buttonColor: context.scaffoldBackgroundColor,
+                  buttonColor: appGreyColor.withOpacity(0.5),
                   textStyle: boldTextStyle(),
                   onTap: () => Get.back(),
                 ).expand(),
                 AppButtonWidget(
+                  buttonColor: appBackGroundColor,
                   text: confirmText,
                   onTap: () {
                     Get.back();

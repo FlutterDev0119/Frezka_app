@@ -6,6 +6,7 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:apps/utils/library.dart';
 
 import '../modules/genAI_clinical/model/fetch_docs_clinical.dart';
+import '../modules/genAI_pv/model/doc_language_model.dart';
 import '../modules/genAI_pv/model/generate_sql_model.dart';
 import '../modules/governAI/model/count_traces_model.dart';
 import '../modules/governAI/model/fetch_traces_model.dart';
@@ -308,6 +309,15 @@ class GenAIPVServiceApis {
       method: MethodType.post,
     );
     return GenerateSQL.fromJson(response);
+  }
+
+  static Future<DocLanguage> getDocsLanguage({required Map request}) async {
+    final response = await buildHttpResponse(
+      endPoint: APIEndPoints.fetchDocsLanguage,
+      request: request,
+      method: MethodType.post,
+    );
+    return DocLanguage.fromJson(response);
   }
 }
 

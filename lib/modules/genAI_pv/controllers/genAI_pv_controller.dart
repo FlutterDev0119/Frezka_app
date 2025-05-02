@@ -7,9 +7,11 @@ import 'package:nb_utils/nb_utils.dart';
 
 import '../../../utils/common/common_base.dart';
 import '../../../utils/component/app_dialogue_component.dart';
+import '../model/doc_language_model.dart';
 import '../model/generate_sql_model.dart';
 
 class GenAIPVController extends GetxController {
+  final GlobalKey menuKey = GlobalKey();
   RxList<File> imageFiles = <File>[].obs;
   RxList<String> fileNames = <String>[].obs;
   var genAIDropdownValue = 'Upload File'.obs;
@@ -39,6 +41,7 @@ class GenAIPVController extends GetxController {
 
 
   var generateSQLResponse = Rxn<GenerateSQL>();
+  var generateDataLanaguageResponse = Rxn<DocLanguage>();
   var errorMessage = ''.obs;
   var dataLakeInput = ''.obs;
   @override
@@ -155,6 +158,24 @@ class GenAIPVController extends GetxController {
 
       final response = await GenAIPVServiceApis.getGenerateSQL(request: request);
       generateSQLResponse.value = response;
+    } catch (e) {
+      print('Error fetching GenerateSQL: $e');
+      errorMessage.value = 'Error occurred while fetching data.';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+  Future<void> getDocsLanguage({required String language}) async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+
+      final request = {
+        "language": language
+      };
+
+      final response = await GenAIPVServiceApis.getDocsLanguage(request: request);
+      generateDataLanaguageResponse.value = response;
     } catch (e) {
       print('Error fetching GenerateSQL: $e');
       errorMessage.value = 'Error occurred while fetching data.';

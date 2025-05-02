@@ -11,6 +11,7 @@ class TranslationMemoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
+      automaticallyImplyLeading: true,
       isLoading: controller.isLoading,
       appBarBackgroundColor: appBackGroundColor,
       appBarTitleText: "Translation Memory",
@@ -45,18 +46,19 @@ class TranslationMemoryScreen extends StatelessWidget {
             }),
             Expanded(
               child: Obx(() {
-                if (controller.allFiles.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No data available',
-                      style: TextStyle(color: appWhiteColor),
-                    ),
-                  );
-                }
+
                 return ListView.builder(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   itemCount: controller.filteredFiles.length,
                   itemBuilder: (context, index) {
+                    if (controller.allFiles.isEmpty) {
+                      return Center(
+                        child: Text(
+                          'No data available',
+                          style: TextStyle(color: appWhiteColor),
+                        ),
+                      );
+                    }
                     final item = controller.filteredFiles[index];
                     return _buildListItem(item, index);
                   },
@@ -79,9 +81,9 @@ class TranslationMemoryScreen extends StatelessWidget {
           children: [
             _headerButton("Language", SortColumn.language),
             _headerButton("Source Phrase", SortColumn.sourcePhrase),
-            _headerButton("Translation Edits", SortColumn.translationEdits),
+            // _headerButton("Translation Edits", SortColumn.translationEdits),
             _headerButton("Approver", SortColumn.approver),
-            _headerButton("Actions", SortColumn.actions),
+            // _headerButton("Actions", SortColumn.actions),
           ],
         ),
       ),
@@ -134,6 +136,87 @@ class TranslationMemoryScreen extends StatelessWidget {
     );
   }
 
+  // Widget _buildListItem(TranslationMemory item, int index) {
+  //   return Card(
+  //     color: appDashBoardCardColor,
+  //     margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+  //     elevation: 2,
+  //     shape: RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.circular(12),
+  //     ),
+  //     child: Stack(
+  //       children: [
+  //         Padding(
+  //           padding: const EdgeInsets.all(16),
+  //           child: Column(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               Text(
+  //                 "Source: ${item.en}",
+  //                 style: const TextStyle(
+  //                   fontWeight: FontWeight.bold,
+  //                   fontSize: 16,
+  //                 ),
+  //               ),
+  //               const SizedBox(height: 4),
+  //               Text(
+  //                 "Language: ${item.lang.toUpperCase()}",
+  //                 style: const TextStyle(fontSize: 14),
+  //               ),
+  //               const SizedBox(height: 4),
+  //               Text(
+  //                 "Translation: ${item.es}",
+  //                 style: const TextStyle(fontSize: 13, color: Colors.grey),
+  //               ),
+  //               const SizedBox(height: 2),
+  //               Text(
+  //                 "Name: ${item.name}",
+  //                 style: const TextStyle(fontSize: 10, color: Colors.grey),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //         Positioned(
+  //           bottom: 4,
+  //           right: 4,
+  //           child: PopupMenuButton<String>(
+  //             color: appDashBoardCardColor,
+  //             icon: Container(margin: EdgeInsets.all(5),child: const Icon(Icons.more_vert)),
+  //             onSelected: (value) {
+  //               if (value == 'edit') {
+  //                 _editItem(item, index);
+  //               } else if (value == 'remove') {
+  //                 controller.deleteTranslation(item.id);
+  //               }
+  //             },
+  //             itemBuilder: (BuildContext context) => [
+  //               const PopupMenuItem<String>(
+  //                 value: 'edit',
+  //                 child: Text(
+  //                   'Edit',
+  //                   style: TextStyle(
+  //                       color: Colors.green,
+  //                       fontWeight: FontWeight.bold,
+  //                       fontSize: 12),
+  //                 ),
+  //               ),
+  //               const PopupMenuItem<String>(
+  //                 value: 'remove',
+  //                 child: Text(
+  //                   'Remove',
+  //                   style: TextStyle(
+  //                       color: Colors.red,
+  //                       fontWeight: FontWeight.bold,
+  //                       fontSize: 12),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
   Widget _buildListItem(TranslationMemory item, int index) {
     return Card(
       color: appDashBoardCardColor,
@@ -142,63 +225,87 @@ class TranslationMemoryScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        title: Text(
-          item.name,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 40, 12), // add right space for icon
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Source: ${item.en}",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                if (item.lang.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    "Language: ${item.lang.toUpperCase()}",
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ],
+                if (item.es.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    "Translation: ${item.es}",
+                    style: const TextStyle(fontSize: 13, color: Colors.grey),
+                  ),
+                ],
+                if (item.name.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    "Name: ${item.name}",
+                    style: const TextStyle(fontSize: 10, color: Colors.grey),
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Language: ${item.lang.toUpperCase()}",
-                style: const TextStyle(fontSize: 14),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                "Source: ${item.en}",
-                style: const TextStyle(fontSize: 13, color: Colors.grey),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                "Translation: ${item.es}",
-                style: const TextStyle(fontSize: 13, color: Colors.grey),
-              ),
-            ],
+          Positioned(
+            bottom: 4,
+            right: 4,
+            child: PopupMenuButton<String>(
+              color: appDashBoardCardColor,
+              icon: const Icon(Icons.more_vert),
+              onSelected: (value) {
+                if (value == 'edit') {
+                  _editItem(item, index);
+                } else if (value == 'remove') {
+                  controller.deleteTranslation(item.id);
+                }
+              },
+              itemBuilder: (BuildContext context) => [
+                const PopupMenuItem<String>(
+                  value: 'edit',
+                  child: Text(
+                    'Edit',
+                    style: TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12),
+                  ),
+                ),
+                const PopupMenuDivider(height: 0,),
+                const PopupMenuItem<String>(
+                  value: 'remove',
+                  child: Text(
+                    'Remove',
+                    style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        trailing: PopupMenuButton<String>(
-          color: appDashBoardCardColor,
-          icon: const Icon(Icons.more_vert),
-          onSelected: (value) {
-            if (value == 'edit') {
-              _editItem(item, index);
-            } else if (value == 'remove') {
-              controller.deleteTranslation(item.id);
-            }
-          },
-          itemBuilder: (BuildContext context) {
-            return [
-              const PopupMenuItem<String>(
-                value: 'edit',
-                child: Text('Edit', style: TextStyle(color: Colors.green,fontWeight: FontWeight.bold,fontSize: 12 )),
-              ),
-              const PopupMenuItem<String>(
-                value: 'remove',
-                child: Text('Remove', style: TextStyle(color: Colors.red,fontWeight: FontWeight.bold,fontSize: 12 )),
-              ),
-            ];
-          },
-        ),
+        ],
       ),
     );
   }
+
 
   void _editItem(TranslationMemory item, int index) {
     final sourceController = TextEditingController(text: item.en);

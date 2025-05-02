@@ -13,6 +13,7 @@ class EngageAIScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
+      resizeToAvoidBottomPadding:true ,
       isLoading: controller.isLoading,
       appBarBackgroundColor: appBackGroundColor,
       appBarTitleText: "Engage AI",

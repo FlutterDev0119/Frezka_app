@@ -229,7 +229,7 @@ class DashboardScreen extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 30,
-                backgroundColor: AppColors.primary,
+                backgroundColor: appBackGroundColor,//AppColors.primary,
                 child: Text(controller.firstLetter.value, style: GoogleFonts.roboto(color: appWhiteColor, fontSize: 24, fontWeight: FontWeight.bold)),
               ),
               10.height,
@@ -252,7 +252,7 @@ class DashboardScreen extends StatelessWidget {
         child: Card(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           // elevation: 10,
-          shadowColor: AppColors.primary.withOpacity(0.3),
+          shadowColor:appBackGroundColor.withOpacity(0.3), //AppColors.primary.withOpacity(0.3),
           child: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -283,7 +283,7 @@ class DashboardScreen extends StatelessWidget {
                   child: Icon(
                     item['icon'],
                     size: 42,
-                    color: AppColors.primary,
+                    color:appBackGroundColor, //AppColors.primary,
                   ),
                 ),
                 const SizedBox(height: 16),

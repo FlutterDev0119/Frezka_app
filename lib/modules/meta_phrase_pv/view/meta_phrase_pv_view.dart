@@ -220,7 +220,7 @@ class MetaPhraseScreen extends StatelessWidget {
                       if (label == mode) return appBackGroundColor;
                       if (labelIndex < currentIndex) return appGreenColor;
 
-                      return Colors.grey.shade300;
+                      return appWhiteColor.withOpacity(0.8);
                     }
 
                     IconData getIcon(String label) {
@@ -243,8 +243,7 @@ class MetaPhraseScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: displayModes.map((label) {
                           return Expanded(
-                            child:
-                            Container(
+                            child: Container(
                               child: Card(
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                                 color: getColor(label),
@@ -253,14 +252,14 @@ class MetaPhraseScreen extends StatelessWidget {
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(getIcon(label), color: Colors.white),
+                                      Icon(getIcon(label), color: controller.modes.indexOf(label) == controller.modes.indexOf(mode) ?  appWhiteColor :appTextColor),
                                       const SizedBox(height: 4),
                                       Marquee(
                                         child: Text(
                                           maxLines: 1,
                                           label,
                                           textAlign: TextAlign.center,
-                                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                          style:  TextStyle(color: controller.modes.indexOf(label) == controller.modes.indexOf(mode) ?  appWhiteColor : appTextColor, fontWeight: FontWeight.bold),
                                         ),
                                       ),
                                     ],
@@ -660,7 +659,7 @@ class MetaPhraseScreen extends StatelessWidget {
                   Obx(() {
                     final selected = controller.selectedMode.value;
                     final certifyOptions = ['Finalize', 'Return', 'Reject'];
-                    if (selected == 'Peer Review' && controller.isEditing.value==true) {
+                    if (selected == 'Peer Review' && controller.isEditing.value == true) {
                       Future.delayed(Duration.zero, () {
                         showPeerReviewDialog(
                           context,
@@ -684,75 +683,136 @@ class MetaPhraseScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Container(
-                                  width: 150,
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
-                                    color: appBackGroundColor,
-                                    border: Border.all(color: Colors.grey.shade400),
-                                  ),
-                                  child: DropdownButtonHideUnderline(
+                                    width: 150,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      color: appBackGroundColor,
+                                      border: Border.all(color: Colors.grey.shade400),
+                                    ),
                                     child:
-                                    Obx(
-                                      () {
-                                        return DropdownButton<String>(
-                                          dropdownColor: appBackGroundColor,
-                                          value: controller.selected.value,
-                                          icon: const Icon(Icons.arrow_drop_down, color: appWhiteColor),
-                                          style: const TextStyle(fontSize: 16, color: appWhiteColor),
-                                          isExpanded: true,
-                                          items: controller.modes.map((String value) {
-                                            // final isDisabled = selected == 'Review' && value == 'Peer Review';
-                                            // // final isDisabled = selected == 'Review' && value == 'Peer Review' && controller.isEditing.value == true;
-                                            // // final isPeerReview = value == 'Peer Review' && value == "Edit";
-                                            // // final isDisabled = selected == 'Review'  && isPeerReview && !controller.isEditing.value;
-                                            //
-                                            // return DropdownMenuItem<String>(
-                                            //   value: isDisabled ? null : value,
-                                            //   enabled: !isDisabled,
-                                            //   child: Text(
-                                            //     value,
-                                            //     style: TextStyle(
-                                            //       color: isDisabled ? Colors.grey : appWhiteColor,
-                                            //     ),
-                                            //   ),
-                                            // );
-                                            final isPeerReview = value == 'Peer Review';
-                                            final isDisabled = (controller.selected == 'Review' && isPeerReview && !controller.isEditing.value);
+                                        // DropdownButtonHideUnderline(
+                                        //   child:
+                                        //   Obx(
+                                        //     () {
+                                        //       return DropdownButton<String>(
+                                        //         dropdownColor: appBackGroundColor,
+                                        //         value: controller.selected.value,
+                                        //         icon: const Icon(Icons.arrow_drop_down, color: appWhiteColor),
+                                        //         style: const TextStyle(fontSize: 16, color: appWhiteColor),
+                                        //         isExpanded: true,
+                                        //         items: controller.modes.map((String value) {
+                                        //           final isPeerReview = value == 'Peer Review';
+                                        //           final isDisabled = (controller.selected == 'Review' && isPeerReview && !controller.isEditing.value);
+                                        //
+                                        //           return DropdownMenuItem<String>(
+                                        //             value: value,
+                                        //             child: IgnorePointer(
+                                        //               ignoring: isDisabled,
+                                        //               child: Text(
+                                        //                 value,
+                                        //                 style: TextStyle(
+                                        //                   color: isDisabled ? Colors.grey : appWhiteColor,
+                                        //                 ),
+                                        //               ),
+                                        //             ),
+                                        //           );
+                                        //         }).toList(),
+                                        //         onChanged: (String? newValue) {
+                                        //           if (newValue == 'Peer Review' && selected == 'Review' && !controller.isEditing.value) {
+                                        //             // Don't allow selection if not editable
+                                        //             return;
+                                        //           }
+                                        //           // Prevent null (disabled item) from being selected
+                                        //           if (newValue != null) {
+                                        //             controller.updateSelectedMode(newValue);
+                                        //             if (newValue == 'Edit') {
+                                        //               // controller.startEditing();
+                                        //               controller.isReverse.value = false;
+                                        //             }
+                                        //           }
+                                        //         },
+                                        //       );
+                                        //     }
+                                        //   ),
+                                        // ),
+                                        Builder(
+                                      builder: (context) {
+                                        return GestureDetector(
+                                          onTap: () async {
+                                            final RenderBox button = context.findRenderObject() as RenderBox;
+                                            final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+                                            final RelativeRect position = RelativeRect.fromRect(
+                                              Rect.fromPoints(
+                                                button.localToGlobal(Offset.zero, ancestor: overlay),
+                                                button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+                                              ),
+                                              Offset.zero & overlay.size,
+                                            );
 
-                                            return DropdownMenuItem<String>(
-                                              value: value,
-                                              child: IgnorePointer(
-                                                ignoring: isDisabled,
-                                                child: Text(
-                                                  value,
-                                                  style: TextStyle(
-                                                    color: isDisabled ? Colors.grey : appWhiteColor,
+                                            final List<PopupMenuEntry<String>> items = [];
+                                            for (int i = 0; i < controller.modes.length; i++) {
+                                              final value = controller.modes[i];
+                                              final isPeerReview = value == 'Peer Review';
+                                              final isDisabled =
+                                                  (controller.selected.value == 'Review' && isPeerReview && !controller.isEditing.value);
+
+                                              items.add(
+                                                PopupMenuItem<String>(
+                                                  enabled: !isDisabled,
+                                                  value: value,
+                                                  height: 40,
+                                                  child: Text(
+                                                    value,
+                                                    style: TextStyle(
+                                                      color: isDisabled ? appWhiteColor.withOpacity(0.5) : appWhiteColor,
+                                                      fontSize: 14,
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                            );
-                                          }).toList(),
-                                          onChanged: (String? newValue) {
-                                            if (newValue == 'Peer Review' && selected == 'Review' && !controller.isEditing.value) {
-                                              // Don't allow selection if not editable
-                                              return;
-                                            }
-                                            // Prevent null (disabled item) from being selected
-                                            if (newValue != null) {
-                                              controller.updateSelectedMode(newValue);
-                                              if (newValue == 'Edit') {
-                                                // controller.startEditing();
-                                                controller.isReverse.value = false;
+                                              );
+
+                                              if (i != controller.modes.length - 1) {
+                                                items.add(const PopupMenuDivider(height: 1));
                                               }
                                             }
-                                          },
-                                        );
-                                      }
-                                    ),
-                                  ),
-                                ),
 
+                                            final selected = await showMenu<String>(
+                                              context: context,
+                                              position: position,
+                                              color: appBackGroundColor,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              items: items,
+                                            );
+
+                                            if (selected != null) {
+                                              controller.updateSelectedMode(selected);
+                                              if (selected == 'Edit') controller.isReverse.value = false;
+                                            }
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                            decoration: BoxDecoration(
+                                              color: Colors.transparent,
+                                              borderRadius: BorderRadius.circular(8),
+                                              // border: Border.all(color: appWhiteColor),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  controller.selected.value,
+                                                  style: const TextStyle(color: appWhiteColor, fontSize: 16),
+                                                ),
+                                                const Icon(Icons.arrow_drop_down, color: appWhiteColor),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    )),
                                 // Only show this if 'Certify' is selected
                                 if (selected == 'Certify') const SizedBox(height: 8),
                                 if (selected == 'Certify')
@@ -822,7 +882,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                   Obx(() {
                                     if (controller.isReturnSelected.value) {
                                       return Container(
-                                        margin: EdgeInsets.only(right: 8,top: 5),
+                                        margin: EdgeInsets.only(right: 8, top: 5),
                                         padding: EdgeInsets.symmetric(horizontal: 8),
                                         decoration: BoxDecoration(
                                           color: appWhiteColor,
@@ -875,7 +935,10 @@ class MetaPhraseScreen extends StatelessWidget {
                                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                                 elevation: 3,
                                               ),
-                                              child: const Text('Submit',style: TextStyle(color: appWhiteColor),),
+                                              child: const Text(
+                                                'Submit',
+                                                style: TextStyle(color: appWhiteColor),
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -921,7 +984,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                   Obx(() {
                                     if (controller.isRejectSelected.value) {
                                       return Container(
-                                        margin: EdgeInsets.only(right: 8,top: 5),
+                                        margin: EdgeInsets.only(right: 8, top: 5),
                                         padding: EdgeInsets.symmetric(horizontal: 8),
                                         decoration: BoxDecoration(
                                           color: appWhiteColor,
@@ -974,7 +1037,10 @@ class MetaPhraseScreen extends StatelessWidget {
                                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                                 elevation: 3,
                                               ),
-                                              child: const Text('Submit',style: TextStyle(color: appWhiteColor),),
+                                              child: const Text(
+                                                'Submit',
+                                                style: TextStyle(color: appWhiteColor),
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -1079,7 +1145,7 @@ void showPeerReviewDialog(BuildContext context, VoidCallback onConfirm, VoidCall
               ),
               SizedBox(height: 24),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   AppButton(
                     textStyle: TextStyle(color: appBackGroundColor),
@@ -1090,7 +1156,7 @@ void showPeerReviewDialog(BuildContext context, VoidCallback onConfirm, VoidCall
                   ),
                   AppButton(
                     color: appBackGroundColor,
-                    onTap: ()  {
+                    onTap: () {
                       Get.back();
                     },
                     child: Text(
@@ -1213,7 +1279,7 @@ void showCredentialsDialog(BuildContext context, VoidCallback onConfirm, VoidCal
                   // ),
                   AppButton(
                     textStyle: TextStyle(color: appBackGroundColor),
-                    onTap:onCancel,
+                    onTap: onCancel,
                     child: Text('Cancel'),
                   ),
                   5.width,
