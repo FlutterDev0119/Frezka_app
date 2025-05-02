@@ -22,8 +22,8 @@ class DashboardScreen extends StatelessWidget {
         key: _scaffoldKey,
         backgroundColor: AppColors.appBackground,
         //appBackGroundColor,
-        appBar: buildAppBar(),
-        drawer: buildDrawer(),
+        appBar: buildAppBar(context),
+        drawer: buildDrawer(context),
         body: Obx(
           () {
             if (controller.email.value.isEmpty) {
@@ -35,9 +35,9 @@ class DashboardScreen extends StatelessWidget {
         ));
   }
 
-  AppBar buildAppBar() {
+  AppBar buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text("Dashboard", style: GoogleFonts.roboto(color: appWhiteColor, fontWeight: FontWeight.bold, fontSize: 18)),
+      title: Text("Dashboard", style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: appWhiteColor),),
       backgroundColor: appBackGroundColor,
       elevation: 0,
       leading: IconButton(
@@ -50,7 +50,7 @@ class DashboardScreen extends StatelessWidget {
             backgroundColor: appWhiteColor,
             child: Text(
               controller.firstLetter.value,
-              style: GoogleFonts.roboto(
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 color: appBackGroundColor,
                 fontWeight: FontWeight.bold,
               ),
@@ -88,7 +88,7 @@ class DashboardScreen extends StatelessWidget {
             itemCount: itemsWithWelcome.length,
             itemBuilder: (context, index) {
               var item = itemsWithWelcome[index];
-              return item['type'] == "welcome" ? _buildWelcomeCard(context) : _buildCard(item);
+              return item['type'] == "welcome" ? _buildWelcomeCard(context) : _buildCard(context,item);
             },
           );
         },
@@ -96,7 +96,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget buildDrawer() {
+  Widget buildDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -109,28 +109,56 @@ class DashboardScreen extends StatelessWidget {
                 CircleAvatar(
                   radius: 30,
                   backgroundColor: appDashBoardCardColor,
-                  child: Text(controller.firstLetter.value,
-                      style: GoogleFonts.roboto(color: appBackGroundColor, fontSize: 24, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    controller.firstLetter.value,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: appBackGroundColor,
+                      fontWeight: FontWeight.bold, // Optional if not defined in theme
+                    ),
+                  ),
                 ),
-                10.height,
-                Text(controller.fullName.value, style: GoogleFonts.roboto(color: appWhiteColor, fontSize: 18)),
-                Text(controller.email.value, style: GoogleFonts.roboto(color: appWhiteColor.withOpacity(0.7), fontSize: 14)),
+                const SizedBox(height: 10),
+                Text(
+                  controller.fullName.value,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: appWhiteColor,
+                  ),
+                ),
+                Text(
+                  controller.email.value,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: appWhiteColor.withOpacity(0.7),
+                  ),
+                ),
               ],
+
             ),
           ),
-          _buildDrawerItem(Icons.smart_toy_rounded, "My Agent", '/my_agent'),
-          _buildDrawerItem(Icons.local_hospital_rounded, "GenAI Clinical", '/GenAI_Clinical'),
-          _buildDrawerItem(Icons.settings, "Settings", '/settings'),
-          _buildDrawerItem(Icons.logout, "Logout", '/login', color: appBackGroundColor, isLogout: true),
+          _buildDrawerItem(context, Icons.smart_toy_rounded, "My Agent", Routes.MYAGENT),
+          _buildDrawerItem(context, Icons.health_and_safety_rounded, "Engage AI", Routes.ENGAGEAI),
+          _buildDrawerItem(context, Icons.translate_rounded, "Metaphrase PV", Routes.META_PHRASE_PV),
+          _buildDrawerItem(context, Icons.bar_chart_rounded, "GenAI PV", Routes.GENAIPV),
+          _buildDrawerItem(context, Icons.local_hospital_rounded, "GenAI Clinical", Routes.GENAICLINICAL),
+          _buildDrawerItem(context, Icons.sync_rounded, "ReconAI", Routes.RECONAI),
+          _buildDrawerItem(context, Icons.security_rounded, "GovernAI", Routes.GOVERNAI),
+          _buildDrawerItem(context, Icons.admin_panel_settings_rounded, "Prompt Admin", Routes.PROMPTADMIN),
+          _buildDrawerItem(context, Icons.language_rounded, "Translation Memory", Routes.TRANSLATIONMEMORY),
+          _buildDrawerItem(context, Icons.settings_rounded, "System Configuration", Routes.SYSTEMCONFIGURATION),
+
+          _buildDrawerItem(context,Icons.logout, "Logout", '/login', color: appBackGroundColor, isLogout: true),
         ],
       ),
     );
   }
 
-  Widget _buildDrawerItem(IconData icon, String title, String route, {Color color = appBackGroundColor, bool isLogout = false}) {
+  Widget _buildDrawerItem(BuildContext context,IconData icon, String title, String route, {Color color = appBackGroundColor, bool isLogout = false}) {
     return ListTile(
       leading: Icon(icon, color: color),
-      title: Text(title, style: GoogleFonts.roboto(color: appTextColor)),
+      title: Text(
+        title,
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(color: appTextColor),
+      ),
+
       // onTap: () => isLogout ? Get.offAllNamed(route) : Get.toNamed(route),
       onTap: () async {
         if (isLogout) {
@@ -150,7 +178,6 @@ class DashboardScreen extends StatelessWidget {
     await setValue(AppSharedPreferenceKeys.isUserLoggedIn, false);
     await setValue(AppSharedPreferenceKeys.apiToken, '');
     await setValue(AppSharedPreferenceKeys.currentUserData, '');
-    // You can also clear other keys if needed
   }
 
   Widget _buildWelcomeCard(BuildContext context) {
@@ -229,15 +256,43 @@ class DashboardScreen extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 30,
-                backgroundColor: appBackGroundColor,//AppColors.primary,
-                child: Text(controller.firstLetter.value, style: GoogleFonts.roboto(color: appWhiteColor, fontSize: 24, fontWeight: FontWeight.bold)),
+                backgroundColor: appBackGroundColor, // or AppColors.primary
+                child: Text(
+                  controller.firstLetter.value,
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: appWhiteColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24, // You can override font size here
+                  ),
+                ),
               ),
-              10.height,
-              Text("Welcome", style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold, color: appTextColor)),
-              Marquee(child: Text(controller.fullName.value, style: GoogleFonts.roboto(fontSize: 16, color: appTextColor))),
+              const SizedBox(height: 10),
+              Text(
+                "Welcome",
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: appTextColor,
+                ),
+              ),
+              Marquee(
+                child: Text(
+                  controller.fullName.value,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontSize: 16,
+                    color: appTextColor,
+                  ),
+                ),
+              ),
               Center(
-                child: Text("22/03/2025, 17:26:45",
-                    textAlign: TextAlign.center, style: GoogleFonts.roboto(fontSize: 14, color: appTextColor.withOpacity(0.7))),
+                child: Text(
+                  "22/03/2025, 17:26:45",
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 14,
+                    color: appTextColor.withOpacity(0.7),
+                  ),
+                ),
               ),
             ],
           ),
@@ -246,7 +301,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCard(Map<String, dynamic> item) {
+  Widget _buildCard(BuildContext context,Map<String, dynamic> item) {
     return GestureDetector(
         onTap: () => Get.toNamed(item['route']),
         child: Card(
@@ -287,37 +342,7 @@ class DashboardScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Text(
-                //   item['title'],
-                //   textAlign: TextAlign.center,
-                //   style: GoogleFonts.roboto(
-                //     fontSize: 21,
-                //     fontWeight: FontWeight.bold,
-                //     color: AppColors.textColor,
-                //     letterSpacing: 0.8,
-                //   ),
-                // ),
-                _buildTitle(item['title']),
-                // RichText(
-                //   textAlign: TextAlign.center,
-                //   text: TextSpan(
-                //     style: GoogleFonts.roboto(
-                //       fontSize: 21,
-                //       fontWeight: FontWeight.bold,
-                //       color: AppColors.textColor,
-                //       letterSpacing: 0.8,
-                //     ),
-                //     children: [
-                //       TextSpan(
-                //         text: item['title'],
-                //         style: TextStyle(
-                //           fontWeight: FontWeight.bold,
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                //   softWrap: true, // This forces wrapping at spaces
-                // ),
+                _buildTitle(context,item['title']),
 
                 const SizedBox(height: 8),
                 Text(
@@ -325,7 +350,7 @@ class DashboardScreen extends StatelessWidget {
                   maxLines: 4,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.roboto(
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontSize: 15,
                     color: AppColors.textColor,
                   ),
@@ -336,36 +361,33 @@ class DashboardScreen extends StatelessWidget {
         ));
   }
 
-  Widget _buildTitle(String title) {
+  Widget _buildTitle(BuildContext context,String title) {
     // Split the title into two words if possible
     final words = title.split(" ");
     final firstWord = words.isNotEmpty ? words[0] : '';
     final secondWord = words.length > 1 ? words[1] : '';
-
     return Column(
       children: [
         // First word (larger font)
         Text(
           firstWord,
-          style: GoogleFonts.roboto(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             color: AppColors.textColor,
             letterSpacing: 0.8,
+            fontWeight: FontWeight.bold, // Optional if already set in theme
           ),
           textAlign: TextAlign.center,
         ),
         if (secondWord.isNotEmpty)
           Marquee(
             child: Text(
-              style: GoogleFonts.roboto(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+              secondWord,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: AppColors.textColor,
                 letterSpacing: 0.8,
+                fontWeight: FontWeight.bold,
               ),
-              secondWord,
-              textAlign: TextAlign.center, // Center the marquee text
+              textAlign: TextAlign.center,
             ),
           ),
       ],
