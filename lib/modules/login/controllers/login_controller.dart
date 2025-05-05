@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../../network/api_sevices.dart';
 import '../../../routes/app_pages.dart';
+import '../../../utils/common/common.dart';
 import '../../../utils/constants.dart';
 import '../../../utils/shared_prefences.dart';
 
@@ -18,6 +19,43 @@ class LoginController extends BaseController {
   FocusNode passwordFocus = FocusNode();
 
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  // Future<void> loginUser() async {
+  //   if (isLoading.value) return;
+  //   setLoading(true);
+  //
+  //   Map<String, dynamic> request = {
+  //     ConstantKeys.emailKey: "sandesh.singhal@pvanalytica.com",
+  //     ConstantKeys.passwordKey: "Pvana@123",
+  //   };
+  //
+  //   try {
+  //     String? refreshToken = await AuthServiceApis.login(request: request);
+  //
+  //     if (refreshToken != null) {
+  //       toast("Logged in successfully!");
+  //
+  //       // Save all preferences and user data BEFORE navigation
+  //       await setValue(AppSharedPreferenceKeys.userPassword, request[ConstantKeys.passwordKey]);
+  //       await setValue(AppSharedPreferenceKeys.userEmail, request[ConstantKeys.emailKey]);
+  //       await setValue(AppSharedPreferenceKeys.apiToken, refreshToken);
+  //       await setValue(AppSharedPreferenceKeys.isUserLoggedIn, true);
+  //       isLoggedIn(true);
+  //
+  //       // Also update your reactive user model if needed
+  //       loggedInUser.value.access = refreshToken;
+  //
+  //       /// 🚀 Only now navigate to Dashboard
+  //       Get.offAllNamed(Routes.DASHBOARD);
+  //     } else {
+  //       toast("Login failed");
+  //     }
+  //   } catch (e) {
+  //     toast("Login failed: ${e.toString()}");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
 
   Future<void> loginUser() async {
     if (isLoading.value) return;
@@ -39,6 +77,7 @@ class LoginController extends BaseController {
         Get.offAllNamed(Routes.DASHBOARD);
         await setValue(AppSharedPreferenceKeys.userPassword, request[ConstantKeys.passwordKey]);
         await setValue(AppSharedPreferenceKeys.isUserLoggedIn, true);
+
         // await setValue(ConstantKeys.passwordKey, "Pvana@123");
       } else {
         toast("Login failed");

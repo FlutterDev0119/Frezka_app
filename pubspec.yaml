@@ -50,6 +50,9 @@ dependencies:
   # Chart
   fl_chart: ^0.71.0
 
+  #Download
+  pdf: ^3.11.3
+  printing: ^5.14.2
 
 dev_dependencies:
   flutter_test:

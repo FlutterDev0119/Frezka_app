@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:apps/utils/library.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,6 +12,13 @@ import '../../../utils/shared_prefences.dart';
 import '../controllers/meta_phrase_pv_controller.dart';
 import '../model/open_worklist_model.dart';
 import '../model/transalted_model.dart';
+import 'dart:io';
+import 'package:flutter/services.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
 
 class MetaPhraseScreen extends StatelessWidget {
   final MetaPhraseController controller = Get.put(MetaPhraseController());
@@ -169,6 +178,15 @@ class MetaPhraseScreen extends StatelessWidget {
     String translatedCount = getStringAsync("settranslatedCount");
     // controller.setText(selectedTranslationReport!.translatedFile);
     // log("----------set text-----------------${controller.translatedText.value}");
+    String userJson = getStringAsync(AppSharedPreferenceKeys.userModel);
+
+// Decode and convert to UserModel
+    UserModel user = UserModel.fromJson(jsonDecode(userJson));
+
+// Access the fields
+    String? firstName = user.firstName;
+    String? lastName = user.lastName;
+    String? email = user.email;
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SingleChildScrollView(
@@ -200,7 +218,7 @@ class MetaPhraseScreen extends StatelessWidget {
               },
               child: Align(
                 alignment: Alignment.centerRight,
-                child: Icon(Icons.arrow_circle_up_rounded, color: appWhiteColor),
+                child: Icon(Icons.arrow_circle_up_rounded, color: appBackGroundColor),
               ).paddingOnly(right: 10, top: 5, bottom: 5),
             ),
             Card(
@@ -220,7 +238,7 @@ class MetaPhraseScreen extends StatelessWidget {
                       if (label == mode) return appBackGroundColor;
                       if (labelIndex < currentIndex) return appGreenColor;
 
-                      return appWhiteColor.withOpacity(0.8);
+                      return appMetaButtonColor;
                     }
 
                     IconData getIcon(String label) {
@@ -252,14 +270,17 @@ class MetaPhraseScreen extends StatelessWidget {
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(getIcon(label), color: controller.modes.indexOf(label) == controller.modes.indexOf(mode) ?  appWhiteColor :appTextColor),
+                                      Icon(getIcon(label),
+                                          color: controller.modes.indexOf(label) == controller.modes.indexOf(mode) ? appWhiteColor : appTextColor),
                                       const SizedBox(height: 4),
                                       Marquee(
                                         child: Text(
                                           maxLines: 1,
                                           label,
                                           textAlign: TextAlign.center,
-                                          style:  TextStyle(color: controller.modes.indexOf(label) == controller.modes.indexOf(mode) ?  appWhiteColor : appTextColor, fontWeight: FontWeight.bold),
+                                          style: TextStyle(
+                                              color: controller.modes.indexOf(label) == controller.modes.indexOf(mode) ? appWhiteColor : appTextColor,
+                                              fontWeight: FontWeight.bold),
                                         ),
                                       ),
                                     ],
@@ -271,407 +292,421 @@ class MetaPhraseScreen extends StatelessWidget {
                         }).toList());
                   }).paddingOnly(top: 5, bottom: 10),
 
-                  Column(
-                    children: [
-                      Card(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        elevation: 5,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  controller.isCredentialsConfirm.value == false
+                      ? Column(
                           children: [
-                            // Title for Original File
-                            Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Text("Original File", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                            Card(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              elevation: 5,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Title for Original File
+                                  Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Text("Original File", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                                  ),
+
+                                  // Scrollable content for Original File
+                                  Container(
+                                    height: 150,
+                                    padding: const EdgeInsets.all(16),
+                                    child: Scrollbar(
+                                      thumbVisibility: true,
+                                      controller: controller.translatedScrollController,
+                                      child: SingleChildScrollView(
+                                        controller: controller.translatedScrollController,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              selectedTranslationReport!.originalFile,
+                                              style: TextStyle(fontSize: 16),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
 
-                            // Scrollable content for Original File
-                            Container(
-                              height: 150,
-                              padding: const EdgeInsets.all(16),
-                              child: Scrollbar(
-                                thumbVisibility: true,
-                                controller: controller.translatedScrollController,
-                                child: SingleChildScrollView(
-                                  controller: controller.translatedScrollController,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                            // Translated File Card with Scrollable content
+                            Card(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              elevation: 5,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Title Row with Fullscreen Icon
+                                  Row(
                                     children: [
-                                      Text(
-                                        selectedTranslationReport!.originalFile,
-                                        style: TextStyle(fontSize: 16),
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                          child: Text(
+                                            controller.isReverse.value == false ? "Translated File" : "Reverse translate",
+                                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                          ),
+                                        ),
+                                      ),
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          controller.selectedMode.value == "Edit" && controller.isReverse.value == false
+                                              ? IconButton(
+                                                  iconSize: 20,
+                                                  visualDensity: VisualDensity.compact,
+                                                  padding: EdgeInsets.zero,
+                                                  icon: Icon(Icons.document_scanner),
+                                                  onPressed: () {
+                                                    controller.isScoreHighlightMode.value = false;
+                                                  },
+                                                )
+                                              : SizedBox(),
+                                          controller.selectedMode.value == "Edit" && controller.isReverse.value == false
+                                              ? IconButton(
+                                                  iconSize: 20,
+                                                  visualDensity: VisualDensity.compact,
+                                                  padding: EdgeInsets.zero,
+                                                  icon: Icon(Icons.score_outlined),
+                                                  onPressed: () {
+                                                    controller.isScoreHighlightMode.value = !controller.isScoreHighlightMode.value;
+                                                    controller.selectedTranslationReport.value = controller.selectedTranslationReport.value;
+                                                  },
+                                                )
+                                              : SizedBox(),
+                                          controller.selectedMode.value == "Edit" && controller.isReverse.value == false
+                                              ? IconButton(
+                                                  iconSize: 20,
+                                                  visualDensity: VisualDensity.compact,
+                                                  padding: EdgeInsets.zero,
+                                                  icon: Icon(Icons.screenshot_monitor_sharp),
+                                                  onPressed: () {},
+                                                )
+                                              : SizedBox(),
+                                          (controller.selectedMode.value == "Review" || controller.selectedMode.value == "Edit")
+                                              ? IconButton(
+                                                  iconSize: 20,
+                                                  visualDensity: VisualDensity.compact,
+                                                  padding: EdgeInsets.zero,
+                                                  icon: Icon(Icons.compare_arrows),
+                                                  onPressed: () async {
+                                                    final text = controller.selectedTranslationReport.value?.translatedFile ?? '';
+                                                    await controller.fetchReverseTranslation(text);
+                                                    controller.isScoreHighlightMode.value = false;
+                                                    // _buildSelectedCard(context, controller.selectedTranslationReport.value,true);
+                                                  },
+                                                )
+                                              : SizedBox(),
+                                          (controller.selectedMode.value == "Review" || controller.selectedMode.value == "Edit")
+                                              ? IconButton(
+                                                  iconSize: 20,
+                                                  visualDensity: VisualDensity.compact,
+                                                  padding: EdgeInsets.zero,
+                                                  icon: Icon(Icons.fullscreen),
+                                                  onPressed: () {
+                                                    controller.isScoreHighlightMode.value = false;
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (context) {
+                                                        return Dialog(
+                                                          insetPadding: EdgeInsets.zero,
+                                                          backgroundColor: Colors.white,
+                                                          child: AppScaffold(
+                                                            automaticallyImplyLeading: false,
+                                                            appBarBackgroundColor: appBackGroundColor,
+                                                            appBarTitleText: "Translation Details",
+                                                            appBarTitleTextStyle: TextStyle(
+                                                              fontSize: 20,
+                                                              color: appWhiteColor,
+                                                            ),
+                                                            actions: [
+                                                              IconButton(
+                                                                icon: Icon(
+                                                                  Icons.close,
+                                                                  color: appWhiteColor,
+                                                                ),
+                                                                onPressed: () => Navigator.of(context).pop(),
+                                                              )
+                                                            ],
+                                                            body: Padding(
+                                                              padding: const EdgeInsets.all(16),
+                                                              child: Scrollbar(
+                                                                thumbVisibility: true,
+                                                                child: SingleChildScrollView(
+                                                                  child: Column(
+                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                    children: [
+                                                                      Text(
+                                                                        "Original File",
+                                                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                                                      ),
+                                                                      const SizedBox(height: 8),
+                                                                      Container(
+                                                                        padding: const EdgeInsets.all(12),
+                                                                        decoration: BoxDecoration(
+                                                                          color: appDashBoardCardColor,
+                                                                          borderRadius: BorderRadius.circular(8),
+                                                                          border: Border.all(color: Colors.grey.shade300),
+                                                                        ),
+                                                                        child: Text(
+                                                                          selectedTranslationReport.originalFile,
+                                                                          style: TextStyle(fontSize: 16),
+                                                                        ),
+                                                                      ),
+                                                                      const SizedBox(height: 24),
+                                                                      Text(
+                                                                        "Translated File",
+                                                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                                                      ),
+                                                                      const SizedBox(height: 8),
+                                                                      Container(
+                                                                        padding: const EdgeInsets.all(12),
+                                                                        decoration: BoxDecoration(
+                                                                          color: appDashBoardCardColor,
+                                                                          borderRadius: BorderRadius.circular(8),
+                                                                          border: Border.all(color: Colors.grey.shade300),
+                                                                        ),
+                                                                        child: Text(
+                                                                          selectedTranslationReport.translatedFile,
+                                                                          style: TextStyle(fontSize: 16),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    );
+                                                  },
+                                                )
+                                              : SizedBox(),
+                                        ],
                                       ),
                                     ],
                                   ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
 
-                      // Translated File Card with Scrollable content
-                      Card(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        elevation: 5,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Title Row with Fullscreen Icon
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                    child: Text(
-                                      controller.isReverse.value == false ? "Translated File" : "Reverse translate",
-                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                                    ),
-                                  ),
-                                ),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    controller.selectedMode.value == "Edit" && controller.isReverse.value == false
-                                        ? IconButton(
-                                            iconSize: 20,
-                                            visualDensity: VisualDensity.compact,
-                                            padding: EdgeInsets.zero,
-                                            icon: Icon(Icons.document_scanner),
-                                            onPressed: () {
-                                              controller.isScoreHighlightMode.value = false;
-                                            },
-                                          )
-                                        : SizedBox(),
-                                    controller.selectedMode.value == "Edit" && controller.isReverse.value == false
-                                        ? IconButton(
-                                            iconSize: 20,
-                                            visualDensity: VisualDensity.compact,
-                                            padding: EdgeInsets.zero,
-                                            icon: Icon(Icons.score_outlined),
-                                            onPressed: () {
-                                              controller.isScoreHighlightMode.value = true;
+                                  Container(
+                                    height: 150,
+                                    padding: const EdgeInsets.all(16),
+                                    child: Scrollbar(
+                                      controller: controller.translatedScrollController1,
+                                      thumbVisibility: true,
+                                      child: SingleChildScrollView(
+                                        controller: controller.translatedScrollController1,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Obx(() {
+                                              final isScoreHighlight = controller.isScoreHighlightMode.value;
 
-                                              controller.selectedTranslationReport.value = controller.selectedTranslationReport.value;
-                                              // selectedTranslationReport.sentenceScore
-                                            },
-                                          )
-                                        : SizedBox(),
-                                    controller.selectedMode.value == "Edit" && controller.isReverse.value == false
-                                        ? IconButton(
-                                            iconSize: 20,
-                                            visualDensity: VisualDensity.compact,
-                                            padding: EdgeInsets.zero,
-                                            icon: Icon(Icons.screenshot_monitor_sharp),
-                                            onPressed: () {
-                                              controller.isScoreHighlightMode.value = false;
-                                            },
-                                          )
-                                        : SizedBox(),
-                                    (controller.selectedMode.value == "Review" || controller.selectedMode.value == "Edit")
-                                        ? IconButton(
-                                            iconSize: 20,
-                                            visualDensity: VisualDensity.compact,
-                                            padding: EdgeInsets.zero,
-                                            icon: Icon(Icons.compare_arrows),
-                                            onPressed: () async {
-                                              final text = controller.selectedTranslationReport.value?.translatedFile ?? '';
-                                              await controller.fetchReverseTranslation(text);
-                                              controller.isScoreHighlightMode.value = false;
-                                              // _buildSelectedCard(context, controller.selectedTranslationReport.value,true);
-                                            },
-                                          )
-                                        : SizedBox(),
-                                    (controller.selectedMode.value == "Review" || controller.selectedMode.value == "Edit")
-                                        ? IconButton(
-                                            iconSize: 20,
-                                            visualDensity: VisualDensity.compact,
-                                            padding: EdgeInsets.zero,
-                                            icon: Icon(Icons.fullscreen),
-                                            onPressed: () {
-                                              controller.isScoreHighlightMode.value = false;
-                                              showDialog(
-                                                context: context,
-                                                builder: (context) {
-                                                  return Dialog(
-                                                    insetPadding: EdgeInsets.zero,
-                                                    backgroundColor: Colors.white,
-                                                    child: AppScaffold(
-                                                      automaticallyImplyLeading: false,
-                                                      appBarBackgroundColor: appBackGroundColor,
-                                                      appBarTitleText: "Translation Details",
-                                                      appBarTitleTextStyle: TextStyle(
-                                                        fontSize: 20,
-                                                        color: appWhiteColor,
+                                              // Check if we need to show the scored sentences
+                                              if (isScoreHighlight) {
+                                                final scoredTexts = controller.selectedTranslationReport.value?.sentenceScore ?? [];
+
+                                                if (scoredTexts.isEmpty) {
+                                                  return Center(child: Text("No sentences available"));
+                                                }
+
+                                                return Wrap(
+                                                  spacing: 4,
+                                                  runSpacing: 4,
+                                                  alignment: WrapAlignment.start,
+                                                  children: scoredTexts.map<Widget>((sentenceScore) {
+                                                    final sentence = sentenceScore.sentence;
+                                                    final score = sentenceScore.score;
+
+                                                    // Color color = score <= 50 ? Colors.yellow : Colors.green;
+                                                    Color color;
+
+                                                    if (score >= 0 && score <= 39) {
+                                                      color = appScore0To39Color;
+                                                    } else if (score >= 40 && score <= 64) {
+                                                      color = appScore40To64Color;
+                                                    } else if (score >= 65 && score <= 100) {
+                                                      color = appScore65To100Color;
+                                                    } else {
+                                                      color = appGreyColor;
+                                                    }
+
+                                                    return Container(
+                                                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                                      color: color,
+                                                      child: Text(
+                                                        sentence,
+                                                        style: TextStyle(fontSize: 16, color: appTextColor),
                                                       ),
-                                                      actions: [
-                                                        IconButton(
-                                                          icon: Icon(
-                                                            Icons.close,
-                                                            color: appWhiteColor,
-                                                          ),
-                                                          onPressed: () => Navigator.of(context).pop(),
-                                                        )
-                                                      ],
-                                                      body: Padding(
-                                                        padding: const EdgeInsets.all(16),
-                                                        child: Scrollbar(
-                                                          thumbVisibility: true,
-                                                          child: SingleChildScrollView(
-                                                            child: Column(
-                                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                                              children: [
-                                                                Text(
-                                                                  "Original File",
-                                                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                                                                ),
-                                                                const SizedBox(height: 8),
-                                                                Container(
-                                                                  padding: const EdgeInsets.all(12),
-                                                                  decoration: BoxDecoration(
-                                                                    color: appDashBoardCardColor,
-                                                                    borderRadius: BorderRadius.circular(8),
-                                                                    border: Border.all(color: Colors.grey.shade300),
-                                                                  ),
-                                                                  child: Text(
-                                                                    selectedTranslationReport.originalFile,
-                                                                    style: TextStyle(fontSize: 16),
-                                                                  ),
-                                                                ),
-                                                                const SizedBox(height: 24),
-                                                                Text(
-                                                                  "Translated File",
-                                                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                                                                ),
-                                                                const SizedBox(height: 8),
-                                                                Container(
-                                                                  padding: const EdgeInsets.all(12),
-                                                                  decoration: BoxDecoration(
-                                                                    color: appDashBoardCardColor,
-                                                                    borderRadius: BorderRadius.circular(8),
-                                                                    border: Border.all(color: Colors.grey.shade300),
-                                                                  ),
-                                                                  child: Text(
-                                                                    selectedTranslationReport.translatedFile,
-                                                                    style: TextStyle(fontSize: 16),
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                              );
-                                            },
-                                          )
-                                        : SizedBox(),
-                                  ],
-                                ),
-                              ],
-                            ),
-
-                            Container(
-                              height: 150,
-                              padding: const EdgeInsets.all(16),
-                              child: Scrollbar(
-                                controller: controller.translatedScrollController1,
-                                thumbVisibility: true,
-                                child: SingleChildScrollView(
-                                  controller: controller.translatedScrollController1,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      // Obx(() {
-                                      //   final isEditingTranslatedFile =
-                                      //       controller.selectedMode.value == "Edit" && controller.isReverse.value == false;
-                                      //
-                                      //   if (isEditingTranslatedFile && controller.isEditing.value) {
-                                      //     return TextField(
-                                      //       controller: controller.translatedTextController,
-                                      //       autofocus: true,
-                                      //       maxLines: null,
-                                      //       style: const TextStyle(fontSize: 16),
-                                      //       decoration: const InputDecoration.collapsed(hintText: ''),
-                                      //       onEditingComplete: () {
-                                      //         controller.exitEditMode();
-                                      //         FocusScope.of(Get.context!).unfocus();
-                                      //       },
-                                      //       onSubmitted: (_) {
-                                      //         controller.exitEditMode();
-                                      //         FocusScope.of(Get.context!).unfocus();
-                                      //       },
-                                      //     );
-                                      //   }
-                                      //
-                                      //   final displayText = controller.isReverse.value
-                                      //       ? controller.reverseTranslatedText.value
-                                      //       : controller.selectedTranslationReport.value?.translatedFile ?? '';
-                                      //
-                                      //   return GestureDetector(
-                                      //     onTap: () {
-                                      //       if (controller.selectedMode.value == "Edit" && !controller.isReverse.value) {
-                                      //         controller.enterEditMode();
-                                      //       }
-                                      //     },
-                                      //     child: Text(
-                                      //       displayText,
-                                      //       style: const TextStyle(fontSize: 16),
-                                      //     ),
-                                      //   );
-                                      // })
-                                      // Obx(() {
-                                      //   final isScoreHighlight = controller.isScoreHighlightMode.value;
-                                      //   log("------------------isScoreHighlight $isScoreHighlight");
-                                      //
-                                      //   if (isScoreHighlight) {
-                                      //     final scoredTexts = controller.selectedTranslationReport.value?.sentenceScore ?? [];
-                                      //     log("------------------scoredTexts1 $scoredTexts");
-                                      //
-                                      //     if (scoredTexts.isEmpty) {
-                                      //       return Center(child: Text("No sentences available"));
-                                      //     }
-                                      //
-                                      //     return Wrap(
-                                      //       alignment: WrapAlignment.start,
-                                      //       children: scoredTexts.map<Widget>((sentenceScore) {
-                                      //         final sentence = sentenceScore.sentence;
-                                      //         final score = sentenceScore.score;
-                                      //
-                                      //         Color color = score <= 50 ? Colors.yellow : Colors.green;
-                                      //
-                                      //         return Text(
-                                      //           sentence,
-                                      //           style: TextStyle(fontSize: 16, color: color),
-                                      //         );
-                                      //       }).toList(),
-                                      //     );
-                                      //   }
-                                      //   // Default behavior if isScoreHighlight is false
-                                      //   final displayText = controller.isReverse.value
-                                      //       ? controller.reverseTranslatedText.value
-                                      //       : controller.selectedTranslationReport.value?.translatedFile ?? '';
-                                      //   log("------------------displaytext $displayText");
-                                      //
-                                      //   return GestureDetector(
-                                      //     onTap: () {
-                                      //       if (controller.selectedMode.value == "Edit" && !controller.isReverse.value) {
-                                      //         controller.enterEditMode();
-                                      //       }
-                                      //     },
-                                      //     child: Text(
-                                      //       displayText,
-                                      //       style: const TextStyle(fontSize: 16),
-                                      //     ),
-                                      //   );
-                                      // })
-                                      Obx(() {
-                                        final isScoreHighlight = controller.isScoreHighlightMode.value;
-
-                                        // Check if we need to show the scored sentences
-                                        if (isScoreHighlight) {
-                                          final scoredTexts = controller.selectedTranslationReport.value?.sentenceScore ?? [];
-
-                                          if (scoredTexts.isEmpty) {
-                                            return Center(child: Text("No sentences available"));
-                                          }
-
-                                          return Wrap(
-                                            alignment: WrapAlignment.start,
-                                            children: scoredTexts.map<Widget>((sentenceScore) {
-                                              final sentence = sentenceScore.sentence;
-                                              final score = sentenceScore.score;
-
-                                              // Color color = score <= 50 ? Colors.yellow : Colors.green;
-                                              Color color;
-
-                                              if (score >= 0 && score <= 39) {
-                                                color = appScore0To39Color;
-                                              } else if (score >= 40 && score <= 64) {
-                                                color = appScore40To64Color;
-                                              } else if (score >= 65 && score <= 100) {
-                                                color = appScore65To100Color;
-                                              } else {
-                                                color = appGreyColor;
+                                                    );
+                                                  }).toList(),
+                                                );
                                               }
 
-                                              return Text(
-                                                sentence,
-                                                style: TextStyle(fontSize: 16, color: color),
+                                              // Default behavior if isScoreHighlight is false
+                                              final displayText = controller.isReverse.value
+                                                  ? controller.reverseTranslatedText.value
+                                                  : controller.selectedTranslationReport.value?.translatedFile ?? '';
+
+                                              // Check if we are in "Edit" mode
+                                              final isEditingTranslatedFile =
+                                                  controller.selectedMode.value == "Edit" && controller.isReverse.value == false;
+                                              if (isEditingTranslatedFile && controller.isEditing.value) {
+                                                return TextField(
+                                                  controller: controller.translatedTextController,
+                                                  autofocus: true,
+                                                  maxLines: null,
+                                                  style: const TextStyle(fontSize: 16),
+                                                  decoration: const InputDecoration.collapsed(hintText: ''),
+                                                  onEditingComplete: () {
+                                                    controller.exitEditMode();
+                                                    FocusScope.of(Get.context!).unfocus();
+                                                  },
+                                                  onSubmitted: (_) {
+                                                    controller.exitEditMode();
+                                                    FocusScope.of(Get.context!).unfocus();
+                                                  },
+                                                );
+                                              }
+
+                                              // Display text as normal if not in edit mode
+                                              return GestureDetector(
+                                                onTap: () {
+                                                  if (controller.selectedMode.value == "Edit" && !controller.isReverse.value) {
+                                                    controller.enterEditMode();
+                                                  }
+                                                },
+                                                child: Text(
+                                                  displayText,
+                                                  style: const TextStyle(fontSize: 16),
+                                                ),
                                               );
-                                            }).toList(),
-                                          );
-                                        }
-
-                                        // Default behavior if isScoreHighlight is false
-                                        final displayText = controller.isReverse.value
-                                            ? controller.reverseTranslatedText.value
-                                            : controller.selectedTranslationReport.value?.translatedFile ?? '';
-
-                                        // Check if we are in "Edit" mode
-                                        final isEditingTranslatedFile =
-                                            controller.selectedMode.value == "Edit" && controller.isReverse.value == false;
-                                        if (isEditingTranslatedFile && controller.isEditing.value) {
-                                          return TextField(
-                                            controller: controller.translatedTextController,
-                                            autofocus: true,
-                                            maxLines: null,
-                                            style: const TextStyle(fontSize: 16),
-                                            decoration: const InputDecoration.collapsed(hintText: ''),
-                                            onEditingComplete: () {
-                                              controller.exitEditMode();
-                                              FocusScope.of(Get.context!).unfocus();
-                                            },
-                                            onSubmitted: (_) {
-                                              controller.exitEditMode();
-                                              FocusScope.of(Get.context!).unfocus();
-                                            },
-                                          );
-                                        }
-
-                                        // Display text as normal if not in edit mode
-                                        return GestureDetector(
-                                          onTap: () {
-                                            if (controller.selectedMode.value == "Edit" && !controller.isReverse.value) {
-                                              controller.enterEditMode();
-                                            }
-                                          },
-                                          child: Text(
-                                            displayText,
-                                            style: const TextStyle(fontSize: 16),
-                                          ),
-                                        );
-                                      })
-                                    ],
-                                  ),
-                                ),
+                                            })
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                ],
                               ),
                             )
                           ],
+                        )
+                      : Center(
+                          child: Container(
+                            width: 600,
+                            alignment: Alignment.topLeft,
+                            margin: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text(
+                                  'Certificate of Translation',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: appBackGroundColor,
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: RichText(
+                                    textAlign: TextAlign.start,
+                                    text: TextSpan(
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.black, // Or your theme color
+                                      ),
+                                      children: [
+                                        const TextSpan(text: 'I, '),
+                                        TextSpan(text: firstName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                        const TextSpan(text: ', certify that I am competent to translate between English and '),
+                                        const TextSpan(text: 'Japanese (ja)', style: TextStyle(fontWeight: FontWeight.bold)),
+                                        const TextSpan(text: '. I further certify that I translated the document titled '),
+                                         TextSpan(text: '"$fileName"', style: TextStyle(fontWeight: FontWeight.bold)),
+                                        const TextSpan(text: ', and the translation is true and accurate to the best of my abilities.'),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 20),
+                                const Divider(thickness: 1),
+                                const SizedBox(height: 12),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children:  [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text('Name:', style: TextStyle(fontWeight: FontWeight.bold)),
+                                          SizedBox(height: 8),
+                                          Text('Signature:', style: TextStyle(fontWeight: FontWeight.bold)),
+                                          SizedBox(height: 8),
+                                          Text('Phone Number:', style: TextStyle(fontWeight: FontWeight.bold)),
+                                          SizedBox(height: 8),
+                                          Text('Address:', style: TextStyle(fontWeight: FontWeight.bold)),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        children: [
+                                          Marquee(child: Text(firstName.toString())),
+                                          SizedBox(height: 8),
+                                          Marquee(child: Text(email.toString())),
+                                          SizedBox(height: 8),
+                                          Text('123456789'),
+                                          SizedBox(height: 8),
+                                          Text('India'),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 24),
+                                SizedBox(
+                                  height: 40,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () async {
+                                      log("--------------");
+                                      await generateAndDownloadCertificate(firstName!,email!,fileName);
+                                    },
+                                    icon: const Icon(Icons.download,color: appWhiteColor,),
+                                    label: const Text('Download'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:appBackGroundColor,
+                                      foregroundColor: appWhiteColor,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      )
-                    ],
-                  ),
 
                   /// Dropdown styled like a button
                   Obx(() {
                     final selected = controller.selectedMode.value;
                     final certifyOptions = ['Finalize', 'Return', 'Reject'];
-                    if (selected == 'Peer Review' && controller.isEditing.value == true) {
+                    if (selected == 'Peer Review' && controller.isEditing.value == true && controller.hasShownPeerReviewDialog.isFalse) {
                       Future.delayed(Duration.zero, () {
-                        showPeerReviewDialog(
-                          context,
-                          () {
-                            // Confirm action
-                            Get.back();
-                          },
-                          () {
-                            // Cancel action
-                            Get.back();
-                          },
-                        );
+                        showPeerReviewDialog(context);
                       });
                     }
                     return Column(
@@ -682,7 +717,165 @@ class MetaPhraseScreen extends StatelessWidget {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Container(
+                             controller.isCredentialsConfirm.value ? 
+                             Container(
+                    width: 150,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: appBackGroundColor,
+                          border: Border.all(color: Colors.grey.shade400),
+                        ),
+                        child: Builder(
+                          builder: (context) {
+                            return GestureDetector(
+                              onTap: () async {
+                                final RenderBox button = context.findRenderObject() as RenderBox;
+                                final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+                                final RelativeRect position = RelativeRect.fromRect(
+                                  Rect.fromPoints(
+                                    button.localToGlobal(Offset.zero, ancestor: overlay),
+                                    button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+                                  ),
+                                  Offset.zero & overlay.size,
+                                );
+
+                                final List<PopupMenuEntry<String>> items = [];
+                                for (int i = 0; i < controller.modes.length; i++) {
+                                  final value = controller.modes[i];
+                                  final isPeerReview = value == 'Peer Review';
+                                  final isDisabled =
+                                  ((controller.selected.value == 'Review' || controller.selected.value == 'Edit') && isPeerReview && !controller.isEditing.value);
+
+                                  items.add(
+                                    PopupMenuItem<String>(
+                                      enabled: !isDisabled,
+                                      value: value,
+                                      height: 40,
+                                      child: Text(
+                                        value,
+                                        style: TextStyle(
+                                          color: isDisabled ? appWhiteColor.withOpacity(0.5) : appWhiteColor,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+
+                                  if (i != controller.modes.length - 1) {
+                                    items.add(const PopupMenuDivider(height: 1));
+                                  }
+                                }
+                                final isCertify = controller.selected.value == 'Certify';
+
+                                final selected = await showMenu<String>(
+                                  context: context,
+                                  position: position,
+                                  color: appBackGroundColor,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  items: isCertify
+                                      ? certifyOptions.map((option) {
+                                    return PopupMenuItem<String>(
+                                      value: option,
+                                      child: InkWell(
+                                          onTap: () {
+                                            if (option == "Finalize") {
+                                              Get.back();
+                                              showCredentialsDialog(context, controller);
+                                              controller.isReturnSelected.value = false;
+                                              controller.isRejectSelected.value = false;
+                                            } else if (option == "Return") {
+                                              Get.back();
+                                              log("-----------------Return------------------");
+                                              controller.isReturnSelected.value = true;
+                                              controller.isRejectSelected.value = false;
+                                            } else if (option == "Reject") {
+                                              Get.back();
+                                              log("-----------------Reject------------------");
+                                              controller.isRejectSelected.value = true;
+                                              controller.isReturnSelected.value = false;
+                                            }
+                                            controller.updateSelectedMode("Certify");
+                                          },
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.symmetric(vertical: 8.0), // Equal space above and below
+                                                child: Column(
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      children: [
+                                                        Padding(
+                                                          padding: const EdgeInsets.only(bottom: 10),
+                                                          child: Icon(
+                                                            option == "Return"
+                                                                ? Icons.keyboard_return
+                                                                : option == "Reject"
+                                                                ? Icons.close
+                                                                : Icons.check_circle_outline,
+                                                            color: appWhiteColor,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: 10),
+                                                        Padding(
+                                                          padding: const EdgeInsets.only(bottom: 10),
+                                                          child: Text(
+                                                            option,
+                                                            style: const TextStyle(
+                                                              fontWeight: FontWeight.bold,
+                                                              color: appWhiteColor,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    if (option != "Reject")
+                                                      const Padding(
+                                                        padding: EdgeInsets.only(top: 2.0),
+                                                        child: Divider(
+                                                          color: Colors.white54,
+                                                          thickness: 1,
+                                                          height: 1,
+                                                        ),
+                                                      ),
+                                                  ],
+                                                ),
+                                              )
+                                            ],
+                                          )),
+                                    );
+                                  }).toList()
+                                      : _buildModeOptionsWithDividers(controller),
+                                );
+
+                                if (selected != null) {
+                                  controller.updateSelectedMode(selected);
+                                  if (selected == 'Edit') controller.isReverse.value = false;
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                  // border: Border.all(color: appWhiteColor),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Obx(() => Text(
+                                      controller.selected.value,
+                                      style: const TextStyle(color: appWhiteColor, fontSize: 16),
+                                    )),
+                                    const Icon(Icons.arrow_drop_down, color: appWhiteColor),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        )): Container(
                                     width: 150,
                                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                                     decoration: BoxDecoration(
@@ -690,53 +883,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                       color: appBackGroundColor,
                                       border: Border.all(color: Colors.grey.shade400),
                                     ),
-                                    child:
-                                        // DropdownButtonHideUnderline(
-                                        //   child:
-                                        //   Obx(
-                                        //     () {
-                                        //       return DropdownButton<String>(
-                                        //         dropdownColor: appBackGroundColor,
-                                        //         value: controller.selected.value,
-                                        //         icon: const Icon(Icons.arrow_drop_down, color: appWhiteColor),
-                                        //         style: const TextStyle(fontSize: 16, color: appWhiteColor),
-                                        //         isExpanded: true,
-                                        //         items: controller.modes.map((String value) {
-                                        //           final isPeerReview = value == 'Peer Review';
-                                        //           final isDisabled = (controller.selected == 'Review' && isPeerReview && !controller.isEditing.value);
-                                        //
-                                        //           return DropdownMenuItem<String>(
-                                        //             value: value,
-                                        //             child: IgnorePointer(
-                                        //               ignoring: isDisabled,
-                                        //               child: Text(
-                                        //                 value,
-                                        //                 style: TextStyle(
-                                        //                   color: isDisabled ? Colors.grey : appWhiteColor,
-                                        //                 ),
-                                        //               ),
-                                        //             ),
-                                        //           );
-                                        //         }).toList(),
-                                        //         onChanged: (String? newValue) {
-                                        //           if (newValue == 'Peer Review' && selected == 'Review' && !controller.isEditing.value) {
-                                        //             // Don't allow selection if not editable
-                                        //             return;
-                                        //           }
-                                        //           // Prevent null (disabled item) from being selected
-                                        //           if (newValue != null) {
-                                        //             controller.updateSelectedMode(newValue);
-                                        //             if (newValue == 'Edit') {
-                                        //               // controller.startEditing();
-                                        //               controller.isReverse.value = false;
-                                        //             }
-                                        //           }
-                                        //         },
-                                        //       );
-                                        //     }
-                                        //   ),
-                                        // ),
-                                        Builder(
+                                    child: Builder(
                                       builder: (context) {
                                         return GestureDetector(
                                           onTap: () async {
@@ -755,7 +902,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                               final value = controller.modes[i];
                                               final isPeerReview = value == 'Peer Review';
                                               final isDisabled =
-                                                  (controller.selected.value == 'Review' && isPeerReview && !controller.isEditing.value);
+                                                  ((controller.selected.value == 'Review' || controller.selected.value == 'Edit') && isPeerReview && !controller.isEditing.value);
 
                                               items.add(
                                                 PopupMenuItem<String>(
@@ -777,21 +924,155 @@ class MetaPhraseScreen extends StatelessWidget {
                                               }
                                             }
 
+                                            // final selected = await showMenu<String>(
+                                            //   context: context,
+                                            //   position: position,
+                                            //   color: appBackGroundColor,
+                                            //   shape: RoundedRectangleBorder(
+                                            //     borderRadius: BorderRadius.circular(12),
+                                            //   ),
+                                            //   items: items,
+                                            // );
+                                            final isCertify = controller.selected.value == 'Certify';
+
                                             final selected = await showMenu<String>(
                                               context: context,
                                               position: position,
                                               color: appBackGroundColor,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(12),
-                                              ),
-                                              items: items,
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                              items: isCertify
+                                                  ? certifyOptions.map((option) {
+                                                      return PopupMenuItem<String>(
+                                                        value: option,
+                                                        child: InkWell(
+                                                            onTap: () {
+                                                              if (option == "Finalize") {
+                                                                Get.back();
+                                                                showCredentialsDialog(context, controller);
+                                                                controller.isReturnSelected.value = false;
+                                                                controller.isRejectSelected.value = false;
+                                                              } else if (option == "Return") {
+                                                                Get.back();
+                                                                log("-----------------Return------------------");
+                                                                controller.isReturnSelected.value = true;
+                                                                controller.isRejectSelected.value = false;
+                                                              } else if (option == "Reject") {
+                                                                Get.back();
+                                                                log("-----------------Reject------------------");
+                                                                controller.isRejectSelected.value = true;
+                                                                controller.isReturnSelected.value = false;
+                                                              }
+                                                              controller.updateSelectedMode("Certify");
+                                                            },
+                                                            child: Column(
+                                                              mainAxisSize: MainAxisSize.min,
+                                                              children: [
+                                                                Padding(
+                                                                  padding: const EdgeInsets.symmetric(vertical: 8.0), // Equal space above and below
+                                                                  child: Column(
+                                                                    children: [
+                                                                      Row(
+                                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                                        children: [
+                                                                          Padding(
+                                                                            padding: const EdgeInsets.only(bottom: 10),
+                                                                            child: Icon(
+                                                                              option == "Return"
+                                                                                  ? Icons.keyboard_return
+                                                                                  : option == "Reject"
+                                                                                      ? Icons.close
+                                                                                      : Icons.check_circle_outline,
+                                                                              color: appWhiteColor,
+                                                                            ),
+                                                                          ),
+                                                                          const SizedBox(width: 10),
+                                                                          Padding(
+                                                                            padding: const EdgeInsets.only(bottom: 10),
+                                                                            child: Text(
+                                                                              option,
+                                                                              style: const TextStyle(
+                                                                                fontWeight: FontWeight.bold,
+                                                                                color: appWhiteColor,
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                      if (option != "Reject")
+                                                                        const Padding(
+                                                                          padding: EdgeInsets.only(top: 2.0),
+                                                                          child: Divider(
+                                                                            color: Colors.white54,
+                                                                            thickness: 1,
+                                                                            height: 1,
+                                                                          ),
+                                                                        ),
+                                                                    ],
+                                                                  ),
+                                                                )
+                                                              ],
+                                                            )),
+                                                      );
+                                                    }).toList()
+                                                  : _buildModeOptionsWithDividers(controller),
+                                              // : controller.modes.map((value) {
+                                              //     final isPeerReview = value == 'Peer Review';
+                                              //     final isDisabled =
+                                              //         (controller.selected.value == 'Review' && isPeerReview && !controller.isEditing.value);
+                                              //     for (int i = 0; i < controller.modes.length; i++) {
+                                              //       final value = controller.modes[i];
+                                              //       items.add(
+                                              //         PopupMenuItem<String>(
+                                              //           enabled: !isDisabled,
+                                              //           value: value,
+                                              //           child: Text(
+                                              //             value,
+                                              //             style: TextStyle(
+                                              //               color: isDisabled ? appWhiteColor.withOpacity(0.5) : appWhiteColor,
+                                              //               fontSize: 14,
+                                              //             ),
+                                              //           ),
+                                              //         ),
+                                              //       );
+                                              //
+                                              //       // Add divider after each item except the last one
+                                              //       if (i < controller.modes.length - 1) {
+                                              //         items.add(
+                                              //           const PopupMenuDivider(
+                                              //             height: 1,
+                                              //           ),
+                                              //         );
+                                              //       }
+                                              //     }
+                                              //     return PopupMenuItem<String>(
+                                              //       enabled: !isDisabled,
+                                              //       value: value,
+                                              //       child: Text(
+                                              //         value,
+                                              //         style: TextStyle(
+                                              //           color: isDisabled ? appWhiteColor.withOpacity(0.5) : appWhiteColor,
+                                              //           fontSize: 14,
+                                              //         ),
+                                              //       ),
+                                              //     );
+                                              //   }).toList(),
                                             );
 
-                                            if (selected != null) {
-                                              controller.updateSelectedMode(selected);
-                                              if (selected == 'Edit') controller.isReverse.value = false;
-                                            }
-                                          },
+                                                if (selected != null) {
+                                                  controller.updateSelectedMode(selected);
+                                                  if (selected == 'Edit') {
+                                                    controller.selected.value = 'Edit';
+                                                    controller.isReverse.value = false;
+                                                    controller.isEditing.value = false;
+                                                  }
+                                                  if (selected == 'Review') {
+                                                    controller.selected.value = 'Review';
+                                                    controller.isReverse.value = false;
+                                                    controller.isEditing.value = false;
+
+                                                  }
+                                                }
+                                              },
                                           child: Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                             decoration: BoxDecoration(
@@ -802,10 +1083,10 @@ class MetaPhraseScreen extends StatelessWidget {
                                             child: Row(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
-                                                Text(
-                                                  controller.selected.value,
-                                                  style: const TextStyle(color: appWhiteColor, fontSize: 16),
-                                                ),
+                                                Obx(() => Text(
+                                                      controller.selected.value,
+                                                      style: const TextStyle(color: appWhiteColor, fontSize: 16),
+                                                    )),
                                                 const Icon(Icons.arrow_drop_down, color: appWhiteColor),
                                               ],
                                             ),
@@ -829,56 +1110,58 @@ class MetaPhraseScreen extends StatelessWidget {
                                         ),
                                       ],
                                     ),
-                                    child: Column(
-                                      children: certifyOptions.map((option) {
-                                        return InkWell(
-                                          onTap: () {
-                                            if (option == "Finalize") {
-                                              showCredentialsDialog(
-                                                context,
-                                                () {
-                                                  Get.back();
-                                                },
-                                                () {
-                                                  Get.back();
-                                                },
-                                              );
-                                              controller.isReturnSelected.value = false;
-                                              controller.isRejectSelected.value = false;
-                                            } else if (option == "Return") {
-                                              controller.isReturnSelected.value = true;
-                                              controller.isRejectSelected.value = false;
-                                            } else if (option == "Reject") {
-                                              controller.isRejectSelected.value = true;
-                                              controller.isReturnSelected.value = false;
-                                            }
-
-                                            print("Selected: $option");
-                                          },
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                    option == "Return"
-                                                        ? Icons.keyboard_return
-                                                        : option == "Reject"
-                                                            ? Icons.close
-                                                            : Icons.check_circle_outline,
-                                                    color: Colors.blue),
-                                                const SizedBox(width: 10),
-                                                Text(
-                                                  option,
-                                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
+                                    // child: Column(
+                                    //   children: certifyOptions.map((option) {
+                                    //     return InkWell(
+                                    //       onTap: () {
+                                    //         if (option == "Finalize") {
+                                    //           showCredentialsDialog(
+                                    //             context,
+                                    //             () {
+                                    //               Get.back();
+                                    //             },
+                                    //             () {
+                                    //               Get.back();
+                                    //             },
+                                    //           );
+                                    //           controller.isReturnSelected.value = false;
+                                    //           controller.isRejectSelected.value = false;
+                                    //         } else if (option == "Return") {
+                                    //           controller.isReturnSelected.value = true;
+                                    //           controller.isRejectSelected.value = false;
+                                    //         } else if (option == "Reject") {
+                                    //           controller.isRejectSelected.value = true;
+                                    //           controller.isReturnSelected.value = false;
+                                    //         }else{
+                                    //           controller.updateSelectedMode("Certify");
+                                    //         }
+                                    //
+                                    //         print("Selected: $option");
+                                    //       },
+                                    //       child: Padding(
+                                    //         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                    //         child: Row(
+                                    //           children: [
+                                    //             Icon(
+                                    //                 option == "Return"
+                                    //                     ? Icons.keyboard_return
+                                    //                     : option == "Reject"
+                                    //                         ? Icons.close
+                                    //                         : Icons.check_circle_outline,
+                                    //                 color: Colors.blue),
+                                    //             const SizedBox(width: 10),
+                                    //             Text(
+                                    //               option,
+                                    //               style: const TextStyle(fontWeight: FontWeight.bold),
+                                    //             ),
+                                    //           ],
+                                    //         ),
+                                    //       ),
+                                    //     );
+                                    //   }).toList(),
+                                    // ),
                                   ),
-                                if (selected == 'Certify' && controller.isReturnSelected.value)
+                                if (controller.isReturnSelected.value)
                                   Obx(() {
                                     if (controller.isReturnSelected.value) {
                                       return Container(
@@ -947,107 +1230,70 @@ class MetaPhraseScreen extends StatelessWidget {
                                       return const SizedBox();
                                     }
                                   }),
-                                if (selected == 'Certify' && controller.isRejectSelected.value)
-                                  // Obx(() => Column(
-                                  //   children: [
-                                  //     DropdownButtonFormField<String>(
-                                  //       decoration: const InputDecoration(
-                                  //         labelText: 'Select a reason',
-                                  //         border: OutlineInputBorder(),
-                                  //       ),
-                                  //       value: controller.selectedReason.value.isEmpty
-                                  //           ? null
-                                  //           : controller.selectedReason.value,
-                                  //       items: controller.reasons.map((reason) {
-                                  //         return DropdownMenuItem(
-                                  //           value: reason,
-                                  //           child: Text(reason),
-                                  //         );
-                                  //       }).toList(),
-                                  //       onChanged: (value) {
-                                  //         controller.updateSelectedReason(value);
-                                  //       },
-                                  //     ),
-                                  //     const SizedBox(height: 20),
-                                  //     TextField(
-                                  //       controller: controller.textRejectController,
-                                  //       decoration: const InputDecoration(
-                                  //         labelText: 'Or type your reason',
-                                  //         border: OutlineInputBorder(),
-                                  //       ),
-                                  //       onChanged: (text) {
-                                  //         controller.clearSelectedIfTyped(text);
-                                  //       },
-                                  //     ),
-                                  //   ],
-                                  // )),
+                                if (controller.isRejectSelected.value)
                                   Obx(() {
-                                    if (controller.isRejectSelected.value) {
-                                      return Container(
-                                        margin: EdgeInsets.only(right: 8, top: 5),
-                                        padding: EdgeInsets.symmetric(horizontal: 8),
-                                        decoration: BoxDecoration(
-                                          color: appWhiteColor,
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            5.height,
-                                            Text(
-                                              "Reject",
-                                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                    return Container(
+                                      margin: EdgeInsets.only(right: 8, top: 5),
+                                      padding: EdgeInsets.symmetric(horizontal: 8),
+                                      decoration: BoxDecoration(
+                                        color: appWhiteColor,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          5.height,
+                                          Text(
+                                            "Reject",
+                                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                          ),
+                                          const SizedBox(height: 10),
+                                          DropdownButtonFormField<String>(
+                                            isExpanded: true,
+                                            value: controller.selectedReason.value.isEmpty ? null : controller.selectedReason.value,
+                                            decoration: const InputDecoration(
+                                              hintText: "select a justification/ reasoan for rejecting",
+                                              // labelText: 'Select a reason',
+                                              border: OutlineInputBorder(),
                                             ),
-                                            const SizedBox(height: 10),
-                                            DropdownButtonFormField<String>(
-                                              isExpanded: true,
-                                              value: controller.selectedReason.value.isEmpty ? null : controller.selectedReason.value,
-                                              decoration: const InputDecoration(
-                                                hintText: "select a justification/ reasoan for rejecting",
-                                                // labelText: 'Select a reason',
-                                                border: OutlineInputBorder(),
-                                              ),
-                                              items: controller.filteredReasons.map((reason) {
-                                                return DropdownMenuItem<String>(
-                                                  value: reason,
-                                                  child: Marquee(child: Text(reason)),
-                                                );
-                                              }).toList(),
-                                              onChanged: controller.onReasonSelected,
+                                            items: controller.filteredReasons.map((reason) {
+                                              return DropdownMenuItem<String>(
+                                                value: reason,
+                                                child: Marquee(child: Text(reason)),
+                                              );
+                                            }).toList(),
+                                            onChanged: controller.onReasonSelected,
+                                          ),
+                                          6.height,
+                                          TextField(
+                                            controller: controller.rejectTextController,
+                                            maxLines: 4,
+                                            decoration: InputDecoration(
+                                              hintText: 'Provide your justification for Sentence Structure needs improvement',
+                                              border: OutlineInputBorder(),
+                                              contentPadding: const EdgeInsets.all(12.0),
                                             ),
-                                            6.height,
-                                            TextField(
-                                              controller: controller.rejectTextController,
-                                              maxLines: 4,
-                                              decoration: InputDecoration(
-                                                hintText: 'Provide your justification for Sentence Structure needs improvement',
-                                                border: OutlineInputBorder(),
-                                                contentPadding: const EdgeInsets.all(12.0),
-                                              ),
+                                          ),
+                                          const SizedBox(height: 12),
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              // Handle submit action
+                                              print('Submitted: ${controller.rejectTextController.text}');
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: appBackGroundColor,
+                                              padding: const EdgeInsets.symmetric(vertical: 14),
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                              elevation: 3,
                                             ),
-                                            const SizedBox(height: 12),
-                                            ElevatedButton(
-                                              onPressed: () {
-                                                // Handle submit action
-                                                print('Submitted: ${controller.rejectTextController.text}');
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: appBackGroundColor,
-                                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                                elevation: 3,
-                                              ),
-                                              child: const Text(
-                                                'Submit',
-                                                style: TextStyle(color: appWhiteColor),
-                                              ),
+                                            child: const Text(
+                                              'Submit',
+                                              style: TextStyle(color: appWhiteColor),
                                             ),
-                                          ],
-                                        ),
-                                      );
-                                    } else {
-                                      return const SizedBox();
-                                    }
+                                          ),
+                                        ],
+                                      ),
+                                    );
                                   })
                               ],
                             ),
@@ -1107,7 +1353,40 @@ class MetaPhraseScreen extends StatelessWidget {
   }
 }
 
-void showPeerReviewDialog(BuildContext context, VoidCallback onConfirm, VoidCallback onCancel) {
+List<PopupMenuEntry<String>> _buildModeOptionsWithDividers(dynamic controller) {
+  final List<PopupMenuEntry<String>> items = [];
+
+  for (int i = 0; i < controller.modes.length; i++) {
+    final value = controller.modes[i];
+    final isPeerReview = value == 'Peer Review';
+    final isDisabled = ((controller.selected.value == 'Review' || controller.selected.value == 'Edit') && isPeerReview && !controller.isEditing.value);
+
+    items.add(
+      PopupMenuItem<String>(
+        enabled: !isDisabled,
+        value: value,
+        child: Center(
+          child: Text(
+            value,
+            style: TextStyle(
+              color: isDisabled ? appWhiteColor.withOpacity(0.5) : appWhiteColor,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    if (i < controller.modes.length - 1) {
+      items.add(const PopupMenuDivider(height: 1));
+    }
+  }
+
+  return items;
+}
+
+void showPeerReviewDialog(BuildContext context) {
+  final MetaPhraseController controller = Get.put(MetaPhraseController());
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -1151,13 +1430,20 @@ void showPeerReviewDialog(BuildContext context, VoidCallback onConfirm, VoidCall
                     textStyle: TextStyle(color: appBackGroundColor),
                     onTap: () {
                       Get.back();
+                      log('-----------------cancel------------------');
+                      controller.isEditing.value = false;
+                      // controller.hasShownPeerReviewDialog.value = false;
                     },
                     child: Text('Cancel'),
                   ),
                   AppButton(
                     color: appBackGroundColor,
                     onTap: () {
+                      // Confirm action
                       Get.back();
+                      log('-----------------confirm------------------');
+                      controller.selected.value = "Certify";
+                      controller.hasShownPeerReviewDialog.value = true;
                     },
                     child: Text(
                       'Confirm',
@@ -1195,15 +1481,18 @@ void showPeerReviewDialog(BuildContext context, VoidCallback onConfirm, VoidCall
     },
   );
 }
-
-void showCredentialsDialog(BuildContext context, VoidCallback onConfirm, VoidCallback onCancel) {
+void showCredentialsDialog(BuildContext context, controller) {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final ValueNotifier<bool> obscurePassword = ValueNotifier<bool>(true);
+  final ValueNotifier<String?> errorMessage = ValueNotifier<String?>(null);
+
   String storedEmail = getStringAsync(AppSharedPreferenceKeys.userEmail);
   String storedPass = getStringAsync(ConstantKeys.passwordKey);
+
   emailController.text = storedEmail.toString();
   passwordController.text = storedPass.toString();
+
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -1218,24 +1507,24 @@ void showCredentialsDialog(BuildContext context, VoidCallback onConfirm, VoidCal
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 "Credentials",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
 
               // Email Field
               TextField(
                 controller: emailController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: "Enter your email",
                   border: OutlineInputBorder(),
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
 
               // Password Field with visibility toggle
               ValueListenableBuilder<bool>(
@@ -1246,7 +1535,7 @@ void showCredentialsDialog(BuildContext context, VoidCallback onConfirm, VoidCal
                     obscureText: isObscure,
                     decoration: InputDecoration(
                       hintText: "Enter your password",
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
                         icon: Icon(
                           isObscure ? Icons.visibility_off : Icons.visibility,
@@ -1259,36 +1548,54 @@ void showCredentialsDialog(BuildContext context, VoidCallback onConfirm, VoidCal
                   );
                 },
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 8),
+
+              // Error message display
+              ValueListenableBuilder<String?>(
+                valueListenable: errorMessage,
+                builder: (context, message, child) {
+                  if (message == null) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      message,
+                      style: const TextStyle(color: Colors.red, fontSize: 13),
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 24),
 
               // Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // TextButton(
-                  //   onPressed: onCancel,
-                  //   child: Text("Cancel"),
-                  // ),
-                  // SizedBox(width: 12),
-                  // ElevatedButton(
-                  //   onPressed: onConfirm,
-                  //   style: ElevatedButton.styleFrom(
-                  //     backgroundColor: Colors.blue,
-                  //   ),
-                  //   child: Text("Confirm"),
-                  // ),
                   AppButton(
-                    textStyle: TextStyle(color: appBackGroundColor),
-                    onTap: onCancel,
-                    child: Text('Cancel'),
+                    textStyle: const TextStyle(color: Colors.white),
+                    onTap: () {
+                      Get.back();
+                    },
+                    child: const Text('Cancel'),
                   ),
-                  5.width,
+                  const SizedBox(width: 8),
                   AppButton(
                     color: appBackGroundColor,
-                    onTap: onConfirm,
-                    child: Text(
+                    onTap: () {
+                      final email = emailController.text.trim();
+                      final password = passwordController.text;
+
+                      if (email.isEmpty || password.isEmpty) {
+                        errorMessage.value = "Please enter both email and password.";
+                      } else {
+                        errorMessage.value = null;
+                        controller.isCredentialsConfirm.value = true;
+                        Get.back();
+                      }
+                    },
+                    child: const Text(
                       'Confirm',
-                      style: TextStyle(color: white),
+                      style: TextStyle(color: Colors.white),
                     ),
                   )
                 ],
@@ -1299,4 +1606,190 @@ void showCredentialsDialog(BuildContext context, VoidCallback onConfirm, VoidCal
       );
     },
   );
+}
+
+// void showCredentialsDialog(BuildContext context, controller) {
+//   final TextEditingController emailController = TextEditingController();
+//   final TextEditingController passwordController = TextEditingController();
+//   final ValueNotifier<bool> obscurePassword = ValueNotifier<bool>(true);
+//   String storedEmail = getStringAsync(AppSharedPreferenceKeys.userEmail);
+//   String storedPass = getStringAsync(ConstantKeys.passwordKey);
+//   emailController.text = storedEmail.toString();
+//   passwordController.text = storedPass.toString();
+//   showDialog(
+//     context: context,
+//     barrierDismissible: false,
+//     builder: (context) {
+//       return Dialog(
+//         shape: RoundedRectangleBorder(
+//           borderRadius: BorderRadius.circular(12),
+//         ),
+//         child: Padding(
+//           padding: const EdgeInsets.all(24),
+//           child: Column(
+//             mainAxisSize: MainAxisSize.min,
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               Text(
+//                 "Credentials",
+//                 style: TextStyle(
+//                   fontSize: 20,
+//                   fontWeight: FontWeight.bold,
+//                 ),
+//               ),
+//               SizedBox(height: 16),
+//
+//               // Email Field
+//               TextField(
+//                 controller: emailController,
+//                 decoration: InputDecoration(
+//                   hintText: "Enter your email",
+//                   border: OutlineInputBorder(),
+//                 ),
+//               ),
+//               SizedBox(height: 16),
+//
+//               // Password Field with visibility toggle
+//               ValueListenableBuilder<bool>(
+//                 valueListenable: obscurePassword,
+//                 builder: (context, isObscure, child) {
+//                   return TextField(
+//                     controller: passwordController,
+//                     obscureText: isObscure,
+//                     decoration: InputDecoration(
+//                       hintText: "Enter your password",
+//                       border: OutlineInputBorder(),
+//                       suffixIcon: IconButton(
+//                         icon: Icon(
+//                           isObscure ? Icons.visibility_off : Icons.visibility,
+//                         ),
+//                         onPressed: () {
+//                           obscurePassword.value = !obscurePassword.value;
+//                         },
+//                       ),
+//                     ),
+//                   );
+//                 },
+//               ),
+//               SizedBox(height: 24),
+//
+//               // Buttons
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.end,
+//                 children: [
+//                   AppButton(
+//                     textStyle: TextStyle(color: appBackGroundColor),
+//                     onTap: () {
+//                       Get.back();
+//                     },
+//                     child: Text('Cancel'),
+//                   ),
+//                   5.width,
+//                   AppButton(
+//                     color: appBackGroundColor,
+//                     onTap: () {
+//                       if (emailController.text.isNotEmpty && passwordController.text.isNotEmpty) {
+//                         controller.isCredentialsConfirm.value = true;
+//                       }else{
+//                         toast("fill");
+//                       }
+//                     }, //onConfirm,
+//                     child: Text(
+//                       'Confirm',
+//                       style: TextStyle(color: white),
+//                     ),
+//                   )
+//                 ],
+//               ),
+//             ],
+//           ),
+//         ),
+//       );
+//     },
+//   );
+// }
+
+
+Future<void> generateAndDownloadCertificate(String firstName,String email,String fileName) async {
+  final pdf = pw.Document();
+
+  pdf.addPage(
+    pw.Page(
+      build: (context) {
+        return pw.Container(
+          padding: const pw.EdgeInsets.all(24),
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Center(
+                child: pw.Text(
+                  'Certificate of Translation',
+                  style: pw.TextStyle(
+                    fontSize: 20,
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.blue,
+                  ),
+                ),
+              ),
+              pw.SizedBox(height: 20),
+              pw.Text(
+                'I, $firstName, certify that I am competent to translate between English and Japanese (ja). '
+                    'I further certify that I translated the document titled "$fileName", and the translation is true '
+                    'and accurate to the best of my abilities.',
+                style: pw.TextStyle(fontSize: 14),
+              ),
+              pw.SizedBox(height: 20),
+              pw.Divider(),
+              pw.SizedBox(height: 10),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text('Name:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                      pw.SizedBox(height: 8),
+                      pw.Text('Signature:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                      pw.SizedBox(height: 8),
+                      pw.Text('Phone Number:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                      pw.SizedBox(height: 8),
+                      pw.Text('Address:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                    ],
+                  ),
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.Text(firstName.toString()),
+                      pw.SizedBox(height: 8),
+                      pw.Text(email.toString()),
+                      pw.SizedBox(height: 8),
+                      pw.Text('123456789'),
+                      pw.SizedBox(height: 8),
+                      pw.Text('India'),
+                    ],
+                  )
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    ),
+  );
+
+  // Permissions (Only needed for Android)
+  if (Platform.isAndroid) {
+    final status = await Permission.storage.request();
+    if (!status.isGranted) {
+      print('Storage permission denied');
+      return;
+    }
+  }
+
+  final outputDir = await getApplicationDocumentsDirectory();
+  final filePath = "${outputDir.path}/certificate.pdf";
+  final file = File(filePath);
+  await file.writeAsBytes(await pdf.save());
+
+  OpenFile.open(filePath); // Optional: open after save
 }

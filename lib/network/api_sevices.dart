@@ -24,6 +24,29 @@ import '../utils/constants.dart';
 import '../utils/shared_prefences.dart';
 
 class AuthServiceApis {
+  // static Future<String?> login({
+  //   required Map<String, dynamic> request,
+  // }) async {
+  //   UserDataResponseModel userDataResponse = await UserDataResponseModel.fromJson(
+  //     await buildHttpResponse(
+  //       endPoint: APIEndPoints.login,
+  //       request: request,
+  //       method: MethodType.post,
+  //     ),
+  //   );
+  //
+  //   isLoggedIn(true);
+  //   loggedInUser(userDataResponse);
+  //   apiToken = userDataResponse.access!;
+  //
+  //   setValue(AppSharedPreferenceKeys.isUserLoggedIn, true);
+  //   setValue(AppSharedPreferenceKeys.currentUserData, loggedInUser.value.toJson());
+  //   setValue(AppSharedPreferenceKeys.apiToken, loggedInUser.value.access);
+  //   setValue(AppSharedPreferenceKeys.userEmail, request['email'].toString()); //userDataResponse.userModel?.email
+  //   setValue(AppSharedPreferenceKeys.userModel, jsonEncode(userDataResponse.userModel)); //userDataResponse.userModel?.email
+  //   setValue(AppSharedPreferenceKeys.userPassword, request[ConstantKeys.passwordKey]);
+  //   return userDataResponse.refresh;
+  // }
   static Future<String?> login({
     required Map<String, dynamic> request,
   }) async {
@@ -37,14 +60,29 @@ class AuthServiceApis {
 
     isLoggedIn(true);
     loggedInUser(userDataResponse);
+
+    // Set API tokens
     apiToken = userDataResponse.access!;
-    setValue(AppSharedPreferenceKeys.isUserLoggedIn, true);
-    setValue(AppSharedPreferenceKeys.currentUserData, loggedInUser.value.toJson());
-    setValue(AppSharedPreferenceKeys.apiToken, loggedInUser.value.access);
-    setValue(AppSharedPreferenceKeys.userEmail, request['email'].toString()); //userDataResponse.userModel?.email
-    setValue(AppSharedPreferenceKeys.userModel, jsonEncode(userDataResponse.userModel)); //userDataResponse.userModel?.email
-    setValue(AppSharedPreferenceKeys.userPassword, request[ConstantKeys.passwordKey]);
-    return userDataResponse.refresh;
+    final refreshToken = userDataResponse.refresh!;
+    final accessToken = userDataResponse.access!;
+    final userModel = userDataResponse.userModel;
+
+    // Save to shared preferences
+    await setValue(AppSharedPreferenceKeys.isUserLoggedIn, true);
+    await setValue(AppSharedPreferenceKeys.apiToken, accessToken);
+    await setValue(AppSharedPreferenceKeys.refreshToken, refreshToken);
+    await setValue(AppSharedPreferenceKeys.userEmail, request['email'].toString());
+    await setValue(AppSharedPreferenceKeys.userPassword, request[ConstantKeys.passwordKey]);
+
+    // Save user model
+    if (userModel != null) {
+      await setValue(AppSharedPreferenceKeys.userModel, jsonEncode(userModel));
+    }
+
+    // Save entire loggedInUser model if needed (optional)
+    await setValue(AppSharedPreferenceKeys.currentUserData, loggedInUser.value.toJson());
+
+    return refreshToken;
   }
 
   // static Future<BaseResponseModel> forgotPassword({required Map<String, dynamic> request}) async {
@@ -302,6 +340,24 @@ class GovernAIServiceApis {
 //---------------------------------------------------------------------------------------------------------------
 /// GenAI PV
 class GenAIPVServiceApis {
+  static Future<FetchDocsClinical?> fetchGenAIDocs() async {
+    List<String> params = [];
+
+    try {
+      final response = await buildHttpResponse(
+        endPoint: getEndPoint(
+          endPoint: APIEndPoints.fetchGenAIDocs,
+          params: params,
+        ),
+      );
+
+      return FetchDocsClinical.fromJson(response);
+    } catch (e) {
+      toast(e.toString());
+      print("Error fetching clinical documents: $e");
+      return null;
+    }
+  }
   static Future<GenerateSQL> getGenerateSQL({required Map request}) async {
     final response = await buildHttpResponse(
       endPoint: APIEndPoints.fetchGenerateSQL,
@@ -315,7 +371,7 @@ class GenAIPVServiceApis {
     final response = await buildHttpResponse(
       endPoint: APIEndPoints.fetchDocsLanguage,
       request: request,
-      method: MethodType.post,
+      method: MethodType.put,
     );
     return DocLanguage.fromJson(response);
   }

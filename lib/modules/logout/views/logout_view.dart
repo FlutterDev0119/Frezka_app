@@ -23,7 +23,7 @@ class LogoutScreen extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.teal[700], // Deep blue/teal
           ),
-          onPressed: () => controller.logout(context),
+          onPressed: () => LogoutController.logout(),
           child: const Text('Confirm'),
         ),
       ],

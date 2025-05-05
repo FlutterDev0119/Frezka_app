@@ -665,6 +665,7 @@ class GenAIPVScreen extends StatelessWidget {
                             // ),
                             Expanded(
                               child: Obx(() {
+                                
                                 final tags = controller.tags;
                                 return SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,

@@ -14,6 +14,7 @@ class AppSharedPreferenceKeys {
 
   //region Configuration API Constants
   static const apiToken = 'API Token';
+  static const refreshToken = 'refreshToken';
 
   //endregion
 

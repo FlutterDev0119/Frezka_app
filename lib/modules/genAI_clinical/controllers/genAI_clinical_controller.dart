@@ -92,7 +92,9 @@ class GenAIClinicalController extends GetxController {
   final TextEditingController searchController = TextEditingController();
   // Filtered data for displaying in the UI
   RxMap<String, List<String>> filteredAttributes = <String, List<String>>{}.obs;
-
+  var genAIDropdownValue = 'Upload File'.obs;
+  var dataLakeInput = ''.obs;
+  RxBool isShowSqlIcon = false.obs;
   @override
   void onInit() {
     super.onInit();

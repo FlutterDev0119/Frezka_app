@@ -30,9 +30,11 @@ class MetaPhraseController extends BaseController {
   final RxString errorMessage = ''.obs;
   final RxBool isLoading = false.obs;
   final RxBool isReverse = false.obs;
+  final RxBool isCredentialsConfirm = false.obs;
 
   var selectedMode = 'Review'.obs;
   RxBool isCardSelected = false.obs;
+  final hasShownPeerReviewDialog = false.obs;
 
   late ScrollController translatedScrollController = ScrollController();
   late ScrollController translatedScrollController1 = ScrollController();

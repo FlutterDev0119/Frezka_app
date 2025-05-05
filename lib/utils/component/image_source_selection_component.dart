@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -44,10 +47,27 @@ class ImageSourceSelectionComponent extends StatelessWidget {
             hoverColor: Colors.transparent,
             highlightColor: Colors.transparent,
             splashColor: Colors.transparent,
-            onTap: () {
+            // onTap: () {
+            //   Get.back();
+            //   onSourceSelected.call(ImageSource.gallery);
+            // },
+            onTap: () async {
               Get.back();
-              onSourceSelected.call(ImageSource.gallery);
+              FilePickerResult? result = await FilePicker.platform.pickFiles(
+                type: FileType.custom,
+                allowedExtensions: ['xml', 'pdf', 'docx', 'xlsx', 'xls', 'csv', 'txt', 'png', 'jpg']
+              );
+
+              if (result != null && result.files.single.path != null) {
+                File file = File(result.files.single.path!);
+                // Do something with the selected file
+                print('Picked file: ${file.path}');
+                // You can also pass the file to your onSourceSelected callback if modified accordingly
+              } else {
+                // User canceled the picker
+              }
             },
+
           ),
           // SettingItemWidget(
           //   title: 'Camera',

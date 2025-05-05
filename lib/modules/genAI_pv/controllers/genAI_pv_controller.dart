@@ -22,6 +22,8 @@ class GenAIPVController extends GetxController {
   RxBool isLoading = false.obs;
   RxBool isShowSqlIcon = false.obs;
   final TextEditingController searchController = TextEditingController();
+
+
   List<String> tags = [
     "Adverse Event Reporting",
     "Aggregate Reporting",
@@ -44,10 +46,12 @@ class GenAIPVController extends GetxController {
   var generateDataLanaguageResponse = Rxn<DocLanguage>();
   var errorMessage = ''.obs;
   var dataLakeInput = ''.obs;
+
+
   @override
   void onInit() {
     super.onInit();
-    getDocsClinical();
+    fetchGenAIDocs();
     searchController.addListener(() {
       filterAttributes(searchController.text);
     });
@@ -79,12 +83,12 @@ class GenAIPVController extends GetxController {
   }
 
   // Fetch clinical document data (populate classificationMap and selectable attributes)
-  Future<void> getDocsClinical() async {
+  Future<void> fetchGenAIDocs() async {
     if (isLoading.value) return;
     isLoading.value = true;
 
     try {
-      final data = await ClinicalPromptServiceApis.getDocsClinical();
+      final data = await GenAIPVServiceApis.fetchGenAIDocs();
       if (data != null && data.output != null) {
         classificationMap.assignAll(data.output!);
         filteredClassificationMap.assignAll(data.output!);

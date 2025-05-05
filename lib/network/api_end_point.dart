@@ -10,6 +10,7 @@ class APIEndPoints {
   static const String newPrompt = 'v1/new_prompt';
 
   ///GenAI PV
+  static const String fetchGenAIDocs = 'v1/fetch_docs';
   static const String fetchGenerateSQL = 'v1/generate_sql';
   static const String fetchDocsLanguage = 'v1/fetch_docs_language';
 

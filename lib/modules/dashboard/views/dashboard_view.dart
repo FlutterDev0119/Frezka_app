@@ -178,6 +178,9 @@ class DashboardScreen extends StatelessWidget {
     await setValue(AppSharedPreferenceKeys.isUserLoggedIn, false);
     await setValue(AppSharedPreferenceKeys.apiToken, '');
     await setValue(AppSharedPreferenceKeys.currentUserData, '');
+    await clearSharedPref();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
   }
 
   Widget _buildWelcomeCard(BuildContext context) {
