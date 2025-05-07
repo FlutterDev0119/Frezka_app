@@ -12,7 +12,8 @@ import '../constants.dart';
 import 'cached_image_widget.dart';
 
 class ImageSourceSelectionComponent extends StatelessWidget {
-  final Function(ImageSource imageSource) onSourceSelected;
+  // final Function(ImageSource imageSource) onSourceSelected;
+  final void Function(dynamic source) onSourceSelected;
 
   const ImageSourceSelectionComponent({
     super.key,
@@ -52,21 +53,35 @@ class ImageSourceSelectionComponent extends StatelessWidget {
             //   onSourceSelected.call(ImageSource.gallery);
             // },
             onTap: () async {
-              Get.back();
               FilePickerResult? result = await FilePicker.platform.pickFiles(
                 type: FileType.custom,
-                allowedExtensions: ['xml', 'pdf', 'docx', 'xlsx', 'xls', 'csv', 'txt', 'png', 'jpg']
+                allowedExtensions: ['xml', 'pdf', 'docx', 'xlsx', 'xls', 'csv', 'txt', 'png', 'jpg'],
               );
 
               if (result != null && result.files.single.path != null) {
                 File file = File(result.files.single.path!);
-                // Do something with the selected file
-                print('Picked file: ${file.path}');
-                // You can also pass the file to your onSourceSelected callback if modified accordingly
-              } else {
-                // User canceled the picker
+                Get.back();
+                onSourceSelected.call(file); // Custom callback
+
               }
             },
+
+            // onTap: () async {
+            //   Get.back();
+            //   FilePickerResult? result = await FilePicker.platform.pickFiles(
+            //     type: FileType.custom,
+            //     allowedExtensions: ['xml', 'pdf', 'docx', 'xlsx', 'xls', 'csv', 'txt', 'png', 'jpg']
+            //   );
+            //
+            //   if (result != null && result.files.single.path != null) {
+            //     File file = File(result.files.single.path!);
+            //     // Do something with the selected file
+            //     print('Picked file: ${file.path}');
+            //     // You can also pass the file to your onSourceSelected callback if modified accordingly
+            //   } else {
+            //     // User canceled the picker
+            //   }
+            // },
 
           ),
           // SettingItemWidget(

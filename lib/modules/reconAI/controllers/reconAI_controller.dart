@@ -15,21 +15,53 @@ class ReconAIController extends BaseController {
   RxList<String> fileNames = <String>[].obs;
   var sourceDropdownValue = 'Upload File'.obs;
   var targetDropdownValue = 'Upload File'.obs;
+  RxString selectedFileName = ''.obs;
   // Handle source selection for image upload
-  void onSourceSelected(ImageSource imageSource) async {
-    final pickedFile = await pickFilesFromDevice(allowMultipleFiles: true);
-    if (pickedFile.isNotEmpty) {
+  // void onSourceSelected(dynamic  imageSource) async {
+  //   final pickedFile = await pickFilesFromDevice(allowMultipleFiles: true);
+  //   log("pickedFile-----------------$pickedFile");
+  //   if (pickedFile.isNotEmpty) {
+  //     Get.bottomSheet(
+  //       AppDialogueComponent(
+  //         titleText: "Do you want to upload this attachment?",
+  //         confirmText: "Upload",
+  //         onConfirm: () {
+  //           imageFiles.addAll(pickedFile);
+  //           fileNames.addAll(pickedFile.map((e) => e.path.split('/').last));
+  //           selectedFileName.value = pickedFile.first.path.split('/').last;
+  //           print("Selected File: -----------------${selectedFileName.value}");
+  //         },
+  //       ),
+  //       isScrollControlled: true,
+  //     );
+  //   }
+  // }
+  void onSourceSelected(dynamic imageSource) async {
+    if (imageSource is File) {
+      // ✅ Use the file passed from the UI
       Get.bottomSheet(
         AppDialogueComponent(
           titleText: "Do you want to upload this attachment?",
           confirmText: "Upload",
           onConfirm: () {
-            imageFiles.addAll(pickedFile);
-            fileNames.addAll(pickedFile.map((e) => e.path.split('/').last));
+            imageFiles.add(imageSource);
+            fileNames.add(imageSource.path.split('/').last);
+            selectedFileName.value = imageSource.path.split('/').last;
+            print("Selected File: -----------------${selectedFileName.value}");
           },
         ),
         isScrollControlled: true,
       );
+    // } else if (imageSource is ImageSource) {
+    //   // Optional: if you want to support gallery/camera later
+    //   final pickedFile = await pickImageFromSource(imageSource);
+    //   if (pickedFile != null) {
+    //     imageFiles.add(pickedFile);
+    //     fileNames.add(pickedFile.path.split('/').last);
+    //     selectedFileName.value = pickedFile.path.split('/').last;
+    //   }
     }
   }
+
+
 }

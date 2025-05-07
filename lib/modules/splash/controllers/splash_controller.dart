@@ -109,11 +109,11 @@ class SplashController extends BaseController {
   Future<void> handleNavigation() async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.microtask(() {
-        if (isLoggedIn.value) {
-          Get.offAllNamed(Routes.DASHBOARD);
-        } else {
+        // if (isLoggedIn.value) {
+        //   Get.offAllNamed(Routes.DASHBOARD);
+        // } else {
           Get.offAllNamed(Routes.LOGIN);
-        }
+        // }
       });
     });
   }

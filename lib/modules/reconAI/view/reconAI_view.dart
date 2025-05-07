@@ -83,12 +83,44 @@ class ReconAIScreen extends StatelessWidget {
                                 child: Row(
                                   children: [
                                     Expanded(
-                                      child: Text(
-                                        'Select File',
-                                        style: primaryTextStyle(),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ), 5.width,
+                                      child: Obx(() {
+                                        final files = controller.fileNames;
+
+                                        if (files.isEmpty) {
+                                          return Text('Select File', style: primaryTextStyle());
+                                        }
+
+                                        return Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: files.map((file) {
+                                            return Row(
+                                              children: [
+                                                Icon(Icons.insert_drive_file, color: appBackGroundColor, size: 18),
+                                                6.width,
+                                                Expanded(
+                                                  child: Text(
+                                                    file,
+                                                    style: primaryTextStyle(),
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
+                                            ).paddingBottom(4);
+                                          }).toList(),
+                                        );
+                                      }),
+                                    ),
+
+
+
+                                    // Expanded(
+                                    //   child: Text(
+                                    //     'Select File',
+                                    //     style: primaryTextStyle(),
+                                    //     overflow: TextOverflow.ellipsis,
+                                    //   ),
+                                    // ),
+                                    5.width,
                                     GestureDetector(
                                       onTap: () {
                                         controller.sourceDropdownValue.value == 'Upload File' ? Get.bottomSheet(
@@ -204,6 +236,7 @@ class ReconAIScreen extends StatelessWidget {
                                           ImageSourceSelectionComponent(
                                             onSourceSelected: (imageSource) {
                                               hideKeyboard(context);
+                                              log("-------------------------241------------------");
                                               controller.onSourceSelected(imageSource);
                                             },
                                           ),
@@ -356,7 +389,8 @@ class ReconAIScreen extends StatelessWidget {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                GestureDetector(onTap: (){Get.bottomSheet(
+                                GestureDetector(onTap: (){
+                                  Get.bottomSheet(
                                   enableDrag: true,
                                   isScrollControlled: true,
                                   ImageSourceSelectionComponent(
