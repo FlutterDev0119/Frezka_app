@@ -32,6 +32,7 @@ class TranslationMemoryController extends BaseController {
     setLoading(true);
     try {
       final result = await TranslationMemoryServiceApis.fetchTranslationMemoryList();
+      allFiles.clear();
       allFiles.assignAll(result);
     } catch (e) {
       print('Error fetching Translation Memory list: $e');

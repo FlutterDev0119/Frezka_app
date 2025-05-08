@@ -1,4 +1,3 @@
-
 import 'package:apps/utils/library.dart';
 import 'package:nb_utils/nb_utils.dart';
 import '../../../utils/app_scaffold.dart';
@@ -58,19 +57,19 @@ class ReconAIScreen extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Obx(() => DropdownButton<String>(
-                                  value: controller.sourceDropdownValue.value,
-                                  isExpanded: true,
-                                  underline: SizedBox(),
-                                  items: ['Upload File', 'Data Lake'].map((String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(value, style: primaryTextStyle()),
-                                    );
-                                  }).toList(),
-                                  onChanged: (newValue) {
-                                    controller.sourceDropdownValue.value = newValue!;
-                                  },
-                                )),
+                                      value: controller.sourceDropdownValue.value,
+                                      isExpanded: true,
+                                      underline: SizedBox(),
+                                      items: ['Upload File', 'Data Lake'].map((String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(value, style: primaryTextStyle()),
+                                        );
+                                      }).toList(),
+                                      onChanged: (newValue) {
+                                        controller.sourceDropdownValue.value = newValue!;
+                                      },
+                                    )),
                               ),
                               10.height,
                               // Query Input
@@ -90,55 +89,93 @@ class ReconAIScreen extends StatelessWidget {
                                           return Text('Select File', style: primaryTextStyle());
                                         }
 
-                                        return Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: files.map((file) {
-                                            return Row(
-                                              children: [
-                                                Icon(Icons.insert_drive_file, color: appBackGroundColor, size: 18),
-                                                6.width,
-                                                Expanded(
-                                                  child: Text(
-                                                    file,
-                                                    style: primaryTextStyle(),
-                                                    overflow: TextOverflow.ellipsis,
-                                                  ),
+                                        return SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          child: Row(
+                                            children: List.generate(files.length, (index) {
+                                              final fileName = files[index];
+                                              return Container(
+                                                margin: EdgeInsets.only(right: 8),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.blue.shade100,
+                                                  borderRadius: BorderRadius.circular(6),
                                                 ),
-                                              ],
-                                            ).paddingBottom(4);
-                                          }).toList(),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Padding(
+                                                      padding: EdgeInsets.only(left: 8),
+                                                      child: Text(
+                                                        fileName,
+                                                        overflow: TextOverflow.ellipsis,
+                                                        style: TextStyle(color: Colors.black),
+                                                      ),
+                                                    ),
+                                                    PopupMenuButton<String>(
+                                                      padding: EdgeInsets.zero,
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(10), // Rounded corners
+                                                      ),
+                                                      onSelected: (value) {
+                                                        if (value == 'view') {
+                                                          toast('Viewing ${controller.fileNames[index]}');
+                                                        } else if (value == 'remove') {
+                                                          controller.fileNames.removeAt(index);
+                                                          controller.imageFiles.removeAt(index);
+                                                        }
+                                                      },
+                                                      icon: Icon(Icons.menu, size: 18),
+                                                      itemBuilder: (context) => [
+                                                        PopupMenuItem(
+                                                          value: 'view',
+                                                          child: Row(
+                                                            children: [
+                                                              Icon(Icons.remove_red_eye, size: 18),
+                                                              SizedBox(width: 8),
+                                                              Text('View'),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        PopupMenuDivider(), // Adds a horizontal divider
+                                                        PopupMenuItem(
+                                                          value: 'remove',
+                                                          child: Row(
+                                                            children: [
+                                                              Icon(Icons.close, size: 18, color: Colors.red),
+                                                              SizedBox(width: 8),
+                                                              Text('Remove', style: TextStyle(color: Colors.red)),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            }),
+                                          ),
                                         );
                                       }),
                                     ),
-
-
-
-                                    // Expanded(
-                                    //   child: Text(
-                                    //     'Select File',
-                                    //     style: primaryTextStyle(),
-                                    //     overflow: TextOverflow.ellipsis,
-                                    //   ),
-                                    // ),
                                     5.width,
                                     GestureDetector(
                                       onTap: () {
-                                        controller.sourceDropdownValue.value == 'Upload File' ? Get.bottomSheet(
-                                          enableDrag: true,
-                                          isScrollControlled: true,
-                                          ImageSourceSelectionComponent(
-                                            onSourceSelected: (imageSource) {
-                                              hideKeyboard(context);
-                                              controller.onSourceSelected(imageSource);
-                                            },
-                                          ),
-                                        ):SizedBox();
+                                        controller.sourceDropdownValue.value == 'Upload File'
+                                            ? Get.bottomSheet(
+                                                enableDrag: true,
+                                                isScrollControlled: true,
+                                                ImageSourceSelectionComponent(
+                                                  onSourceSelected: (imageSource) {
+                                                    hideKeyboard(context);
+                                                    controller.onSourceSelected(imageSource);
+                                                  },
+                                                ),
+                                              )
+                                            : SizedBox();
                                       },
                                       child: Obx(() {
                                         // Dynamically change icon based on dropdown value
-                                        IconData icon = controller.sourceDropdownValue.value == 'Upload File'
-                                            ? Icons.attach_file
-                                            : Icons.cloud;
+                                        IconData icon = controller.sourceDropdownValue.value == 'Upload File' ? Icons.attach_file : Icons.cloud;
                                         return Icon(icon, color: appBackGroundColor);
                                       }),
                                     ),
@@ -148,13 +185,12 @@ class ReconAIScreen extends StatelessWidget {
                                           ? SizedBox()
                                           : Icon(Icons.file_copy_rounded, color: appBackGroundColor);
                                     }),
-
                                   ],
                                 ),
                               ),
                             ],
                           ),
-          
+
                           12.height,
                           // Buttons
                           Row(
@@ -174,10 +210,10 @@ class ReconAIScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-          
+
                           20.height,
                           // Target Section
-          
+
                           Row(
                             children: [
                               Icon(Icons.cloud_done_outlined, color: Colors.green),
@@ -196,19 +232,19 @@ class ReconAIScreen extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Obx(() => DropdownButton<String>(
-                                  value: controller.targetDropdownValue.value,
-                                  isExpanded: true,
-                                  underline: SizedBox(),
-                                  items: ['Upload File', 'Data Lake'].map((String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(value, style: primaryTextStyle()),
-                                    );
-                                  }).toList(),
-                                  onChanged: (newValue) {
-                                    controller.targetDropdownValue.value = newValue!;
-                                  },
-                                )),
+                                      value: controller.targetDropdownValue.value,
+                                      isExpanded: true,
+                                      underline: SizedBox(),
+                                      items: ['Upload File', 'Data Lake'].map((String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(value, style: primaryTextStyle()),
+                                        );
+                                      }).toList(),
+                                      onChanged: (newValue) {
+                                        controller.targetDropdownValue.value = newValue!;
+                                      },
+                                    )),
                               ),
                               10.height,
                               // Query Input
@@ -221,11 +257,80 @@ class ReconAIScreen extends StatelessWidget {
                                 child: Row(
                                   children: [
                                     Expanded(
-                                      child: Text(
-                                        'Select File',
-                                        style: primaryTextStyle(),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
+                                      child: Obx(() {
+                                        final files = controller.targetFileNames;
+
+                                        if (files.isEmpty) {
+                                          return Text('Select File', style: primaryTextStyle());
+                                        }
+
+                                        return SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          child: Row(
+                                            children: List.generate(files.length, (index) {
+                                              final fileName = files[index];
+                                              return Container(
+                                                margin: EdgeInsets.only(right: 8),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.blue.shade100,
+                                                  borderRadius: BorderRadius.circular(6),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Padding(
+                                                      padding: EdgeInsets.only(left: 8),
+                                                      child: Text(
+                                                        fileName,
+                                                        overflow: TextOverflow.ellipsis,
+                                                        style: TextStyle(color: Colors.black),
+                                                      ),
+                                                    ),
+                                                    PopupMenuButton<String>(
+                                                      padding: EdgeInsets.zero,
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(10), // Rounded corners
+                                                      ),
+                                                      onSelected: (value) {
+                                                        if (value == 'view') {
+                                                          toast('Viewing ${controller.targetFileNames[index]}');
+                                                        } else if (value == 'remove') {
+                                                          controller.targetFileNames.removeAt(index);
+                                                          controller.targetImageFiles.removeAt(index);
+                                                        }
+                                                      },
+                                                      icon: Icon(Icons.menu, size: 18),
+                                                      itemBuilder: (context) => [
+                                                        PopupMenuItem(
+                                                          value: 'view',
+                                                          child: Row(
+                                                            children: [
+                                                              Icon(Icons.remove_red_eye, size: 18),
+                                                              SizedBox(width: 8),
+                                                              Text('View'),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        PopupMenuDivider(), // Adds a horizontal divider
+                                                        PopupMenuItem(
+                                                          value: 'remove',
+                                                          child: Row(
+                                                            children: [
+                                                              Icon(Icons.close, size: 18, color: Colors.red),
+                                                              SizedBox(width: 8),
+                                                              Text('Remove', style: TextStyle(color: Colors.red)),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            }),
+                                          ),
+                                        );
+                                      }),
                                     ),
                                     5.width,
                                     GestureDetector(
@@ -236,18 +341,15 @@ class ReconAIScreen extends StatelessWidget {
                                           ImageSourceSelectionComponent(
                                             onSourceSelected: (imageSource) {
                                               hideKeyboard(context);
-                                              log("-------------------------241------------------");
-                                              controller.onSourceSelected(imageSource);
+                                              controller.onTargetSourceSelected(imageSource);
                                             },
                                           ),
                                         );
                                       },
                                       child: Obx(() {
                                         // Dynamically change icon based on dropdown value
-                                        IconData icon = controller.targetDropdownValue.value == 'Upload File'
-                                            ? Icons.attach_file
-                                            : Icons.cloud;
-                                        return Icon(icon, color:appBackGroundColor);
+                                        IconData icon = controller.targetDropdownValue.value == 'Upload File' ? Icons.attach_file : Icons.cloud;
+                                        return Icon(icon, color: appBackGroundColor);
                                       }),
                                     ),
                                     5.width,
@@ -255,31 +357,30 @@ class ReconAIScreen extends StatelessWidget {
                                       return controller.targetDropdownValue.value == 'Upload File'
                                           ? SizedBox()
                                           : GestureDetector(
-                                        onTap: () {
-                                          showDialog(
-                                            context: Get.context!,
-                                            builder: (_) => AlertDialog(
-                                              title: Text("Box"),
-                                              content: Text("Open Box"),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () => Get.back(),
-                                                  child: Text("Close"),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        },
-                                        child: Icon(Icons.file_copy_rounded, color: appBackGroundColor),
-                                      );
+                                              onTap: () {
+                                                showDialog(
+                                                  context: Get.context!,
+                                                  builder: (_) => AlertDialog(
+                                                    title: Text("Box"),
+                                                    content: Text("Open Box"),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () => Get.back(),
+                                                        child: Text("Close"),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
+                                              child: Icon(Icons.file_copy_rounded, color: appBackGroundColor),
+                                            );
                                     }),
-
                                   ],
                                 ),
                               ),
                             ],
                           ),
-          
+
                           // Row(
                           //   children: [
                           //     // Dropdown
@@ -383,23 +484,95 @@ class ReconAIScreen extends StatelessWidget {
                             child: Row(
                               children: [
                                 Expanded(
-                                  child: Text(
-                                    'Select File',
-                                    style: primaryTextStyle(),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                                  child: Obx(() {
+                                    final files = controller.metaFileNames;
+
+                                    if (files.isEmpty) {
+                                      return Text('Select File', style: primaryTextStyle());
+                                    }
+
+                                    return SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        children: List.generate(files.length, (index) {
+                                          final fileName = files[index];
+                                          return Container(
+                                            margin: EdgeInsets.only(right: 8),
+                                            decoration: BoxDecoration(
+                                              color: Colors.blue.shade100,
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.only(left: 8),
+                                                  child: Text(
+                                                    fileName,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: TextStyle(color: Colors.black),
+                                                  ),
+                                                ),
+                                                PopupMenuButton<String>(
+                                                  padding: EdgeInsets.zero,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(10), // Rounded corners
+                                                  ),
+                                                  onSelected: (value) {
+                                                    if (value == 'view') {
+                                                      toast('Viewing ${controller.metaFileNames[index]}');
+                                                    } else if (value == 'remove') {
+                                                      controller.metaFileNames.removeAt(index);
+                                                      controller.metaImageFiles.removeAt(index);
+                                                    }
+                                                  },
+                                                  icon: Icon(Icons.menu, size: 18),
+                                                  itemBuilder: (context) => [
+                                                    PopupMenuItem(
+                                                      value: 'view',
+                                                      child: Row(
+                                                        children: [
+                                                          Icon(Icons.remove_red_eye, size: 18),
+                                                          SizedBox(width: 8),
+                                                          Text('View'),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    PopupMenuDivider(), // Adds a horizontal divider
+                                                    PopupMenuItem(
+                                                      value: 'remove',
+                                                      child: Row(
+                                                        children: [
+                                                          Icon(Icons.close, size: 18, color: Colors.red),
+                                                          SizedBox(width: 8),
+                                                          Text('Remove', style: TextStyle(color: Colors.red)),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }),
+                                      ),
+                                    );
+                                  }),
                                 ),
-                                GestureDetector(onTap: (){
-                                  Get.bottomSheet(
-                                  enableDrag: true,
-                                  isScrollControlled: true,
-                                  ImageSourceSelectionComponent(
-                                    onSourceSelected: (imageSource) {
-                                      hideKeyboard(context);
-                                      controller.onSourceSelected(imageSource);
+                                GestureDetector(
+                                    onTap: () {
+                                      Get.bottomSheet(
+                                        enableDrag: true,
+                                        isScrollControlled: true,
+                                        ImageSourceSelectionComponent(
+                                          onSourceSelected: (imageSource) {
+                                            hideKeyboard(context);
+                                            controller.onMetaSourceSelected(imageSource);
+                                          },
+                                        ),
+                                      );
                                     },
-                                  ),
-                                );},child: Icon(Icons.attach_file, color: appBackGroundColor)),
+                                    child: Icon(Icons.attach_file, color: appBackGroundColor)),
                               ],
                             ),
                           ),

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:apps/utils/library.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -24,7 +25,7 @@ class ImageSourceSelectionComponent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: boxDecorationDefault(
-        color: context.cardColor,
+        color: appDashBoardCardColor,
       ),
       padding: EdgeInsets.all(16),
       child: AnimatedWrap(
@@ -39,15 +40,17 @@ class ImageSourceSelectionComponent extends StatelessWidget {
           Text('Choose File Source', style: boldTextStyle(size: DefaultConstants.labelTextSize)),
           SettingItemWidget(
             title: 'File',
+            titleTextColor: appBackGroundColor,
             leading: CachedImageWidget(
               url: Assets.iconsIcFile,
               height: 16,
               width: 16,
+              color: appBackGroundColor,
             ),
             decoration: boxDecorationDefault(color: context.scaffoldBackgroundColor),
             hoverColor: Colors.transparent,
             highlightColor: Colors.transparent,
-            splashColor: Colors.transparent,
+            splashColor: appBackGroundColor,
             // onTap: () {
             //   Get.back();
             //   onSourceSelected.call(ImageSource.gallery);
@@ -84,26 +87,6 @@ class ImageSourceSelectionComponent extends StatelessWidget {
             // },
 
           ),
-          // SettingItemWidget(
-          //   title: 'Camera',
-          //   leading: CachedImageWidget(
-          //     url: Assets.iconsIcCamera,
-          //     height: 16,
-          //     width: 16,
-          //   ),
-          //   decoration: boxDecorationDefault(color: context.scaffoldBackgroundColor),
-          //   hoverColor: Colors.transparent,
-          //   highlightColor: Colors.transparent,
-          //   splashColor: Colors.transparent,
-          //   onTap: () {
-          //     Get.back();
-          //     onSourceSelected.call(ImageSource.camera);
-          //   },
-          // ),
-          // Text(
-          //   'Support: JPG,PNG,JPEG and up 5mb size',
-          //   style: secondaryTextStyle(color: Colors.red, fontStyle: FontStyle.italic),
-          // ),
         ],
       ),
     );

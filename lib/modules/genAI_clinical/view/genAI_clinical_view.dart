@@ -438,19 +438,19 @@ class GenAIClinicalScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Obx(() => DropdownButton<String>(
-                    value: controller.genAIDropdownValue.value,
-                    isExpanded: true,
-                    underline: SizedBox(),
-                    items: ['Upload File', 'Data Lake'].map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value, style: primaryTextStyle()),
-                      );
-                    }).toList(),
-                    onChanged: (newValue) {
-                      controller.genAIDropdownValue.value = newValue!;
-                    },
-                  )),
+                        value: controller.genAIDropdownValue.value,
+                        isExpanded: true,
+                        underline: SizedBox(),
+                        items: ['Upload File', 'Data Lake'].map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value, style: primaryTextStyle()),
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          controller.genAIDropdownValue.value = newValue!;
+                        },
+                      )),
                 ),
                 10.height,
                 Container(
@@ -467,18 +467,103 @@ class GenAIClinicalScreen extends StatelessWidget {
                           children: [
                             Expanded(
                                 child: controller.genAIDropdownValue.value == 'Upload File'
-                                    ? Text(
-                                  'Select File',
-                                  style: primaryTextStyle(),
-                                  overflow: TextOverflow.ellipsis,
-                                )
+                                    ? Obx(() {
+                                        final files = controller.fileNames;
+
+                                        if (files.isEmpty) {
+                                          return Text('Select File', style: primaryTextStyle());
+                                        }
+
+                                        return SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          child: Row(
+                                            children: List.generate(files.length, (index) {
+                                              final fileName = files[index];
+                                              return Container(
+                                                margin: EdgeInsets.only(right: 8),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.blue.shade100,
+                                                  borderRadius: BorderRadius.circular(6),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Padding(
+                                                      padding: EdgeInsets.only(left: 8),
+                                                      child: Text(
+                                                        fileName,
+                                                        overflow: TextOverflow.ellipsis,
+                                                        style: TextStyle(color: Colors.black),
+                                                      ),
+                                                    ),
+                                                    PopupMenuButton<String>(
+                                                      padding: EdgeInsets.zero,
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(10), // Rounded corners
+                                                      ),
+                                                      onSelected: (value) {
+                                                        if (value == 'view') {
+                                                          toast('Viewing ${controller.fileNames[index]}');
+                                                        } else if (value == 'remove') {
+                                                          controller.fileNames.removeAt(index);
+                                                          controller.imageFiles.removeAt(index);
+                                                        }
+                                                      },
+                                                      icon: Icon(Icons.menu, size: 18),
+                                                      itemBuilder: (context) => [
+                                                        PopupMenuItem(
+                                                          value: 'view',
+                                                          child: Row(
+                                                            children: [
+                                                              Icon(Icons.remove_red_eye, size: 18),
+                                                              SizedBox(width: 8),
+                                                              Text('View'),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        PopupMenuDivider(),
+                                                        PopupMenuItem(
+                                                          value: 'edit',
+                                                          child: Row(
+                                                            children: [
+                                                              Icon(Icons.edit, size: 18),
+                                                              SizedBox(width: 8),
+                                                              Text('Edit'),
+                                                            ],
+                                                          ),
+                                                        ),// Adds a horizontal divider
+                                                        PopupMenuDivider(), // Adds a horizontal divider
+                                                        PopupMenuItem(
+                                                          value: 'remove',
+                                                          child: Row(
+                                                            children: [
+                                                              Icon(Icons.close, size: 18, color: Colors.red),
+                                                              SizedBox(width: 8),
+                                                              Text('Remove', style: TextStyle(color: Colors.red)),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            }),
+                                          ),
+                                        );
+                                      })
+                                    // Text(
+                                    //   'Select File',
+                                    //   style: primaryTextStyle(),
+                                    //   overflow: TextOverflow.ellipsis,
+                                    // )
                                     : TextField(
-                                  decoration: InputDecoration(
-                                    hintText: 'Include your query',
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  onChanged: (value) => controller.dataLakeInput.value = value,
-                                )),
+                                        decoration: InputDecoration(
+                                          hintText: 'Include your query',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        onChanged: (value) => controller.dataLakeInput.value = value,
+                                      )),
                             5.width,
                             Obx(() {
                               // Icon changes dynamically
@@ -498,51 +583,50 @@ class GenAIClinicalScreen extends StatelessWidget {
                                 },
                                 child: icon == Icons.logout
                                     ? Container(
-                                  margin: EdgeInsets.only(top: 5, bottom: 5),
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: appBackGroundColor,
-                                    borderRadius: BorderRadius.circular(8), // rounded square
-                                  ),
-                                  child: IconButton(
-                                    icon: Icon(Icons.logout, color: appWhiteColor, size: 20),
-                                    onPressed: () {
-                                      log("----1--");
-                                      String? userJson = getStringAsync(AppSharedPreferenceKeys.userModel);
-                                      String Fullname = '';
-                                      String id = '';
-                                      if (userJson.isNotEmpty) {
-                                        var userMap = jsonDecode(userJson);
-                                        var userModel = UserModel.fromJson(userMap); // Replace with your actual model
-                                        Fullname = "${userModel.firstName} ${userModel.lastName}";
-                                        id = userModel.id.toString();
-                                      }
-                                      if (controller.genAIDropdownValue.value != 'Upload File') {
-                                        log(controller.dataLakeInput.value);
-                                        if (controller.dataLakeInput.value.isEmpty) {
-                                          toast("Please Include your query.");
-                                          return;
-                                        }
+                                        margin: EdgeInsets.only(top: 5, bottom: 5),
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: appBackGroundColor,
+                                          borderRadius: BorderRadius.circular(8), // rounded square
+                                        ),
+                                        child: IconButton(
+                                          icon: Icon(Icons.logout, color: appWhiteColor, size: 20),
+                                          onPressed: () {
+                                            String? userJson = getStringAsync(AppSharedPreferenceKeys.userModel);
+                                            String Fullname = '';
+                                            String id = '';
+                                            if (userJson.isNotEmpty) {
+                                              var userMap = jsonDecode(userJson);
+                                              var userModel = UserModel.fromJson(userMap); // Replace with your actual model
+                                              Fullname = "${userModel.firstName} ${userModel.lastName}";
+                                              id = userModel.id.toString();
+                                            }
+                                            if (controller.genAIDropdownValue.value != 'Upload File') {
+                                              log(controller.dataLakeInput.value);
+                                              if (controller.dataLakeInput.value.isEmpty) {
+                                                toast("Please Include your query.");
+                                                return;
+                                              }
 
-                                        // if (controller.dataLakeInput.value.isNotEmpty) {
-                                        //   controller
-                                        //       .fetchGenerateSQL(
-                                        //     controller.dataLakeInput.value,
-                                        //     userId: id,
-                                        //     userName: Fullname,
-                                        //   )
-                                        //       .then(
-                                        //         (value) {
-                                        //       controller.isShowSqlIcon.value = true;
-                                        //     },
-                                        //   );
-                                        // }
-                                      }
-                                      // Handle translation
-                                    },
-                                  ),
-                                )
+                                              // if (controller.dataLakeInput.value.isNotEmpty) {
+                                              //   controller
+                                              //       .fetchGenerateSQL(
+                                              //     controller.dataLakeInput.value,
+                                              //     userId: id,
+                                              //     userName: Fullname,
+                                              //   )
+                                              //       .then(
+                                              //         (value) {
+                                              //       controller.isShowSqlIcon.value = true;
+                                              //     },
+                                              //   );
+                                              // }
+                                            }
+                                            // Handle translation
+                                          },
+                                        ),
+                                      )
                                     : Icon(icon, color: appBackGroundColor),
                               );
                             }),
@@ -551,148 +635,68 @@ class GenAIClinicalScreen extends StatelessWidget {
                               return controller.genAIDropdownValue.value == 'Upload File'
                                   ? SizedBox()
                                   : GestureDetector(onTap: () {
-                                showDialog(
-                                  context: Get.context!,
-                                  builder: (_) => AlertDialog(
-                                    title: Text("Box"),
-                                    content: Text("Open Box"),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Get.back(),
-                                        child: Text("Close"),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }, child: Obx(() {
-                                return controller.genAIDropdownValue.value == 'Upload File'
-                                    ? SizedBox()
-                                    : GestureDetector(
-                                  onTap: () {},
-                                  child: controller.isShowSqlIcon.value
-                                      ? Container(
-                                    margin: EdgeInsets.only(top: 5, bottom: 5),
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: appBackGroundColor,
-                                      borderRadius: BorderRadius.circular(8), // rounded square
-                                    ),
-                                    child: IconButton(
-                                      icon: Icon(Icons.file_copy_rounded, color: appWhiteColor, size: 20),
-                                      onPressed: () {
-                                        // final sqlText = controller.generateSQLResponse.value?.sqlQuery ?? 'No SQL generated';
-                                        //
-                                        // showDialog(
-                                        //   context: Get.context!,
-                                        //   builder: (_) => AlertDialog(
-                                        //     title: Text("Generated SQL"),
-                                        //     content: SingleChildScrollView(
-                                        //       child: Text(sqlText),
-                                        //     ),
-                                        //     actions: [
-                                        //       AppButton(
-                                        //         color: appBackGroundColor,
-                                        //         onTap:  () => Get.back(),
-                                        //         child: Text(
-                                        //           'Close',
-                                        //           style: TextStyle(color: white),
-                                        //         ),
-                                        //       )
-                                        //     ],
-                                        //   ),
-                                        // );
-                                      },
-                                    ),
-                                  )
-                                      : SizedBox(),
-
-                                  // Icon(Icons.file_copy_rounded, color: appBackGroundColor),
-                                );
-                              }));
-                            }),
-                          ],
-                        ),
-
-                        /// 👇 File list shown only if dropdown is 'Upload File'
-                        Obx(() {
-                          if (controller.genAIDropdownValue.value != 'Upload File' || controller.fileNames.isEmpty) {
-                            return SizedBox();
-                          }
-
-                          return Container(
-                            margin: EdgeInsets.only(top: 12),
-                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: appBackGroundColor),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: controller.fileNames.asMap().entries.map((entry) {
-                                  final index = entry.key;
-                                  final fileName = entry.value;
-
-                                  return Container(
-                                    margin: EdgeInsets.only(right: 8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue.shade100,
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Padding(
-                                          padding: EdgeInsets.only(left: 8),
-                                          child: Text(
-                                            fileName,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(color: Colors.black),
-                                          ),
-                                        ),
-                                        PopupMenuButton<String>(
-                                          padding: EdgeInsets.zero,
-                                          onSelected: (value) {
-                                            if (value == 'view') {
-                                              toast('Viewing ${controller.fileNames[index]}');
-                                            } else if (value == 'remove') {
-                                              controller.fileNames.removeAt(index);
-                                              controller.imageFiles.removeAt(index);
-                                            }
-                                          },
-                                          icon: Icon(Icons.menu, size: 18),
-                                          itemBuilder: (context) => [
-                                            PopupMenuItem(
-                                              value: 'view',
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.remove_red_eye, size: 18),
-                                                  SizedBox(width: 8),
-                                                  Text('View'),
-                                                ],
-                                              ),
-                                            ),
-                                            PopupMenuItem(
-                                              value: 'remove',
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.close, size: 18, color: Colors.red),
-                                                  SizedBox(width: 8),
-                                                  Text('Remove', style: TextStyle(color: Colors.red)),
-                                                ],
-                                              ),
+                                      showDialog(
+                                        context: Get.context!,
+                                        builder: (_) => AlertDialog(
+                                          title: Text("Box"),
+                                          content: Text("Open Box"),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Get.back(),
+                                              child: Text("Close"),
                                             ),
                                           ],
                                         ),
-                                      ],
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                          );
-                        }),
+                                      );
+                                    }, child: Obx(() {
+                                      return controller.genAIDropdownValue.value == 'Upload File'
+                                          ? SizedBox()
+                                          : GestureDetector(
+                                              onTap: () {},
+                                              child: controller.isShowSqlIcon.value
+                                                  ? Container(
+                                                      margin: EdgeInsets.only(top: 5, bottom: 5),
+                                                      width: 40,
+                                                      height: 40,
+                                                      decoration: BoxDecoration(
+                                                        color: appBackGroundColor,
+                                                        borderRadius: BorderRadius.circular(8), // rounded square
+                                                      ),
+                                                      child: IconButton(
+                                                        icon: Icon(Icons.file_copy_rounded, color: appWhiteColor, size: 20),
+                                                        onPressed: () {
+                                                          // final sqlText = controller.generateSQLResponse.value?.sqlQuery ?? 'No SQL generated';
+                                                          //
+                                                          // showDialog(
+                                                          //   context: Get.context!,
+                                                          //   builder: (_) => AlertDialog(
+                                                          //     title: Text("Generated SQL"),
+                                                          //     content: SingleChildScrollView(
+                                                          //       child: Text(sqlText),
+                                                          //     ),
+                                                          //     actions: [
+                                                          //       AppButton(
+                                                          //         color: appBackGroundColor,
+                                                          //         onTap:  () => Get.back(),
+                                                          //         child: Text(
+                                                          //           'Close',
+                                                          //           style: TextStyle(color: white),
+                                                          //         ),
+                                                          //       )
+                                                          //     ],
+                                                          //   ),
+                                                          // );
+                                                        },
+                                                      ),
+                                                    )
+                                                  : SizedBox(),
+
+                                              // Icon(Icons.file_copy_rounded, color: appBackGroundColor),
+                                            );
+                                    }));
+                            }),
+                          ],
+                        ),
                       ],
                     );
                   }),
@@ -840,7 +844,7 @@ class GenAIClinicalScreen extends StatelessWidget {
                       'Ready to Use Prompts',
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
-
+                    5.height,
                     // Display Selected Tags
                     Obx(() {
                       if (controller.selectedTags.isEmpty) {
@@ -918,29 +922,79 @@ class GenAIClinicalScreen extends StatelessWidget {
                         ),
                       );
                     }),
-
+                    10.height,
                     // Filter Icon for Selecting Attributes
                     Row(
                       children: [
+                        // Expanded(
+                        //   child: Obx(() {
+                        //     final prompts = controller.classificationMap.values.expand((e) => e).toList();
+                        //     return SingleChildScrollView(
+                        //       scrollDirection: Axis.horizontal,
+                        //       child: Row(
+                        //         children: prompts.map((chip) {
+                        //           final isSelected = controller.selectedChips.contains(chip);
+                        //           return Padding(
+                        //             padding: const EdgeInsets.all(4.0),
+                        //             child: GestureDetector(
+                        //               onTap: () => controller.toggleSelection(chip), // Replaced toggleChip with toggleSelection
+                        //               child: FilterChip(
+                        //                 label: Text(chip),
+                        //                 selected: isSelected,
+                        //                 onSelected: (_) => controller.toggleSelection(chip),
+                        //                 // Replaced toggleChip with toggleSelection
+                        //                 selectedColor: appBackGroundColor,
+                        //                 backgroundColor: Colors.grey.shade200,
+                        //               ),
+                        //             ),
+                        //           );
+                        //         }).toList(),
+                        //       ),
+                        //     );
+                        //   }),
+                        // ),
                         Expanded(
                           child: Obx(() {
-                            final prompts = controller.classificationMap.values.expand((e) => e).toList();
+                            final tags = controller.tags;
                             return SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: Row(
-                                children: prompts.map((chip) {
-                                  final isSelected = controller.selectedChips.contains(chip);
+                                children: tags.map((tag) {
+                                  final isSelected = controller.selectedParentTag.value == tag;
+                                  final isInSelectedTags = controller.selectedTags.contains(tag);
+
+                                  final showRedBorder = isSelected && isInSelectedTags;
+
                                   return Padding(
-                                    padding: const EdgeInsets.all(4.0),
-                                    child: GestureDetector(
-                                      onTap: () => controller.toggleSelection(chip), // Replaced toggleChip with toggleSelection
-                                      child: FilterChip(
-                                        label: Text(chip),
-                                        selected: isSelected,
-                                        onSelected: (_) => controller.toggleSelection(chip),
-                                        // Replaced toggleChip with toggleSelection
-                                        selectedColor: appBackGroundColor,
-                                        backgroundColor: Colors.grey.shade200,
+                                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                          border: Border.all(color: showRedBorder ? appBackGroundColor : Colors.grey.shade300),
+                                          borderRadius: BorderRadius.circular(8),
+                                          color: appWhiteColor),
+                                      child: GestureDetector(
+                                        onTap: () async {
+                                          controller.toggleSelection(tag);
+                                          await setValue("group", tag);
+                                        },
+                                        child: Chip(
+                                          label: Text(
+                                            "# $tag",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              color: isInSelectedTags ? appBackGroundColor : Colors.black87,
+                                            ),
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                            side: BorderSide(
+                                              color: isInSelectedTags ? Colors.blueAccent : Colors.transparent,
+                                              width: 1.5,
+                                            ),
+                                          ),
+                                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                          backgroundColor: isInSelectedTags ? appDashBoardCardColor : appWhiteColor,
+                                        ),
                                       ),
                                     ),
                                   );
@@ -949,7 +1003,7 @@ class GenAIClinicalScreen extends StatelessWidget {
                             );
                           }),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 2),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Align(
@@ -1010,17 +1064,16 @@ class GenAIClinicalScreen extends StatelessWidget {
                                               prefixIcon: Icon(Icons.search),
                                               suffixIcon: controller.searchController.text.isNotEmpty
                                                   ? IconButton(
-                                                icon: Icon(Icons.clear),
-                                                onPressed: () {
-                                                  controller.searchController.clear();
-                                                },
-                                              )
+                                                      icon: Icon(Icons.clear),
+                                                      onPressed: () {
+                                                        controller.searchController.clear();
+                                                      },
+                                                    )
                                                   : null,
                                               border: InputBorder.none,
                                             ),
                                           ),
                                         ),
-
 
                                         // Chip List Section
                                         Expanded(
@@ -1039,7 +1092,7 @@ class GenAIClinicalScreen extends StatelessWidget {
                                                       Center(
                                                         child: Text(
                                                           category,
-                                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16,color: appWhiteColor),
+                                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: appWhiteColor),
                                                         ),
                                                       ),
                                                       const SizedBox(height: 8),
@@ -1047,12 +1100,13 @@ class GenAIClinicalScreen extends StatelessWidget {
                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                         children: attributes.map((attribute) {
                                                           final isSelected = controller.selectedTags.contains(attribute);
-
+                                                          log("isSelected-------------------2----$isSelected");
                                                           return GestureDetector(
                                                             onTap: () => controller.toggleAttribute(attribute),
                                                             child: Chip(
                                                               label: Text(attribute),
-                                                              backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
+                                                              backgroundColor:
+                                                                  isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
                                                               labelStyle: TextStyle(color: isSelected ? appBackGroundColor : Colors.black87),
                                                             ),
                                                           );
@@ -1071,24 +1125,20 @@ class GenAIClinicalScreen extends StatelessWidget {
                                   ),
                                 )).then((_) {
                                   // Clear the search controller and filtered list after dialog is closed
-                                 controller.searchController.clear();
-                                 controller.filteredClassificationMap.assignAll(controller.classificationMap);
-                                });;
+                                  controller.searchController.clear();
+                                  controller.filteredClassificationMap.assignAll(controller.classificationMap);
+                                });
+                                ;
                               },
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 8),
-                                child: Image.asset(
-                                  Assets.iconsFilterDownArrow,
-                                  width: 25,
-                                  height: 25,
-                                  color: appBackGroundColor,
-                                ),
+                              child: Image.asset(
+                                Assets.iconsFilterDownArrow,
+                                width: 25,
+                                height: 25,
+                                color: appBackGroundColor,
                               ),
                             ),
                           ),
                         ),
-
-
                       ],
                     ),
 
@@ -1116,7 +1166,6 @@ class GenAIClinicalScreen extends StatelessWidget {
                 ),
               ),
             ),
-
           ],
         ),
       ),

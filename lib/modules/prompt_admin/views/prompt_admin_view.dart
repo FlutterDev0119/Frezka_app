@@ -1,12 +1,8 @@
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../../../generated/assets.dart';
 import '../../../utils/common/colors.dart';
@@ -20,7 +16,6 @@ class PromptAdminScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return AppScaffold(
       resizeToAvoidBottomPadding: true,
       appBarBackgroundColor: appBackGroundColor,
@@ -41,7 +36,7 @@ class PromptAdminScreen extends StatelessWidget {
               TextField(
                 controller: controller.inputController,
                 // onEditingComplete: controller.userSubmittedData,
-                readOnly: true,
+                // readOnly: true,
                 decoration: appInputDecoration(
                   context: context,
                   hintText: "Enter Prompt Name",
@@ -249,9 +244,7 @@ class PromptAdminScreen extends StatelessWidget {
                                                       color: isSelected ? appBackGroundColor : Colors.black87,
                                                     ),
                                                   ),
-                                                  backgroundColor: isSelected
-                                                      ? appBackGroundColor.withOpacity(0.2)
-                                                      : Colors.grey.shade200,
+                                                  backgroundColor: isSelected ? appBackGroundColor.withOpacity(0.2) : Colors.grey.shade200,
                                                 ),
                                               ),
                                             );
@@ -259,7 +252,6 @@ class PromptAdminScreen extends StatelessWidget {
                                         ),
                                       ),
                                     )
-
                                   ],
                                 ),
                               ),
@@ -368,7 +360,6 @@ class PromptAdminScreen extends StatelessWidget {
                                                   Column(
                                                     mainAxisAlignment: MainAxisAlignment.start,
                                                     crossAxisAlignment: CrossAxisAlignment.start,
-
                                                     children: prompts.map((prompt) {
                                                       final isSelected = controller.selectedTags.contains(prompt);
                                                       return Padding(
@@ -530,10 +521,10 @@ class PromptAdminScreen extends StatelessWidget {
                         Widget content;
                         switch (index) {
                           case 0:
-                            content = buildRoleSection();
+                            content = buildRoleSection(context);
                             break;
                           case 1:
-                            content = buildChooseImageSection();
+                            content = buildChooseImageSection(context);
                             break;
                           case 2:
                             content = buildClickSection(context);
@@ -556,7 +547,7 @@ class PromptAdminScreen extends StatelessWidget {
                       Align(
                         alignment: Alignment.bottomRight,
                         child: ElevatedButton(
-                          onPressed: () async{
+                          onPressed: () async {
                             // controller.createNewPrompt();
                             if (controller.currentIndex.value < 4) {
                               controller.currentIndex.value++;
@@ -564,38 +555,36 @@ class PromptAdminScreen extends StatelessWidget {
                               controller.currentIndex.value = 0;
                             }
                             if (controller.currentIndex.value == 4) {
+                              //  String promptName = getStringAsync("promptName");
+                              //  String Role = getStringAsync("Role");
+                              //
+                              //  List<String> Sources =  controller.selectedSources.toList();
+                              //  String action =  controller.actionController.text;
+                              // String group = getStringAsync("group");
+                              // log("promptName---------------$promptName");
+                              // log("Role---------------$Role");
+                              // log("Sources---------------$Sources");
+                              // log("action---------------$action");
+                              // log("group---------------$group");
+                              String promptName = getStringAsync("promptName").trim();
+                              String role = getStringAsync("Role").trim();
+                              List<String> sources = controller.selectedSources.toList();
+                              String action = controller.actionController.text.trim();
+                              String group = getStringAsync("group").trim();
 
-                            //  String promptName = getStringAsync("promptName");
-                            //  String Role = getStringAsync("Role");
-                            //
-                            //  List<String> Sources =  controller.selectedSources.toList();
-                            //  String action =  controller.actionController.text;
-                            // String group = getStringAsync("group");
-                             // log("promptName---------------$promptName");
-                             // log("Role---------------$Role");
-                             // log("Sources---------------$Sources");
-                             // log("action---------------$action");
-                             // log("group---------------$group");
-                            String promptName = getStringAsync("promptName").trim();
-                            String role = getStringAsync("Role").trim();
-                            List<String> sources = controller.selectedSources.toList();
-                            String action = controller.actionController.text.trim();
-                            String group = getStringAsync("group").trim();
+                              Map<String, dynamic> payload = {
+                                "prompt_name": promptName.isNotEmpty ? promptName : "",
+                                "role": {
+                                  "user_role": role.isNotEmpty ? role : "",
+                                },
+                                "group": group.isNotEmpty ? group : "",
+                                "source": sources.isNotEmpty ? sources : [],
+                                "metadata": {},
+                                "task": action.isNotEmpty ? action : "",
+                              };
 
-                            Map<String, dynamic> payload = {
-                              "prompt_name": promptName.isNotEmpty ? promptName : "",
-                              "role": {
-                                "user_role": role.isNotEmpty ? role : "",
-                              },
-                              "group": group.isNotEmpty ? group : "",
-                              "source": sources.isNotEmpty ? sources : [],
-                              "metadata": {},
-                              "task": action.isNotEmpty ? action : "",
-                            };
-
-                            log("Payload: ${jsonEncode(payload)}");
-                            await controller.createNewPrompt(payload);
-
+                              log("Payload: ${jsonEncode(payload)}");
+                              await controller.createNewPrompt(payload);
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -615,6 +604,7 @@ class PromptAdminScreen extends StatelessWidget {
       ),
     );
   }
+
   // Widget _buildOption(String label, IconData icon, int index) {
   //   return Obx(() {
   //     bool isSelected = controller.currentIndex.value == index;
@@ -655,13 +645,9 @@ class PromptAdminScreen extends StatelessWidget {
   Widget _buildOption(String label, IconData icon, int index) {
     return Obx(() {
       bool isSelected = controller.currentIndex.value == index;
-      return
-        GestureDetector(
+      return GestureDetector(
         onTap: () => controller.currentIndex.value = index,
-        child:
-
-
-        Container(
+        child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           margin: const EdgeInsets.symmetric(horizontal: 4),
           decoration: BoxDecoration(
@@ -709,7 +695,7 @@ class PromptAdminScreen extends StatelessWidget {
     );
   }
 
-  Widget buildRoleSection() {
+  Widget buildRoleSection(BuildContext context) {
     return Container(
       margin: EdgeInsets.all(16),
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -721,23 +707,60 @@ class PromptAdminScreen extends StatelessWidget {
       child: Obx(() => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("User Role", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text("User Role", style: Theme.of(context).textTheme.titleLarge), //TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
-              Obx(() => DropdownButton<String>(
-                    isExpanded: true,
-                    value: controller.selectedRole.value,
-                    onChanged: (String? newValue) async{
-                      controller.selectedRole.value = newValue!;
-                      controller.fetchRolePrompt(newValue);
-                      await setValue("Role", newValue);
-                    },
-                    items: controller.roles.map((String role) {
-                      return DropdownMenuItem<String>(
-                        value: role,
-                        child: Text(role),
-                      );
-                    }).toList(),
+              Obx(() => Container(
+                    // padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    // decoration: BoxDecoration(
+                    //   border: Border.all(
+                    //     color: Colors.grey.shade400, // Change to red or another color as needed
+                    //     width: 1.5,
+                    //   ),
+                    //   borderRadius: BorderRadius.circular(8),
+                    //   color: Colors.white,
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade400),
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.white,
+                    ),
+
+                    child: DropdownButton<String>(
+                      borderRadius: BorderRadius.circular(12),
+                      dropdownColor: appDashBoardCardColor,
+                      isExpanded: true,
+                      underline: SizedBox(),
+                      // Remove the default underline
+                      value: controller.selectedRole.value,
+                      onChanged: (String? newValue) async {
+                        controller.selectedRole.value = newValue!;
+                        controller.fetchRolePrompt(newValue);
+                        await setValue("Role", newValue);
+                      },
+                      items: controller.roles.map((String role) {
+                        return DropdownMenuItem<String>(
+                          value: role,
+                          child: Text(role),
+                        );
+                      }).toList(),
+                    ),
                   )),
+
+              // Obx(() => DropdownButton<String>(
+              //       isExpanded: true,
+              //       value: controller.selectedRole.value,
+              //       onChanged: (String? newValue) async{
+              //         controller.selectedRole.value = newValue!;
+              //         controller.fetchRolePrompt(newValue);
+              //         await setValue("Role", newValue);
+              //       },
+              //       items: controller.roles.map((String role) {
+              //         return DropdownMenuItem<String>(
+              //           value: role,
+              //           child: Text(role),
+              //         );
+              //       }).toList(),
+              //     )),
               controller.responseText.value.isNotEmpty ? 20.height : SizedBox(),
               controller.responseText.value.isNotEmpty ? Text("Response", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)) : SizedBox(),
               controller.responseText.value.isNotEmpty ? 8.height : SizedBox(),
@@ -748,19 +771,28 @@ class PromptAdminScreen extends StatelessWidget {
                         controller: TextEditingController(text: controller.responseText.value)
                           ..selection = TextSelection.collapsed(offset: controller.responseText.value.length),
                         maxLines: 4,
+                        // decoration: InputDecoration(
+                        //   border: OutlineInputBorder(),
+                        // ),
                         decoration: InputDecoration(
-                          border: OutlineInputBorder(),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: Colors.grey.shade400,
+                              // width: 0.5,
+                            ),
+                          ),
                         ),
                       )
                     : SizedBox(),
               ),
-              8.height,
+              10.height,
             ],
           )),
     );
   }
 
-  Widget buildChooseImageSection() {
+  Widget buildChooseImageSection(BuildContext context) {
     return Container(
       margin: EdgeInsets.all(16),
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -776,7 +808,7 @@ class PromptAdminScreen extends StatelessWidget {
           children: [
             Text(
               "Primary Data Source",
-              style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+              style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
             Container(
@@ -792,10 +824,7 @@ class PromptAdminScreen extends StatelessWidget {
                     child: controller.selectedSources.isEmpty
                         ? Text(
                             "Select Data Source",
-                            style: TextStyle(
-                              color: Colors.grey[500],
-                              fontSize: 14,
-                            ),
+                            style: Theme.of(context).textTheme.bodyMedium,
                           )
                         : Wrap(
                             spacing: 8,
@@ -820,11 +849,11 @@ class PromptAdminScreen extends StatelessWidget {
                           ),
                   ),
                   PopupMenuButton<String>(
+                    color: appDashBoardCardColor,
                     icon: Icon(Icons.arrow_drop_down),
                     onSelected: (value) {
                       controller.selectedSources.add(value);
                       log("---------$value");
-
                     },
                     itemBuilder: (context) {
                       return availableSources.map((source) {
@@ -835,10 +864,13 @@ class PromptAdminScreen extends StatelessWidget {
                       }).toList();
                     },
                     enabled: availableSources.isNotEmpty,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ],
               ),
-            ),
+            ).paddingOnly(bottom: 10),
           ],
         );
       }),
@@ -881,11 +913,11 @@ class PromptAdminScreen extends StatelessWidget {
                             Text(item, style: TextStyle(color: Colors.blue)),
                             SizedBox(width: 4),
                             SizedBox(
-                              width:item =="Other" ?0: 28,
+                              width: item == "Other" ? 0 : 28,
                               height: 28,
                               child: PopupMenuButton<String>(
                                 padding: EdgeInsets.zero,
-                                icon: item =="Other" ? SizedBox() : Icon(Icons.menu, size: 16, color: Colors.blue) ,
+                                icon: item == "Other" ? SizedBox() : Icon(Icons.menu, size: 16, color: Colors.blue),
                                 onSelected: (value) {
                                   switch (value) {
                                     case 'View':
@@ -932,13 +964,19 @@ class PromptAdminScreen extends StatelessWidget {
                                 itemBuilder: (context) => [
                                   PopupMenuItem(
                                       value: 'View', child: Row(children: [Icon(Icons.visibility, size: 16), SizedBox(width: 6), Text("View")])),
+                                  PopupMenuDivider(),
                                   PopupMenuItem(
                                       value: 'Replace', child: Row(children: [Icon(Icons.edit, size: 16), SizedBox(width: 6), Text("Replace")])),
+                                  PopupMenuDivider(),
                                   PopupMenuItem(
                                       value: 'Unlock', child: Row(children: [Icon(Icons.lock_open, size: 16), SizedBox(width: 6), Text("Unlock")])),
+                                  PopupMenuDivider(),
                                   PopupMenuItem(
                                       value: 'Remove', child: Row(children: [Icon(Icons.close, size: 16), SizedBox(width: 6), Text("Remove")])),
                                 ],
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12), // adjust as needed
+                                ),
                               ),
                             ),
                           ],
@@ -1024,7 +1062,8 @@ class PromptAdminScreen extends StatelessWidget {
                     SizedBox(width: 10),
                     Obx(() {
                       final fileName = controller.selectedFileNames["Code list"];
-                      return Expanded( // or use Flexible
+                      return Expanded(
+                        // or use Flexible
                         child: Marquee(
                           child: Text(
                             (fileName?.isEmpty ?? true) ? "No file chosen" : fileName!,
@@ -1035,7 +1074,6 @@ class PromptAdminScreen extends StatelessWidget {
                         ),
                       );
                     })
-
                   ],
                 ),
                 SizedBox(height: 20),
@@ -1102,8 +1140,10 @@ class PromptAdminScreen extends StatelessWidget {
             ),
             child: TextField(
               controller: controller.actionController,
-              maxLines: null, // Allow infinite lines (multiline)
-              expands: true,  // Makes the TextField fill the container
+              maxLines: null,
+              // Allow infinite lines (multiline)
+              expands: true,
+              // Makes the TextField fill the container
               decoration: InputDecoration(
                 contentPadding: const EdgeInsets.all(12),
                 border: InputBorder.none, // Remove the default border
@@ -1111,7 +1151,6 @@ class PromptAdminScreen extends StatelessWidget {
               style: TextStyle(fontSize: 16),
             ),
           )
-
         ],
       ),
     );
@@ -1121,11 +1160,13 @@ class PromptAdminScreen extends StatelessWidget {
     return Column(
       children: [
         SizedBox(height: 20),
-        Text("Verify", style: TextStyle(fontSize: 20)),
-        ElevatedButton(
-          onPressed: () => controller.verifyText.value = "Verified",
-          child: Text("Verify Now"),
-        ),
+        Center(child: Text("Verify", style: TextStyle(fontSize: 20,color: appWhiteColor))),
+
+
+        // ElevatedButton(
+        //   onPressed: () => controller.verifyText.value = "Verified",
+        //   child: Text("Verify Now"),
+        // ),
       ],
     );
   }
@@ -1195,20 +1236,24 @@ class PromptAdminScreen extends StatelessWidget {
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
+            AppButton(
               child: Text('Cancel'),
+              onTap: () {
+                Get.back();
+              },
             ),
             filename.isEmpty
                 ? SizedBox()
-                : ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      onReplace(); // Important: triggers picking new file
+                : AppButton(
+                    color: appBackGroundColor,
+                    child: Text(
+                      'Replace',
+                      style: TextStyle(color: appWhiteColor),
+                    ),
+                    onTap: () {
+                      Get.back();
+                      onReplace();
                     },
-                    child: Text('Replace'),
                   ),
           ],
         );

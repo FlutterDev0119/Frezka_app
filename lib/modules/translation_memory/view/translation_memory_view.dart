@@ -46,7 +46,6 @@ class TranslationMemoryScreen extends StatelessWidget {
             }),
             Expanded(
               child: Obx(() {
-
                 return ListView.builder(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   itemCount: controller.filteredFiles.length,
@@ -273,7 +272,11 @@ class TranslationMemoryScreen extends StatelessWidget {
                 if (value == 'edit') {
                   _editItem(item, index);
                 } else if (value == 'remove') {
-                  controller.deleteTranslation(item.id);
+                  controller.deleteTranslation(item.id).then(
+                    (value) async {
+                      await controller.fetchData();
+                    },
+                  );
                 }
               },
               itemBuilder: (BuildContext context) => [
@@ -281,21 +284,17 @@ class TranslationMemoryScreen extends StatelessWidget {
                   value: 'edit',
                   child: Text(
                     'Edit',
-                    style: TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12),
+                    style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                 ),
-                const PopupMenuDivider(height: 0,),
+                const PopupMenuDivider(
+                  height: 0,
+                ),
                 const PopupMenuItem<String>(
                   value: 'remove',
                   child: Text(
                     'Remove',
-                    style: TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12),
+                    style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                 ),
               ],
@@ -306,7 +305,6 @@ class TranslationMemoryScreen extends StatelessWidget {
     );
   }
 
-
   void _editItem(TranslationMemory item, int index) {
     final sourceController = TextEditingController(text: item.en);
     final translationController = TextEditingController(text: item.es);
@@ -314,18 +312,21 @@ class TranslationMemoryScreen extends StatelessWidget {
     Get.dialog(
       AlertDialog(
         backgroundColor: appDashBoardCardColor,
-        title: Text('Edit Translation',style: TextStyle(color: appBackGroundColor),),
+        title: Text(
+          'Edit Translation',
+          style: TextStyle(color: appBackGroundColor),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: sourceController,
-              decoration: InputDecoration(labelText: 'Source Phrase',labelStyle: TextStyle(fontWeight: FontWeight.bold)),
+              decoration: InputDecoration(labelText: 'Source Phrase', labelStyle: TextStyle(fontWeight: FontWeight.bold)),
             ),
             SizedBox(height: 12),
             TextField(
               controller: translationController,
-              decoration: InputDecoration(labelText: 'Translation Edits',labelStyle: TextStyle(fontWeight: FontWeight.bold)),
+              decoration: InputDecoration(labelText: 'Translation Edits', labelStyle: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -346,10 +347,16 @@ class TranslationMemoryScreen extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              controller.updateTranslation(
+              controller
+                  .updateTranslation(
                 id: item.id ?? 0,
                 en: sourceController.text,
                 es: translationController.text,
+              )
+                  .then(
+                (value) async {
+                  await controller.fetchData();
+                },
               );
             },
             style: ElevatedButton.styleFrom(

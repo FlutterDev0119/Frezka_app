@@ -76,11 +76,80 @@ class GenAIPVScreen extends StatelessWidget {
                               children: [
                                 Expanded(
                                     child: controller.genAIDropdownValue.value == 'Upload File'
-                                        ? Text(
-                                            'Select File',
-                                            style: primaryTextStyle(),
-                                            overflow: TextOverflow.ellipsis,
-                                          )
+                                        ? Obx(() {
+                                            final files = controller.fileNames;
+
+                                            if (files.isEmpty) {
+                                              return Text('Select File', style: primaryTextStyle());
+                                            }
+
+                                            return SingleChildScrollView(
+                                              scrollDirection: Axis.horizontal,
+                                              child: Row(
+                                                children: List.generate(files.length, (index) {
+                                                  final fileName = files[index];
+                                                  return Container(
+                                                    margin: EdgeInsets.only(right: 8),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.blue.shade100,
+                                                      borderRadius: BorderRadius.circular(6),
+                                                    ),
+                                                    child: Row(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        Padding(
+                                                          padding: EdgeInsets.only(left: 8),
+                                                          child: Text(
+                                                            fileName,
+                                                            overflow: TextOverflow.ellipsis,
+                                                            style: TextStyle(color: Colors.black),
+                                                          ),
+                                                        ),
+                                                        PopupMenuButton<String>(
+                                                          padding: EdgeInsets.zero,
+                                                          shape: RoundedRectangleBorder(
+                                                            borderRadius: BorderRadius.circular(10), // Rounded corners
+                                                          ),
+                                                          onSelected: (value) {
+                                                            if (value == 'view') {
+                                                              toast('Viewing ${controller.fileNames[index]}');
+                                                            } else if (value == 'remove') {
+                                                              controller.fileNames.removeAt(index);
+                                                              controller.imageFiles.removeAt(index);
+                                                            }
+                                                          },
+                                                          icon: Icon(Icons.menu, size: 18),
+                                                          itemBuilder: (context) => [
+                                                            PopupMenuItem(
+                                                              value: 'view',
+                                                              child: Row(
+                                                                children: [
+                                                                  Icon(Icons.remove_red_eye, size: 18),
+                                                                  SizedBox(width: 8),
+                                                                  Text('View'),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                            PopupMenuDivider(), // Adds a horizontal divider
+                                                            PopupMenuItem(
+                                                              value: 'remove',
+                                                              child: Row(
+                                                                children: [
+                                                                  Icon(Icons.close, size: 18, color: Colors.red),
+                                                                  SizedBox(width: 8),
+                                                                  Text('Remove', style: TextStyle(color: Colors.red)),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+                                                }),
+                                              ),
+                                            );
+                                          })
                                         : TextField(
                                             decoration: InputDecoration(
                                               hintText: 'Include your query',
@@ -117,7 +186,6 @@ class GenAIPVScreen extends StatelessWidget {
                                             child: IconButton(
                                               icon: Icon(Icons.logout, color: appWhiteColor, size: 20),
                                               onPressed: () {
-                                                log("----1--");
                                                 String? userJson = getStringAsync(AppSharedPreferenceKeys.userModel);
                                                 String Fullname = '';
                                                 String id = '';
@@ -202,7 +270,7 @@ class GenAIPVScreen extends StatelessWidget {
                                                                   actions: [
                                                                     AppButton(
                                                                       color: appBackGroundColor,
-                                                                      onTap:  () => Get.back(),
+                                                                      onTap: () => Get.back(),
                                                                       child: Text(
                                                                         'Close',
                                                                         style: TextStyle(color: white),
@@ -223,85 +291,85 @@ class GenAIPVScreen extends StatelessWidget {
                               ],
                             ),
 
-                            /// 👇 File list shown only if dropdown is 'Upload File'
-                            Obx(() {
-                              if (controller.genAIDropdownValue.value != 'Upload File' || controller.fileNames.isEmpty) {
-                                return SizedBox();
-                              }
-
-                              return Container(
-                                margin: EdgeInsets.only(top: 12),
-                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: appBackGroundColor),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    children: controller.fileNames.asMap().entries.map((entry) {
-                                      final index = entry.key;
-                                      final fileName = entry.value;
-
-                                      return Container(
-                                        margin: EdgeInsets.only(right: 8),
-                                        decoration: BoxDecoration(
-                                          color: Colors.blue.shade100,
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Padding(
-                                              padding: EdgeInsets.only(left: 8),
-                                              child: Text(
-                                                fileName,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(color: Colors.black),
-                                              ),
-                                            ),
-                                            PopupMenuButton<String>(
-                                              padding: EdgeInsets.zero,
-                                              onSelected: (value) {
-                                                if (value == 'view') {
-                                                  toast('Viewing ${controller.fileNames[index]}');
-                                                } else if (value == 'remove') {
-                                                  controller.fileNames.removeAt(index);
-                                                  controller.imageFiles.removeAt(index);
-                                                }
-                                              },
-                                              icon: Icon(Icons.menu, size: 18),
-                                              itemBuilder: (context) => [
-                                                PopupMenuItem(
-                                                  value: 'view',
-                                                  child: Row(
-                                                    children: [
-                                                      Icon(Icons.remove_red_eye, size: 18),
-                                                      SizedBox(width: 8),
-                                                      Text('View'),
-                                                    ],
-                                                  ),
-                                                ),
-                                                PopupMenuItem(
-                                                  value: 'remove',
-                                                  child: Row(
-                                                    children: [
-                                                      Icon(Icons.close, size: 18, color: Colors.red),
-                                                      SizedBox(width: 8),
-                                                      Text('Remove', style: TextStyle(color: Colors.red)),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                              );
-                            }),
+                            // /// File list shown only if dropdown is 'Upload File'
+                            // Obx(() {
+                            //   if (controller.genAIDropdownValue.value != 'Upload File' || controller.fileNames.isEmpty) {
+                            //     return SizedBox();
+                            //   }
+                            //
+                            //   return Container(
+                            //     margin: EdgeInsets.only(top: 12),
+                            //     padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                            //     decoration: BoxDecoration(
+                            //       border: Border.all(color: appBackGroundColor),
+                            //       borderRadius: BorderRadius.circular(12),
+                            //     ),
+                            //     child: SingleChildScrollView(
+                            //       scrollDirection: Axis.horizontal,
+                            //       child: Row(
+                            //         children: controller.fileNames.asMap().entries.map((entry) {
+                            //           final index = entry.key;
+                            //           final fileName = entry.value;
+                            //
+                            //           return Container(
+                            //             margin: EdgeInsets.only(right: 8),
+                            //             decoration: BoxDecoration(
+                            //               color: Colors.blue.shade100,
+                            //               borderRadius: BorderRadius.circular(6),
+                            //             ),
+                            //             child: Row(
+                            //               mainAxisSize: MainAxisSize.min,
+                            //               children: [
+                            //                 Padding(
+                            //                   padding: EdgeInsets.only(left: 8),
+                            //                   child: Text(
+                            //                     fileName,
+                            //                     overflow: TextOverflow.ellipsis,
+                            //                     style: TextStyle(color: Colors.black),
+                            //                   ),
+                            //                 ),
+                            //                 PopupMenuButton<String>(
+                            //                   padding: EdgeInsets.zero,
+                            //                   onSelected: (value) {
+                            //                     if (value == 'view') {
+                            //                       toast('Viewing ${controller.fileNames[index]}');
+                            //                     } else if (value == 'remove') {
+                            //                       controller.fileNames.removeAt(index);
+                            //                       controller.imageFiles.removeAt(index);
+                            //                     }
+                            //                   },
+                            //                   icon: Icon(Icons.menu, size: 18),
+                            //                   itemBuilder: (context) => [
+                            //                     PopupMenuItem(
+                            //                       value: 'view',
+                            //                       child: Row(
+                            //                         children: [
+                            //                           Icon(Icons.remove_red_eye, size: 18),
+                            //                           SizedBox(width: 8),
+                            //                           Text('View'),
+                            //                         ],
+                            //                       ),
+                            //                     ),
+                            //                     PopupMenuItem(
+                            //                       value: 'remove',
+                            //                       child: Row(
+                            //                         children: [
+                            //                           Icon(Icons.close, size: 18, color: Colors.red),
+                            //                           SizedBox(width: 8),
+                            //                           Text('Remove', style: TextStyle(color: Colors.red)),
+                            //                         ],
+                            //                       ),
+                            //                     ),
+                            //                   ],
+                            //                 ),
+                            //               ],
+                            //             ),
+                            //           );
+                            //         }).toList(),
+                            //       ),
+                            //     ),
+                            //   );
+                            // }),
                           ],
                         );
                       }),
@@ -373,13 +441,18 @@ class GenAIPVScreen extends StatelessWidget {
                                       children: [
                                         Text(attribute),
                                         PopupMenuButton<String>(
+                                          padding: EdgeInsets.zero,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(10), // Rounded corners
+                                          ),
                                           icon: Icon(Icons.menu, size: 18),
                                           onSelected: (value) {
                                             if (value == 'view') {
                                               toast('Viewing "$attribute"');
                                             } else if (value == 'remove') {
                                               controller.removeAttribute(attribute);
-                                              // controller.toggleSelection(attribute);
+                                            } else if (value == 'edit') {
+                                              toast("Edit");
                                             }
                                           },
                                           itemBuilder: (context) => [
@@ -393,6 +466,18 @@ class GenAIPVScreen extends StatelessWidget {
                                                 ],
                                               ),
                                             ),
+                                            PopupMenuDivider(),
+                                            PopupMenuItem(
+                                              value: 'edit',
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.edit, size: 18),
+                                                  SizedBox(width: 8),
+                                                  Text('Edit'),
+                                                ],
+                                              ),
+                                            ),
+                                            PopupMenuDivider(),
                                             PopupMenuItem(
                                               value: 'remove',
                                               child: Row(
@@ -424,8 +509,7 @@ class GenAIPVScreen extends StatelessWidget {
                                 color: appBackGroundColor,
                                 borderRadius: BorderRadius.circular(8), // rounded square
                               ),
-                              child:
-                              Builder(
+                              child: Builder(
                                 builder: (context) {
                                   return IconButton(
                                     key: controller.menuKey,
@@ -451,7 +535,20 @@ class GenAIPVScreen extends StatelessWidget {
                                           PopupMenuItem(
                                             value: 'en',
                                             onTap: () {
-                                              controller.getDocsLanguage(language: "en");
+                                              controller.tags.assignAll([
+                                                "Adverse Event Reporting",
+                                                "Aggregate Reporting",
+                                                "Investigator Analysis",
+                                                "PV Agreements",
+                                                "Quality Control",
+                                                "Reconciliation",
+                                                "Risk Management",
+                                                "Sampling",
+                                                "Site Analysis",
+                                                "System",
+                                                "Trial Analysis",
+                                              ]);
+                                              // controller.getDocsLanguage(language: "en");
                                             },
                                             height: 20,
                                             child: Row(
@@ -548,7 +645,6 @@ class GenAIPVScreen extends StatelessWidget {
                               //     }
                               //   },
                               // ),
-
                             ),
                             2.width,
                             Container(
@@ -665,7 +761,6 @@ class GenAIPVScreen extends StatelessWidget {
                             // ),
                             Expanded(
                               child: Obx(() {
-                                
                                 final tags = controller.tags;
                                 return SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
@@ -794,7 +889,7 @@ class GenAIPVScreen extends StatelessWidget {
                                                           Center(
                                                             child: Text(
                                                               category,
-                                                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16,color: appWhiteColor),
+                                                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: appWhiteColor),
                                                             ),
                                                           ),
                                                           const SizedBox(height: 8),

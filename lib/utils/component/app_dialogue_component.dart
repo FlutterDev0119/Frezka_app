@@ -37,7 +37,7 @@ class AppDialogueComponent extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: boxDecorationDefault(
-        color: context.cardColor,
+        color: appDashBoardCardColor,
         borderRadius: radiusOnly(
           topLeft: defaultRadius,
           topRight: defaultRadius,
@@ -45,7 +45,7 @@ class AppDialogueComponent extends StatelessWidget {
       ),
       child: AnimatedCrossFade(
         crossFadeState: CrossFadeState.showFirst,
-        duration: Duration(milliseconds: 600), // Fixed duration unit
+        duration: Duration(milliseconds: 200), // Fixed duration unit
         firstChild: Column(
           mainAxisSize: MainAxisSize.min, // Ensures height adjusts dynamically
           children: [
@@ -76,12 +76,14 @@ class AppDialogueComponent extends StatelessWidget {
               spacing: 16,
               children: [
                 AppButtonWidget(
+                  elevation: 0,
                   text: cancelText,
-                  buttonColor: appGreyColor.withOpacity(0.5),
+                  buttonColor: appBarBackgroundColorGlobal,
                   textStyle: boldTextStyle(),
                   onTap: () => Get.back(),
                 ).expand(),
                 AppButtonWidget(
+                  elevation: 0,
                   buttonColor: appBackGroundColor,
                   text: confirmText,
                   onTap: () {
@@ -90,7 +92,7 @@ class AppDialogueComponent extends StatelessWidget {
                   },
                 ).expand(),
               ],
-            ),
+            ).paddingOnly(bottom: 10),
           ],
         ),
         secondChild: SizedBox.shrink(), // Cleaner alternative to Offstage()

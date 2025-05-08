@@ -252,15 +252,39 @@ class PromptAdminController extends BaseController {
 //       );
 //     }
 //   }
-  void onSourceSelected(ImageSource source, String item) async {
-    final pickedFile = await ImagePicker().pickImage(source: source);
-    if (pickedFile != null) {
-      final file = File(pickedFile.path);
-      imageFiles.add(file);
-      final fileName = file.path.split('/').last;
+//   void onSourceSelected(ImageSource source, String item) async {
+//     final pickedFile = await ImagePicker().pickImage(source: source);
+//     if (pickedFile != null) {
+//       final file = File(pickedFile.path);
+//       imageFiles.add(file);
+//       final fileName = file.path.split('/').last;
+//
+//       // Update specific item
+//       selectedFileNames[item] = fileName;
+//     }
+//   }
+  void onSourceSelected(dynamic imageSource, String item) async {
+    if (imageSource is File) {
+      String fileName = imageSource.path.split('/').last;
+      bool isDuplicate = fileNames.contains(fileName);
 
-      // Update specific item
-      selectedFileNames[item] = fileName;
+      if (isDuplicate) {
+        toast("File already added");
+        return;
+      }
+
+      Get.bottomSheet(
+        AppDialogueComponent(
+          titleText: "Do you want to upload this attachment?",
+          confirmText: "Upload",
+          onConfirm: () {
+            imageFiles.add(imageSource);
+            fileNames.add(fileName);
+            selectedFileNames[item] = fileName;
+          },
+        ),
+        isScrollControlled: true,
+      );
     }
   }
 

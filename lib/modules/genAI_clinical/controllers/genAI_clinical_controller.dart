@@ -95,6 +95,8 @@ class GenAIClinicalController extends GetxController {
   var genAIDropdownValue = 'Upload File'.obs;
   var dataLakeInput = ''.obs;
   RxBool isShowSqlIcon = false.obs;
+  var tags = <String>[].obs;
+  final RxString selectedParentTag = ''.obs;
   @override
   void onInit() {
     super.onInit();
@@ -103,7 +105,12 @@ class GenAIClinicalController extends GetxController {
     searchController.addListener(() {
       filterAttributes(searchController.text);
     });
-
+    tags.assignAll([
+      "Trials Risk Analysis",
+      "Investigator Details",
+      "Studies Dropout Rates",
+      "Clinical Trials Details",
+    ]);
   }
 
   // Method to toggle selection for both chips and attributes (unified logic)
@@ -138,25 +145,29 @@ class GenAIClinicalController extends GetxController {
       isLoading.value = false;
     }
   }
+  void onSourceSelected(dynamic imageSource) async {
+    if (imageSource is File) {
+      String fileName = imageSource.path.split('/').last;
+      bool isDuplicate = fileNames.contains(fileName);
 
-  // Handle source selection for image upload
-  void onSourceSelected(ImageSource imageSource) async {
-    final pickedFile = await pickFilesFromDevice(allowMultipleFiles: true);
-    if (pickedFile.isNotEmpty) {
+      if (isDuplicate) {
+        toast("File already added");
+        return;
+      }
+
       Get.bottomSheet(
         AppDialogueComponent(
           titleText: "Do you want to upload this attachment?",
           confirmText: "Upload",
           onConfirm: () {
-            imageFiles.addAll(pickedFile);
-            fileNames.addAll(pickedFile.map((e) => e.path.split('/').last));
+            imageFiles.add(imageSource);
+            fileNames.add(fileName);
           },
         ),
         isScrollControlled: true,
       );
     }
   }
-
   // Toggle the selection of attributes (now unified with chips)
   void toggleAttribute(String attribute) {
     toggleSelection(attribute);

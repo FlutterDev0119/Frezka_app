@@ -23,20 +23,22 @@ class GenAIPVController extends GetxController {
   RxBool isShowSqlIcon = false.obs;
   final TextEditingController searchController = TextEditingController();
 
+  var tags = <String>[].obs;
 
-  List<String> tags = [
-    "Adverse Event Reporting",
-    "Aggregate Reporting",
-    "Investigator Analysis",
-    "PV Agreements",
-    "Quality Control",
-    "Reconciliation",
-    "Risk Management",
-    "Sampling",
-    "Site Analysis",
-    "System",
-    "Trial Analysis",
-  ];
+
+  // List<String> tags = [
+  //   "Adverse Event Reporting",
+  //   "Aggregate Reporting",
+  //   "Investigator Analysis",
+  //   "PV Agreements",
+  //   "Quality Control",
+  //   "Reconciliation",
+  //   "Risk Management",
+  //   "Sampling",
+  //   "Site Analysis",
+  //   "System",
+  //   "Trial Analysis",
+  // ];
   // Filtered data for displaying in the UI
   RxMap<String, List<String>> filteredAttributes = <String, List<String>>{}.obs;
   final RxString selectedParentTag = ''.obs;
@@ -46,7 +48,7 @@ class GenAIPVController extends GetxController {
   var generateDataLanaguageResponse = Rxn<DocLanguage>();
   var errorMessage = ''.obs;
   var dataLakeInput = ''.obs;
-
+  RxString selectedFileName = ''.obs;
 
   @override
   void onInit() {
@@ -55,7 +57,21 @@ class GenAIPVController extends GetxController {
     searchController.addListener(() {
       filterAttributes(searchController.text);
     });
+    tags.assignAll([
+      "Adverse Event Reporting",
+      "Aggregate Reporting",
+      "Investigator Analysis",
+      "PV Agreements",
+      "Quality Control",
+      "Reconciliation",
+      "Risk Management",
+      "Sampling",
+      "Site Analysis",
+      "System",
+      "Trial Analysis",
+    ]);
   }
+
   void addTag(String tag) {
     if (selectedParentTag.value == tag) {
       // Deselect if the same tag is tapped again
@@ -100,24 +116,29 @@ class GenAIPVController extends GetxController {
     }
   }
 
-  // Handle source selection for image upload
-  void onSourceSelected(ImageSource imageSource) async {
-    final pickedFile = await pickFilesFromDevice(allowMultipleFiles: true);
-    if (pickedFile.isNotEmpty) {
+  void onSourceSelected(dynamic imageSource) async {
+    if (imageSource is File) {
+      String fileName = imageSource.path.split('/').last;
+      bool isDuplicate = fileNames.contains(fileName);
+
+      if (isDuplicate) {
+        toast("File already added");
+        return;
+      }
+
       Get.bottomSheet(
         AppDialogueComponent(
           titleText: "Do you want to upload this attachment?",
           confirmText: "Upload",
           onConfirm: () {
-            imageFiles.addAll(pickedFile);
-            fileNames.addAll(pickedFile.map((e) => e.path.split('/').last));
+            imageFiles.add(imageSource);
+            fileNames.add(fileName);
           },
         ),
         isScrollControlled: true,
       );
     }
   }
-
   // Toggle the selection of attributes (now unified with chips)
   void toggleAttribute(String attribute) {
     toggleSelection(attribute);
@@ -169,6 +190,24 @@ class GenAIPVController extends GetxController {
       isLoading.value = false;
     }
   }
+  // Future<void> getDocsLanguage({required String language}) async {
+  //   try {
+  //     isLoading.value = true;
+  //     errorMessage.value = '';
+  //
+  //     final request = {
+  //       "language": language
+  //     };
+  //
+  //     final response = await GenAIPVServiceApis.getDocsLanguage(request: request);
+  //     generateDataLanaguageResponse.value = response;
+  //   } catch (e) {
+  //     print('Error fetching GenerateSQL: $e');
+  //     errorMessage.value = 'Error occurred while fetching data.';
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
   Future<void> getDocsLanguage({required String language}) async {
     try {
       isLoading.value = true;
@@ -180,11 +219,17 @@ class GenAIPVController extends GetxController {
 
       final response = await GenAIPVServiceApis.getDocsLanguage(request: request);
       generateDataLanaguageResponse.value = response;
+
+      /// Update tags from response
+      if (response?.output != null && response!.output.isNotEmpty) {
+        tags.assignAll(response.output);
+      }
     } catch (e) {
-      print('Error fetching GenerateSQL: $e');
+      print('Error fetching language data: $e');
       errorMessage.value = 'Error occurred while fetching data.';
     } finally {
       isLoading.value = false;
     }
   }
+
 }
