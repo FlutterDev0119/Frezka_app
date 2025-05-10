@@ -531,17 +531,28 @@ class MetaPhraseScreen extends StatelessWidget {
                                                     } else if (score >= 65 && score <= 100) {
                                                       color = appScore65To100Color;
                                                     } else {
-                                                      color = appGreyColor;
+                                                      color = appBackGroundColor;
                                                     }
 
-                                                    return Container(
-                                                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                                      color: color,
-                                                      child: Text(
-                                                        sentence,
-                                                        style: TextStyle(fontSize: 16, color: appTextColor),
+                                                    return Tooltip(
+                                                      message: 'Score: $score',
+                                                      decoration: BoxDecoration(
+                                                        color: appDashBoardCardColor,
+                                                        borderRadius: BorderRadius.circular(4),
+                                                      ),
+                                                      textStyle: TextStyle(color: appBackGroundColor),
+                                                      waitDuration: Duration(milliseconds: 500),
+                                                      showDuration: Duration(seconds: 2),
+                                                      child: Container(
+                                                        padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                                        color: color,
+                                                        child: Text(
+                                                          sentence,
+                                                          style: TextStyle(fontSize: 16, color: appTextColor),
+                                                        ),
                                                       ),
                                                     );
+
                                                   }).toList(),
                                                 );
                                               }
@@ -635,19 +646,18 @@ class MetaPhraseScreen extends StatelessWidget {
                                         const TextSpan(text: ', certify that I am competent to translate between English and '),
                                         const TextSpan(text: 'Japanese (ja)', style: TextStyle(fontWeight: FontWeight.bold)),
                                         const TextSpan(text: '. I further certify that I translated the document titled '),
-                                         TextSpan(text: '"$fileName"', style: TextStyle(fontWeight: FontWeight.bold)),
+                                        TextSpan(text: '"$fileName"', style: TextStyle(fontWeight: FontWeight.bold)),
                                         const TextSpan(text: ', and the translation is true and accurate to the best of my abilities.'),
                                       ],
                                     ),
                                   ),
                                 ),
-
                                 const SizedBox(height: 20),
                                 const Divider(thickness: 1),
                                 const SizedBox(height: 12),
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  children:  [
+                                  children: [
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -684,12 +694,15 @@ class MetaPhraseScreen extends StatelessWidget {
                                   child: ElevatedButton.icon(
                                     onPressed: () async {
                                       log("--------------");
-                                      await generateAndDownloadCertificate(firstName!,email!,fileName);
+                                      await generateAndDownloadCertificate(firstName!, email!, fileName);
                                     },
-                                    icon: const Icon(Icons.download,color: appWhiteColor,),
+                                    icon: const Icon(
+                                      Icons.download,
+                                      color: appWhiteColor,
+                                    ),
                                     label: const Text('Download'),
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor:appBackGroundColor,
+                                      backgroundColor: appBackGroundColor,
                                       foregroundColor: appWhiteColor,
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                     ),
@@ -717,346 +730,353 @@ class MetaPhraseScreen extends StatelessWidget {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                             controller.isCredentialsConfirm.value ? 
-                             Container(
-                    width: 150,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          color: appBackGroundColor,
-                          border: Border.all(color: Colors.grey.shade400),
-                        ),
-                        child: Builder(
-                          builder: (context) {
-                            return GestureDetector(
-                              onTap: () async {
-                                final RenderBox button = context.findRenderObject() as RenderBox;
-                                final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
-                                final RelativeRect position = RelativeRect.fromRect(
-                                  Rect.fromPoints(
-                                    button.localToGlobal(Offset.zero, ancestor: overlay),
-                                    button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
-                                  ),
-                                  Offset.zero & overlay.size,
-                                );
-
-                                final List<PopupMenuEntry<String>> items = [];
-                                for (int i = 0; i < controller.modes.length; i++) {
-                                  final value = controller.modes[i];
-                                  final isPeerReview = value == 'Peer Review';
-                                  final isDisabled =
-                                  ((controller.selected.value == 'Review' || controller.selected.value == 'Edit') && isPeerReview && !controller.isEditing.value);
-
-                                  items.add(
-                                    PopupMenuItem<String>(
-                                      enabled: !isDisabled,
-                                      value: value,
-                                      height: 40,
-                                      child: Text(
-                                        value,
-                                        style: TextStyle(
-                                          color: isDisabled ? appWhiteColor.withOpacity(0.5) : appWhiteColor,
-                                          fontSize: 14,
+                                controller.isCredentialsConfirm.value
+                                    ? Container(
+                                        width: 150,
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(12),
+                                          color: appBackGroundColor,
+                                          border: Border.all(color: Colors.grey.shade400),
                                         ),
-                                      ),
-                                    ),
-                                  );
+                                        child: Builder(
+                                          builder: (context) {
+                                            return GestureDetector(
+                                              onTap: () async {
+                                                final RenderBox button = context.findRenderObject() as RenderBox;
+                                                final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+                                                final RelativeRect position = RelativeRect.fromRect(
+                                                  Rect.fromPoints(
+                                                    button.localToGlobal(Offset.zero, ancestor: overlay),
+                                                    button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+                                                  ),
+                                                  Offset.zero & overlay.size,
+                                                );
 
-                                  if (i != controller.modes.length - 1) {
-                                    items.add(const PopupMenuDivider(height: 1));
-                                  }
-                                }
-                                final isCertify = controller.selected.value == 'Certify';
+                                                final List<PopupMenuEntry<String>> items = [];
+                                                for (int i = 0; i < controller.modes.length; i++) {
+                                                  final value = controller.modes[i];
+                                                  final isPeerReview = value == 'Peer Review';
+                                                  final isDisabled =
+                                                      ((controller.selected.value == 'Review' || controller.selected.value == 'Edit') &&
+                                                          isPeerReview &&
+                                                          !controller.isEditing.value);
 
-                                final selected = await showMenu<String>(
-                                  context: context,
-                                  position: position,
-                                  color: appBackGroundColor,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                  items: isCertify
-                                      ? certifyOptions.map((option) {
-                                    return PopupMenuItem<String>(
-                                      value: option,
-                                      child: InkWell(
-                                          onTap: () {
-                                            if (option == "Finalize") {
-                                              Get.back();
-                                              showCredentialsDialog(context, controller);
-                                              controller.isReturnSelected.value = false;
-                                              controller.isRejectSelected.value = false;
-                                            } else if (option == "Return") {
-                                              Get.back();
-                                              log("-----------------Return------------------");
-                                              controller.isReturnSelected.value = true;
-                                              controller.isRejectSelected.value = false;
-                                            } else if (option == "Reject") {
-                                              Get.back();
-                                              log("-----------------Reject------------------");
-                                              controller.isRejectSelected.value = true;
-                                              controller.isReturnSelected.value = false;
-                                            }
-                                            controller.updateSelectedMode("Certify");
-                                          },
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Padding(
-                                                padding: const EdgeInsets.symmetric(vertical: 8.0), // Equal space above and below
-                                                child: Column(
-                                                  children: [
-                                                    Row(
-                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                      children: [
-                                                        Padding(
-                                                          padding: const EdgeInsets.only(bottom: 10),
-                                                          child: Icon(
-                                                            option == "Return"
-                                                                ? Icons.keyboard_return
-                                                                : option == "Reject"
-                                                                ? Icons.close
-                                                                : Icons.check_circle_outline,
-                                                            color: appWhiteColor,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(width: 10),
-                                                        Padding(
-                                                          padding: const EdgeInsets.only(bottom: 10),
-                                                          child: Text(
-                                                            option,
-                                                            style: const TextStyle(
-                                                              fontWeight: FontWeight.bold,
-                                                              color: appWhiteColor,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    if (option != "Reject")
-                                                      const Padding(
-                                                        padding: EdgeInsets.only(top: 2.0),
-                                                        child: Divider(
-                                                          color: Colors.white54,
-                                                          thickness: 1,
-                                                          height: 1,
+                                                  items.add(
+                                                    PopupMenuItem<String>(
+                                                      enabled: !isDisabled,
+                                                      value: value,
+                                                      height: 40,
+                                                      child: Text(
+                                                        value,
+                                                        style: TextStyle(
+                                                          color: isDisabled ? appWhiteColor.withOpacity(0.5) : appWhiteColor,
+                                                          fontSize: 14,
                                                         ),
                                                       ),
-                                                  ],
-                                                ),
-                                              )
-                                            ],
-                                          )),
-                                    );
-                                  }).toList()
-                                      : _buildModeOptionsWithDividers(controller),
-                                );
-
-                                if (selected != null) {
-                                  controller.updateSelectedMode(selected);
-                                  if (selected == 'Edit') controller.isReverse.value = false;
-                                }
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.transparent,
-                                  borderRadius: BorderRadius.circular(8),
-                                  // border: Border.all(color: appWhiteColor),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Obx(() => Text(
-                                      controller.selected.value,
-                                      style: const TextStyle(color: appWhiteColor, fontSize: 16),
-                                    )),
-                                    const Icon(Icons.arrow_drop_down, color: appWhiteColor),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        )): Container(
-                                    width: 150,
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(12),
-                                      color: appBackGroundColor,
-                                      border: Border.all(color: Colors.grey.shade400),
-                                    ),
-                                    child: Builder(
-                                      builder: (context) {
-                                        return GestureDetector(
-                                          onTap: () async {
-                                            final RenderBox button = context.findRenderObject() as RenderBox;
-                                            final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
-                                            final RelativeRect position = RelativeRect.fromRect(
-                                              Rect.fromPoints(
-                                                button.localToGlobal(Offset.zero, ancestor: overlay),
-                                                button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
-                                              ),
-                                              Offset.zero & overlay.size,
-                                            );
-
-                                            final List<PopupMenuEntry<String>> items = [];
-                                            for (int i = 0; i < controller.modes.length; i++) {
-                                              final value = controller.modes[i];
-                                              final isPeerReview = value == 'Peer Review';
-                                              final isDisabled =
-                                                  ((controller.selected.value == 'Review' || controller.selected.value == 'Edit') && isPeerReview && !controller.isEditing.value);
-
-                                              items.add(
-                                                PopupMenuItem<String>(
-                                                  enabled: !isDisabled,
-                                                  value: value,
-                                                  height: 40,
-                                                  child: Text(
-                                                    value,
-                                                    style: TextStyle(
-                                                      color: isDisabled ? appWhiteColor.withOpacity(0.5) : appWhiteColor,
-                                                      fontSize: 14,
                                                     ),
-                                                  ),
-                                                ),
-                                              );
+                                                  );
 
-                                              if (i != controller.modes.length - 1) {
-                                                items.add(const PopupMenuDivider(height: 1));
-                                              }
-                                            }
+                                                  if (i != controller.modes.length - 1) {
+                                                    items.add(const PopupMenuDivider(height: 1));
+                                                  }
+                                                }
+                                                final isCertify = controller.selected.value == 'Certify';
 
-                                            // final selected = await showMenu<String>(
-                                            //   context: context,
-                                            //   position: position,
-                                            //   color: appBackGroundColor,
-                                            //   shape: RoundedRectangleBorder(
-                                            //     borderRadius: BorderRadius.circular(12),
-                                            //   ),
-                                            //   items: items,
-                                            // );
-                                            final isCertify = controller.selected.value == 'Certify';
-
-                                            final selected = await showMenu<String>(
-                                              context: context,
-                                              position: position,
-                                              color: appBackGroundColor,
-                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                              items: isCertify
-                                                  ? certifyOptions.map((option) {
-                                                      return PopupMenuItem<String>(
-                                                        value: option,
-                                                        child: InkWell(
-                                                            onTap: () {
-                                                              if (option == "Finalize") {
-                                                                Get.back();
-                                                                showCredentialsDialog(context, controller);
-                                                                controller.isReturnSelected.value = false;
-                                                                controller.isRejectSelected.value = false;
-                                                              } else if (option == "Return") {
-                                                                Get.back();
-                                                                log("-----------------Return------------------");
-                                                                controller.isReturnSelected.value = true;
-                                                                controller.isRejectSelected.value = false;
-                                                              } else if (option == "Reject") {
-                                                                Get.back();
-                                                                log("-----------------Reject------------------");
-                                                                controller.isRejectSelected.value = true;
-                                                                controller.isReturnSelected.value = false;
-                                                              }
-                                                              controller.updateSelectedMode("Certify");
-                                                            },
-                                                            child: Column(
-                                                              mainAxisSize: MainAxisSize.min,
-                                                              children: [
-                                                                Padding(
-                                                                  padding: const EdgeInsets.symmetric(vertical: 8.0), // Equal space above and below
-                                                                  child: Column(
-                                                                    children: [
-                                                                      Row(
-                                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                final selected = await showMenu<String>(
+                                                  context: context,
+                                                  position: position,
+                                                  color: appBackGroundColor,
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                  items: isCertify
+                                                      ? certifyOptions.map((option) {
+                                                          return PopupMenuItem<String>(
+                                                            value: option,
+                                                            child: InkWell(
+                                                                onTap: () {
+                                                                  if (option == "Finalize") {
+                                                                    Get.back();
+                                                                    showCredentialsDialog(context, controller);
+                                                                    controller.isReturnSelected.value = false;
+                                                                    controller.isRejectSelected.value = false;
+                                                                  } else if (option == "Return") {
+                                                                    Get.back();
+                                                                    log("-----------------Return------------------");
+                                                                    controller.isReturnSelected.value = true;
+                                                                    controller.isRejectSelected.value = false;
+                                                                  } else if (option == "Reject") {
+                                                                    Get.back();
+                                                                    log("-----------------Reject------------------");
+                                                                    controller.isRejectSelected.value = true;
+                                                                    controller.isReturnSelected.value = false;
+                                                                  }
+                                                                  controller.updateSelectedMode("Certify");
+                                                                },
+                                                                child: Column(
+                                                                  mainAxisSize: MainAxisSize.min,
+                                                                  children: [
+                                                                    Padding(
+                                                                      padding:
+                                                                          const EdgeInsets.symmetric(vertical: 8.0), // Equal space above and below
+                                                                      child: Column(
                                                                         children: [
-                                                                          Padding(
-                                                                            padding: const EdgeInsets.only(bottom: 10),
-                                                                            child: Icon(
-                                                                              option == "Return"
-                                                                                  ? Icons.keyboard_return
-                                                                                  : option == "Reject"
-                                                                                      ? Icons.close
-                                                                                      : Icons.check_circle_outline,
-                                                                              color: appWhiteColor,
-                                                                            ),
+                                                                          Row(
+                                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                                            children: [
+                                                                              Padding(
+                                                                                padding: const EdgeInsets.only(bottom: 10),
+                                                                                child: Icon(
+                                                                                  option == "Return"
+                                                                                      ? Icons.keyboard_return
+                                                                                      : option == "Reject"
+                                                                                          ? Icons.close
+                                                                                          : Icons.check_circle_outline,
+                                                                                  color: appWhiteColor,
+                                                                                ),
+                                                                              ),
+                                                                              const SizedBox(width: 10),
+                                                                              Padding(
+                                                                                padding: const EdgeInsets.only(bottom: 10),
+                                                                                child: Text(
+                                                                                  option,
+                                                                                  style: const TextStyle(
+                                                                                    fontWeight: FontWeight.bold,
+                                                                                    color: appWhiteColor,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
                                                                           ),
-                                                                          const SizedBox(width: 10),
-                                                                          Padding(
-                                                                            padding: const EdgeInsets.only(bottom: 10),
-                                                                            child: Text(
-                                                                              option,
-                                                                              style: const TextStyle(
-                                                                                fontWeight: FontWeight.bold,
-                                                                                color: appWhiteColor,
+                                                                          if (option != "Reject")
+                                                                            const Padding(
+                                                                              padding: EdgeInsets.only(top: 2.0),
+                                                                              child: Divider(
+                                                                                color: Colors.white54,
+                                                                                thickness: 1,
+                                                                                height: 1,
                                                                               ),
                                                                             ),
-                                                                          ),
                                                                         ],
                                                                       ),
-                                                                      if (option != "Reject")
-                                                                        const Padding(
-                                                                          padding: EdgeInsets.only(top: 2.0),
-                                                                          child: Divider(
-                                                                            color: Colors.white54,
-                                                                            thickness: 1,
-                                                                            height: 1,
-                                                                          ),
-                                                                        ),
-                                                                    ],
-                                                                  ),
-                                                                )
-                                                              ],
-                                                            )),
-                                                      );
-                                                    }).toList()
-                                                  : _buildModeOptionsWithDividers(controller),
-                                              // : controller.modes.map((value) {
-                                              //     final isPeerReview = value == 'Peer Review';
-                                              //     final isDisabled =
-                                              //         (controller.selected.value == 'Review' && isPeerReview && !controller.isEditing.value);
-                                              //     for (int i = 0; i < controller.modes.length; i++) {
-                                              //       final value = controller.modes[i];
-                                              //       items.add(
-                                              //         PopupMenuItem<String>(
-                                              //           enabled: !isDisabled,
-                                              //           value: value,
-                                              //           child: Text(
-                                              //             value,
-                                              //             style: TextStyle(
-                                              //               color: isDisabled ? appWhiteColor.withOpacity(0.5) : appWhiteColor,
-                                              //               fontSize: 14,
-                                              //             ),
-                                              //           ),
-                                              //         ),
-                                              //       );
-                                              //
-                                              //       // Add divider after each item except the last one
-                                              //       if (i < controller.modes.length - 1) {
-                                              //         items.add(
-                                              //           const PopupMenuDivider(
-                                              //             height: 1,
-                                              //           ),
-                                              //         );
-                                              //       }
-                                              //     }
-                                              //     return PopupMenuItem<String>(
-                                              //       enabled: !isDisabled,
-                                              //       value: value,
-                                              //       child: Text(
-                                              //         value,
-                                              //         style: TextStyle(
-                                              //           color: isDisabled ? appWhiteColor.withOpacity(0.5) : appWhiteColor,
-                                              //           fontSize: 14,
-                                              //         ),
-                                              //       ),
-                                              //     );
-                                              //   }).toList(),
+                                                                    )
+                                                                  ],
+                                                                )),
+                                                          );
+                                                        }).toList()
+                                                      : _buildModeOptionsWithDividers(controller),
+                                                );
+
+                                                if (selected != null) {
+                                                  controller.updateSelectedMode(selected);
+                                                  if (selected == 'Edit') controller.isReverse.value = false;
+                                                }
+                                              },
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.transparent,
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  // border: Border.all(color: appWhiteColor),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Obx(() => Text(
+                                                          controller.selected.value,
+                                                          style: const TextStyle(color: appWhiteColor, fontSize: 16),
+                                                        )),
+                                                    const Icon(Icons.arrow_drop_down, color: appWhiteColor),
+                                                  ],
+                                                ),
+                                              ),
                                             );
+                                          },
+                                        ))
+                                    : Container(
+                                        width: 150,
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(12),
+                                          color: appBackGroundColor,
+                                          border: Border.all(color: Colors.grey.shade400),
+                                        ),
+                                        child: Builder(
+                                          builder: (context) {
+                                            return GestureDetector(
+                                              onTap: () async {
+                                                final RenderBox button = context.findRenderObject() as RenderBox;
+                                                final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+                                                final RelativeRect position = RelativeRect.fromRect(
+                                                  Rect.fromPoints(
+                                                    button.localToGlobal(Offset.zero, ancestor: overlay),
+                                                    button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+                                                  ),
+                                                  Offset.zero & overlay.size,
+                                                );
+
+                                                final List<PopupMenuEntry<String>> items = [];
+                                                for (int i = 0; i < controller.modes.length; i++) {
+                                                  final value = controller.modes[i];
+                                                  final isPeerReview = value == 'Peer Review';
+                                                  final isDisabled =
+                                                      ((controller.selected.value == 'Review' || controller.selected.value == 'Edit') &&
+                                                          isPeerReview &&
+                                                          !controller.isEditing.value);
+
+                                                  items.add(
+                                                    PopupMenuItem<String>(
+                                                      enabled: !isDisabled,
+                                                      value: value,
+                                                      height: 40,
+                                                      child: Text(
+                                                        value,
+                                                        style: TextStyle(
+                                                          color: isDisabled ? appWhiteColor.withOpacity(0.5) : appWhiteColor,
+                                                          fontSize: 14,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  );
+
+                                                  if (i != controller.modes.length - 1) {
+                                                    items.add(const PopupMenuDivider(height: 1));
+                                                  }
+                                                }
+
+                                                // final selected = await showMenu<String>(
+                                                //   context: context,
+                                                //   position: position,
+                                                //   color: appBackGroundColor,
+                                                //   shape: RoundedRectangleBorder(
+                                                //     borderRadius: BorderRadius.circular(12),
+                                                //   ),
+                                                //   items: items,
+                                                // );
+                                                final isCertify = controller.selected.value == 'Certify';
+
+                                                final selected = await showMenu<String>(
+                                                  context: context,
+                                                  position: position,
+                                                  color: appBackGroundColor,
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                  items: isCertify
+                                                      ? certifyOptions.map((option) {
+                                                          return PopupMenuItem<String>(
+                                                            value: option,
+                                                            child: InkWell(
+                                                                onTap: () {
+                                                                  if (option == "Finalize") {
+                                                                    Get.back();
+                                                                    showCredentialsDialog(context, controller);
+                                                                    controller.isReturnSelected.value = false;
+                                                                    controller.isRejectSelected.value = false;
+                                                                  } else if (option == "Return") {
+                                                                    Get.back();
+                                                                    log("-----------------Return------------------");
+                                                                    controller.isReturnSelected.value = true;
+                                                                    controller.isRejectSelected.value = false;
+                                                                  } else if (option == "Reject") {
+                                                                    Get.back();
+                                                                    log("-----------------Reject------------------");
+                                                                    controller.isRejectSelected.value = true;
+                                                                    controller.isReturnSelected.value = false;
+                                                                  }
+                                                                  controller.updateSelectedMode("Certify");
+                                                                },
+                                                                child: Column(
+                                                                  mainAxisSize: MainAxisSize.min,
+                                                                  children: [
+                                                                    Padding(
+                                                                      padding:
+                                                                          const EdgeInsets.symmetric(vertical: 8.0), // Equal space above and below
+                                                                      child: Column(
+                                                                        children: [
+                                                                          Row(
+                                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                                            children: [
+                                                                              Padding(
+                                                                                padding: const EdgeInsets.only(bottom: 10),
+                                                                                child: Icon(
+                                                                                  option == "Return"
+                                                                                      ? Icons.keyboard_return
+                                                                                      : option == "Reject"
+                                                                                          ? Icons.close
+                                                                                          : Icons.check_circle_outline,
+                                                                                  color: appWhiteColor,
+                                                                                ),
+                                                                              ),
+                                                                              const SizedBox(width: 10),
+                                                                              Padding(
+                                                                                padding: const EdgeInsets.only(bottom: 10),
+                                                                                child: Text(
+                                                                                  option,
+                                                                                  style: const TextStyle(
+                                                                                    fontWeight: FontWeight.bold,
+                                                                                    color: appWhiteColor,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                          if (option != "Reject")
+                                                                            const Padding(
+                                                                              padding: EdgeInsets.only(top: 2.0),
+                                                                              child: Divider(
+                                                                                color: Colors.white54,
+                                                                                thickness: 1,
+                                                                                height: 1,
+                                                                              ),
+                                                                            ),
+                                                                        ],
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                )),
+                                                          );
+                                                        }).toList()
+                                                      : _buildModeOptionsWithDividers(controller),
+                                                  // : controller.modes.map((value) {
+                                                  //     final isPeerReview = value == 'Peer Review';
+                                                  //     final isDisabled =
+                                                  //         (controller.selected.value == 'Review' && isPeerReview && !controller.isEditing.value);
+                                                  //     for (int i = 0; i < controller.modes.length; i++) {
+                                                  //       final value = controller.modes[i];
+                                                  //       items.add(
+                                                  //         PopupMenuItem<String>(
+                                                  //           enabled: !isDisabled,
+                                                  //           value: value,
+                                                  //           child: Text(
+                                                  //             value,
+                                                  //             style: TextStyle(
+                                                  //               color: isDisabled ? appWhiteColor.withOpacity(0.5) : appWhiteColor,
+                                                  //               fontSize: 14,
+                                                  //             ),
+                                                  //           ),
+                                                  //         ),
+                                                  //       );
+                                                  //
+                                                  //       // Add divider after each item except the last one
+                                                  //       if (i < controller.modes.length - 1) {
+                                                  //         items.add(
+                                                  //           const PopupMenuDivider(
+                                                  //             height: 1,
+                                                  //           ),
+                                                  //         );
+                                                  //       }
+                                                  //     }
+                                                  //     return PopupMenuItem<String>(
+                                                  //       enabled: !isDisabled,
+                                                  //       value: value,
+                                                  //       child: Text(
+                                                  //         value,
+                                                  //         style: TextStyle(
+                                                  //           color: isDisabled ? appWhiteColor.withOpacity(0.5) : appWhiteColor,
+                                                  //           fontSize: 14,
+                                                  //         ),
+                                                  //       ),
+                                                  //     );
+                                                  //   }).toList(),
+                                                );
 
                                                 if (selected != null) {
                                                   controller.updateSelectedMode(selected);
@@ -1069,31 +1089,30 @@ class MetaPhraseScreen extends StatelessWidget {
                                                     controller.selected.value = 'Review';
                                                     controller.isReverse.value = false;
                                                     controller.isEditing.value = false;
-
                                                   }
                                                 }
                                               },
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                            decoration: BoxDecoration(
-                                              color: Colors.transparent,
-                                              borderRadius: BorderRadius.circular(8),
-                                              // border: Border.all(color: appWhiteColor),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Obx(() => Text(
-                                                      controller.selected.value,
-                                                      style: const TextStyle(color: appWhiteColor, fontSize: 16),
-                                                    )),
-                                                const Icon(Icons.arrow_drop_down, color: appWhiteColor),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    )),
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.transparent,
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  // border: Border.all(color: appWhiteColor),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Obx(() => Text(
+                                                          controller.selected.value,
+                                                          style: const TextStyle(color: appWhiteColor, fontSize: 16),
+                                                        )),
+                                                    const Icon(Icons.arrow_drop_down, color: appWhiteColor),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        )),
                                 // Only show this if 'Certify' is selected
                                 if (selected == 'Certify') const SizedBox(height: 8),
                                 if (selected == 'Certify')
@@ -1359,7 +1378,8 @@ List<PopupMenuEntry<String>> _buildModeOptionsWithDividers(dynamic controller) {
   for (int i = 0; i < controller.modes.length; i++) {
     final value = controller.modes[i];
     final isPeerReview = value == 'Peer Review';
-    final isDisabled = ((controller.selected.value == 'Review' || controller.selected.value == 'Edit') && isPeerReview && !controller.isEditing.value);
+    final isDisabled =
+        ((controller.selected.value == 'Review' || controller.selected.value == 'Edit') && isPeerReview && !controller.isEditing.value);
 
     items.add(
       PopupMenuItem<String>(
@@ -1481,6 +1501,7 @@ void showPeerReviewDialog(BuildContext context) {
     },
   );
 }
+
 void showCredentialsDialog(BuildContext context, controller) {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -1709,8 +1730,7 @@ void showCredentialsDialog(BuildContext context, controller) {
 //   );
 // }
 
-
-Future<void> generateAndDownloadCertificate(String firstName,String email,String fileName) async {
+Future<void> generateAndDownloadCertificate(String firstName, String email, String fileName) async {
   final pdf = pw.Document();
 
   pdf.addPage(
@@ -1734,8 +1754,8 @@ Future<void> generateAndDownloadCertificate(String firstName,String email,String
               pw.SizedBox(height: 20),
               pw.Text(
                 'I, $firstName, certify that I am competent to translate between English and Japanese (ja). '
-                    'I further certify that I translated the document titled "$fileName", and the translation is true '
-                    'and accurate to the best of my abilities.',
+                'I further certify that I translated the document titled "$fileName", and the translation is true '
+                'and accurate to the best of my abilities.',
                 style: pw.TextStyle(fontSize: 14),
               ),
               pw.SizedBox(height: 20),
