@@ -1,6 +1,7 @@
 import 'package:apps/utils/library.dart';
 import 'package:nb_utils/nb_utils.dart';
 import '../../../utils/app_scaffold.dart';
+import '../../../utils/component/app_widgets.dart';
 import '../../../utils/component/image_source_selection_component.dart';
 import '../controllers/reconAI_controller.dart';
 
@@ -473,7 +474,7 @@ class ReconAIScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("MetaData", style: boldTextStyle(color: appBackGroundColor)),
+                          Text("Compare Data set", style: boldTextStyle(color: appBackGroundColor)),
                           12.height,
                           Container(
                             padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
@@ -573,6 +574,54 @@ class ReconAIScreen extends StatelessWidget {
                                       );
                                     },
                                     child: Icon(Icons.attach_file, color: appBackGroundColor)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 12),
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: appDashBoardCardColor, // Light background
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Compare Data set", style: boldTextStyle(color: appBackGroundColor)),
+                          12.height,
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Column(
+                              children: [
+                                Text("Ready to Use Prompts", style: boldTextStyle(color: appBackGroundColor)),
+                                10.height,
+                                AppButtonWidget(
+                                  elevation: 0,
+                                  text: "Reconcillation",
+                                  buttonColor: appBackGroundColor,
+                                  textStyle: boldTextStyle(color: appWhiteColor),
+                                  onTap: () async{
+                                    String data = await controller.readExcelAsString();
+                                    print("---------------------$data");
+                                    // controller.readExcelAsString();
+                                    // controller.reconReconciliation()
+                                  },
+                                ),
+                                5.height,
+                                AppButtonWidget(
+                                  elevation: 0,
+                                  text: "Recommendation",
+                                  buttonColor: appBackGroundColor,
+                                  textStyle: boldTextStyle(color: appWhiteColor),
+                                  onTap: () => Get.back(),
+                                ),
                               ],
                             ),
                           ),

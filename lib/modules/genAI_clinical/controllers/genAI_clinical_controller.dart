@@ -79,6 +79,7 @@ import 'package:nb_utils/nb_utils.dart';
 
 import '../../../utils/common/common_base.dart';
 import '../../../utils/component/app_dialogue_component.dart';
+import '../model/additional_narrative_model.dart';
 
 class GenAIClinicalController extends GetxController {
   RxList<File> imageFiles = <File>[].obs;
@@ -89,7 +90,10 @@ class GenAIClinicalController extends GetxController {
   RxSet<String> selectedChips = <String>{}.obs;
   RxSet<String> selectedTags = <String>{}.obs;
   RxBool isLoading = false.obs;
+  RxBool isAdditionalNarrative = false.obs;
   final TextEditingController searchController = TextEditingController();
+  final TextEditingController personalizeController = TextEditingController();
+
   // Filtered data for displaying in the UI
   RxMap<String, List<String>> filteredAttributes = <String, List<String>>{}.obs;
   var genAIDropdownValue = 'Upload File'.obs;
@@ -97,6 +101,8 @@ class GenAIClinicalController extends GetxController {
   RxBool isShowSqlIcon = false.obs;
   var tags = <String>[].obs;
   final RxString selectedParentTag = ''.obs;
+  var additionalNarrativeRes = Rxn<AdditionalNarrativeRes>();
+
   @override
   void onInit() {
     super.onInit();
@@ -105,12 +111,13 @@ class GenAIClinicalController extends GetxController {
     searchController.addListener(() {
       filterAttributes(searchController.text);
     });
-    tags.assignAll([
-      "Trials Risk Analysis",
-      "Investigator Details",
-      "Studies Dropout Rates",
-      "Clinical Trials Details",
-    ]);
+    // tags.assignAll([
+    //   "Trials Risk Analysis",
+    //   "Investigator Details",
+    //   "Studies Dropout Rates",
+    //   "Clinical Trials Details",
+    // ]);
+    isAdditionalNarrative.value = false;
   }
 
   // Method to toggle selection for both chips and attributes (unified logic)
@@ -138,6 +145,7 @@ class GenAIClinicalController extends GetxController {
       if (data != null && data.output != null) {
         classificationMap.assignAll(data.output!);
         filteredClassificationMap.assignAll(data.output!);
+        tags.assignAll(data.output!.keys.toList());
       }
     } catch (e) {
       toast(e.toString());
@@ -145,6 +153,46 @@ class GenAIClinicalController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<void> additionalNarrative({required String query, required String SafetyReport, required List<String> checkbox, required String narrative}) async {
+    try {
+      isLoading.value = true;
+
+      final request = {
+        "query": query,
+        "SafetyReport": [],
+        "checkbox": checkbox,
+        "narrative": '',
+      };
+
+      final response = await ClinicalPromptServiceApis.fetchAdditionalNarrative(request: request);
+      additionalNarrativeRes.value = response;
+    } catch (e) {
+      print('Error fetching Additional Narrative: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Future<void> additionalNarrativeRes(String query, {String? userId, required String userName}) async {
+  //   try {
+  //     isLoading.value = true;
+  //
+  //     final request = {
+  //       "query": query,
+  //       "SafetyReport": [],
+  //       "checkbox": [],
+  //       "narrative": '',
+  //     };
+  //
+  //     final response = await ClinicalPromptServiceApis.fetchAdditionalNarrative(request: request);
+  //     AdditionalNarrativeRes.value = response;
+  //   } catch (e) {
+  //     print('Error fetching Additional Narrative: $e');
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
   void onSourceSelected(dynamic imageSource) async {
     if (imageSource is File) {
       String fileName = imageSource.path.split('/').last;
@@ -168,6 +216,7 @@ class GenAIClinicalController extends GetxController {
       );
     }
   }
+
   // Toggle the selection of attributes (now unified with chips)
   void toggleAttribute(String attribute) {
     toggleSelection(attribute);
@@ -177,6 +226,7 @@ class GenAIClinicalController extends GetxController {
   void removeAttribute(String attribute) {
     selectedTags.remove(attribute);
   }
+
   // Method to filter attributes based on the search query
   void filterAttributes(String query) {
     final trimmed = query.trim().toLowerCase();

@@ -1,35 +1,36 @@
-class TranslationMemory {
-  final int id;
-   String es;
-   String en;
-   String lang;
-   String name;
+class ReconRes {
+  final List<Message> response;
+  final String traceId;
 
-  TranslationMemory({
-    required this.id,
-    required this.es,
-    required this.en,
-    required this.lang,
-    required this.name,
-  });
+  ReconRes({required this.response, required this.traceId});
 
-  factory TranslationMemory.fromJson(Map<String, dynamic> json) {
-    return TranslationMemory(
-      id: json['id'] ?? 0,
-      es: json['es'] ?? '',
-      en: json['en'] ?? '',
-      lang: json['lang'] ?? '',
-      name: json['name'] ?? '',
+  factory ReconRes.fromJson(Map<String, dynamic> json) {
+    return ReconRes(
+      response: (json['response'] as List<dynamic>)
+          .map((e) => Message.fromJson(e))
+          .toList(),
+      traceId: json['trace_id'],
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'es': es,
-      'en': en,
-      'lang': lang,
-      'name': name,
-    };
+  Map<String, dynamic> toJson() => {
+    'response': response.map((e) => e.toJson()).toList(),
+    'trace_id': traceId,
+  };
+}
+
+class Message {
+  final String message;
+
+  Message({required this.message});
+
+  factory Message.fromJson(Map<String, dynamic> json) {
+    return Message(
+      message: json['message'],
+    );
   }
+
+  Map<String, dynamic> toJson() => {
+    'message': message,
+  };
 }

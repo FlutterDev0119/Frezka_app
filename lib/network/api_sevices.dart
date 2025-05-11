@@ -5,6 +5,7 @@ import 'package:nb_utils/nb_utils.dart';
 
 import 'package:apps/utils/library.dart';
 
+import '../modules/genAI_clinical/model/additional_narrative_model.dart';
 import '../modules/genAI_clinical/model/fetch_docs_clinical.dart';
 import '../modules/genAI_pv/model/doc_language_model.dart';
 import '../modules/genAI_pv/model/generate_sql_model.dart';
@@ -18,6 +19,7 @@ import '../modules/prompt_admin/model/inherit_fetch_doc_model.dart';
 import '../modules/prompt_admin/model/new_prompt_response_model.dart';
 import '../modules/prompt_admin/model/output_model.dart';
 import '../modules/prompt_admin/model/role_model.dart';
+import '../modules/reconAI/model/reconAI_model.dart';
 import '../utils/common/base_response_model.dart';
 import '../utils/common/common.dart';
 import '../utils/constants.dart';
@@ -358,14 +360,17 @@ class GenAIPVServiceApis {
       return null;
     }
   }
-  static Future<GenerateSQL> getGenerateSQL({required Map request}) async {
+
+  static Future<GenerateSQLRes> getGenerateSQL({required Map request}) async {
     final response = await buildHttpResponse(
       endPoint: APIEndPoints.fetchGenerateSQL,
       request: request,
       method: MethodType.post,
     );
-    return GenerateSQL.fromJson(response);
+
+    return GenerateSQLRes.fromJson(response);
   }
+
 
   static Future<DocLanguage> getDocsLanguage({required Map request}) async {
     final response = await buildHttpResponse(
@@ -374,6 +379,15 @@ class GenAIPVServiceApis {
       method: MethodType.put,
     );
     return DocLanguage.fromJson(response);
+  }
+  /// Additional Narrative
+  static Future<AdditionalNarrativeRes> fetchAdditionalNarrative({required Map request}) async {
+    final response = await buildHttpResponse(
+      endPoint: APIEndPoints.fetchAdditionalNarrative,
+      request: request,
+      method: MethodType.post,
+    );
+    return AdditionalNarrativeRes.fromJson(response);
   }
 }
 
@@ -398,6 +412,15 @@ class ClinicalPromptServiceApis {
       return null;
     }
   }
+  /// Additional Narrative
+  static Future<AdditionalNarrativeRes> fetchAdditionalNarrative({required Map request}) async {
+    final response = await buildHttpResponse(
+      endPoint: APIEndPoints.fetchAdditionalNarrative,
+      request: request,
+      method: MethodType.post,
+    );
+    return AdditionalNarrativeRes.fromJson(response);
+  }
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -416,5 +439,17 @@ class ChatServiceApi {
       print("Error sending message: $e");
       return null;
     }
+  }
+}
+//---------------------------------------------------------------------------------------------------------------
+/// Recon AI
+class ReconServiceApi {
+  static Future<ReconRes> reconReconciliation({required Map request}) async {
+    final response = await buildHttpResponse(
+      endPoint: APIEndPoints.reconciliation,
+      request: request,
+      method: MethodType.post,
+    );
+    return ReconRes.fromJson(response);
   }
 }

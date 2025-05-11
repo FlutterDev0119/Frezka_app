@@ -1,9 +1,12 @@
 import 'dart:io';
 import 'package:apps/utils/common/base_controller.dart';
 import 'package:apps/utils/library.dart';
+import 'package:excel/excel.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart';
 import 'package:nb_utils/nb_utils.dart';
 import '../../../utils/component/app_dialogue_component.dart';
+import '../model/reconAI_model.dart';
 
 class ReconAIController extends BaseController {
   RxList<File> imageFiles = <File>[].obs;
@@ -37,6 +40,55 @@ class ReconAIController extends BaseController {
   //     );
   //   }
   // }
+
+  @override
+  void onInit() {
+    super.onInit();
+  }
+  // Future<void> reconReconciliation({required String query, required String SafetyReport, required List<String> checkbox, required String narrative}) async {
+  //   try {
+  //     isLoading.value = true;
+  //
+  //     final request = {
+  //       {
+  //         "user_name": "Sandesh Singhal",
+  //         "source_csv": "patientid,name,age,gender\n1,Aqlice,30,F\n2,Bob,25,M\n3,Charlie,40,M",
+  //         "target_csv": "patientid,name,age\n1,Alice,31\n2,Bob,25\n4,Daisy,22",
+  //         "metadata_csv": "source_column,target_column,relationship\npatientid,patientid,primary key\nname,name,\nage,age,"
+  //       }
+  //     };
+  //
+  //     final response = await ReconServiceApi.reconReconciliation(request: request);
+  //     // ReconRes.value = response;
+  //   } catch (e) {
+  //     print('Error fetching Additional Narrative: $e');
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
+  Future<String> readExcelAsString() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xlsx', 'xls'],
+    );
+
+    if (result != null) {
+      final bytes = File(result.files.single.path!).readAsBytesSync();
+      final excel = Excel.decodeBytes(bytes);
+
+      final buffer = StringBuffer();
+      for (var table in excel.tables.keys) {
+        for (var row in excel.tables[table]!.rows) {
+          buffer.writeln(row.map((cell) => cell?.value ?? '').join('|'));
+
+        }
+      }
+
+      return buffer.toString();
+    }
+
+    return '';
+  }
   void onSourceSelected(dynamic imageSource) async {
     if (imageSource is File) {
       String fileName = imageSource.path.split('/').last;

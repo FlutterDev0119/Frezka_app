@@ -10,6 +10,7 @@ import '../../../utils/app_scaffold.dart';
 import '../../../utils/component/image_source_selection_component.dart';
 import '../../../utils/shared_prefences.dart';
 import '../../forgot_password/model/forgot_password_model.dart';
+import '../../meta_phrase_pv/controllers/meta_phrase_pv_controller.dart';
 import '../controllers/genAI_pv_controller.dart';
 
 class GenAIPVScreen extends StatelessWidget {
@@ -258,8 +259,9 @@ class GenAIPVScreen extends StatelessWidget {
                                                           child: IconButton(
                                                             icon: Icon(Icons.file_copy_rounded, color: appWhiteColor, size: 20),
                                                             onPressed: () {
-                                                              final sqlText = controller.generateSQLResponse.value?.sqlQuery ?? 'No SQL generated';
-
+                                                              final sqlText = controller.generateSQLQuery.value.isNotEmpty
+                                                                  ? controller.generateSQLQuery.value
+                                                                  : 'No SQL generated';
                                                               showDialog(
                                                                 context: Get.context!,
                                                                 builder: (_) => AlertDialog(
@@ -290,86 +292,6 @@ class GenAIPVScreen extends StatelessWidget {
                                 }),
                               ],
                             ),
-
-                            // /// File list shown only if dropdown is 'Upload File'
-                            // Obx(() {
-                            //   if (controller.genAIDropdownValue.value != 'Upload File' || controller.fileNames.isEmpty) {
-                            //     return SizedBox();
-                            //   }
-                            //
-                            //   return Container(
-                            //     margin: EdgeInsets.only(top: 12),
-                            //     padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                            //     decoration: BoxDecoration(
-                            //       border: Border.all(color: appBackGroundColor),
-                            //       borderRadius: BorderRadius.circular(12),
-                            //     ),
-                            //     child: SingleChildScrollView(
-                            //       scrollDirection: Axis.horizontal,
-                            //       child: Row(
-                            //         children: controller.fileNames.asMap().entries.map((entry) {
-                            //           final index = entry.key;
-                            //           final fileName = entry.value;
-                            //
-                            //           return Container(
-                            //             margin: EdgeInsets.only(right: 8),
-                            //             decoration: BoxDecoration(
-                            //               color: Colors.blue.shade100,
-                            //               borderRadius: BorderRadius.circular(6),
-                            //             ),
-                            //             child: Row(
-                            //               mainAxisSize: MainAxisSize.min,
-                            //               children: [
-                            //                 Padding(
-                            //                   padding: EdgeInsets.only(left: 8),
-                            //                   child: Text(
-                            //                     fileName,
-                            //                     overflow: TextOverflow.ellipsis,
-                            //                     style: TextStyle(color: Colors.black),
-                            //                   ),
-                            //                 ),
-                            //                 PopupMenuButton<String>(
-                            //                   padding: EdgeInsets.zero,
-                            //                   onSelected: (value) {
-                            //                     if (value == 'view') {
-                            //                       toast('Viewing ${controller.fileNames[index]}');
-                            //                     } else if (value == 'remove') {
-                            //                       controller.fileNames.removeAt(index);
-                            //                       controller.imageFiles.removeAt(index);
-                            //                     }
-                            //                   },
-                            //                   icon: Icon(Icons.menu, size: 18),
-                            //                   itemBuilder: (context) => [
-                            //                     PopupMenuItem(
-                            //                       value: 'view',
-                            //                       child: Row(
-                            //                         children: [
-                            //                           Icon(Icons.remove_red_eye, size: 18),
-                            //                           SizedBox(width: 8),
-                            //                           Text('View'),
-                            //                         ],
-                            //                       ),
-                            //                     ),
-                            //                     PopupMenuItem(
-                            //                       value: 'remove',
-                            //                       child: Row(
-                            //                         children: [
-                            //                           Icon(Icons.close, size: 18, color: Colors.red),
-                            //                           SizedBox(width: 8),
-                            //                           Text('Remove', style: TextStyle(color: Colors.red)),
-                            //                         ],
-                            //                       ),
-                            //                     ),
-                            //                   ],
-                            //                 ),
-                            //               ],
-                            //             ),
-                            //           );
-                            //         }).toList(),
-                            //       ),
-                            //     ),
-                            //   );
-                            // }),
                           ],
                         );
                       }),
@@ -377,6 +299,29 @@ class GenAIPVScreen extends StatelessWidget {
                   ],
                 ),
                 10.height,
+                // Scrollable Header Buttons Row
+                controller.safetyReports.isNotEmpty
+                    ? SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Row(
+                          children: [
+                            _headerButton("Safety Report ID"),
+                            _headerButton("Initial Receipt Date"),
+                            _headerButton("Awareness Date"),
+                            _headerButton("Study"),
+                            _headerButton("Primary Product"),
+                            _headerButton("Primary Event"),
+                            _headerButton("Occur Country"),
+                            _headerButton("Seriousness"),
+                          ],
+                        ),
+                      )
+                    : SizedBox(),
+                controller.safetyReports.isNotEmpty ? 10.height : SizedBox(),
+                controller.safetyReports.isNotEmpty ? buildSafetyReportCards() : SizedBox(),
+
+                controller.safetyReports.isNotEmpty ? 10.height : SizedBox(),
                 // Curate the Response Section
                 Container(
                   padding: EdgeInsets.all(10),
@@ -535,20 +480,7 @@ class GenAIPVScreen extends StatelessWidget {
                                           PopupMenuItem(
                                             value: 'en',
                                             onTap: () {
-                                              controller.tags.assignAll([
-                                                "Adverse Event Reporting",
-                                                "Aggregate Reporting",
-                                                "Investigator Analysis",
-                                                "PV Agreements",
-                                                "Quality Control",
-                                                "Reconciliation",
-                                                "Risk Management",
-                                                "Sampling",
-                                                "Site Analysis",
-                                                "System",
-                                                "Trial Analysis",
-                                              ]);
-                                              // controller.getDocsLanguage(language: "en");
+                                              controller.tags.assignAll(controller.classificationMap.keys.toList());
                                             },
                                             height: 20,
                                             child: Row(
@@ -599,52 +531,6 @@ class GenAIPVScreen extends StatelessWidget {
                                   );
                                 },
                               ),
-                              // IconButton(
-                              //   icon: Icon(Icons.translate, color: Colors.white, size: 20),
-                              //   onPressed: () async {
-                              //     final selectedLang = await showMenu<String>(
-                              //       context: context,
-                              //       position: RelativeRect.fromLTRB(0, 0, 0, 0), // Adjust as needed
-                              //       items: [
-                              //         PopupMenuItem(
-                              //           value: 'en',
-                              //           child: Row(
-                              //             children: [
-                              //               Image.asset('assets/images/flag/english.png', width: 20, height: 20), // Add your US flag
-                              //               const SizedBox(width: 8),
-                              //               const Text("English"),
-                              //             ],
-                              //           ),
-                              //         ),
-                              //         PopupMenuItem(
-                              //           value: 'ja',
-                              //           child: Row(
-                              //             children: [
-                              //               Image.asset('assets/images/flag/japanese.png', width: 20, height: 20), // Japan flag
-                              //               const SizedBox(width: 8),
-                              //               const Text("Japanese"),
-                              //             ],
-                              //           ),
-                              //         ),
-                              //         PopupMenuItem(
-                              //           value: 'es',
-                              //           child: Row(
-                              //             children: [
-                              //               Image.asset('assets/images/flag/spanish.png', width: 20, height: 20), // Spain flag
-                              //               const SizedBox(width: 8),
-                              //               const Text("Spanish"),
-                              //             ],
-                              //           ),
-                              //         ),
-                              //       ],
-                              //     );
-                              //
-                              //     if (selectedLang != null) {
-                              //       // Handle selected language
-                              //       print('Selected language: $selectedLang');
-                              //     }
-                              //   },
-                              // ),
                             ),
                             2.width,
                             Container(
@@ -721,59 +607,22 @@ class GenAIPVScreen extends StatelessWidget {
                             //     );
                             //   }),
                             // ),
-                            // Expanded(
-                            //   child: SingleChildScrollView(
-                            //     scrollDirection: Axis.horizontal, // Make it scrollable horizontally
-                            //     child: Row(
-                            //       children: controller.tags.map((tag) {
-                            //         final isSelected = controller.selectedParentTag.value == tag;
-                            //
-                            //         return GestureDetector(
-                            //           onTap: () async {
-                            //             controller.addTag(tag);
-                            //             await setValue("group", tag);
-                            //           },
-                            //           child: Padding(
-                            //             padding: const EdgeInsets.symmetric(horizontal: 4.0), // Add spacing between chips
-                            //             child: Chip(
-                            //               label: Text(
-                            //                 "# $tag",
-                            //                 style: TextStyle(
-                            //                   fontWeight: FontWeight.w500,
-                            //                   color: isSelected ? appBackGroundColor : Colors.black87,
-                            //                 ),
-                            //               ),
-                            //               shape: RoundedRectangleBorder(
-                            //                 borderRadius: BorderRadius.circular(8), // adjust the roundness
-                            //                 side: BorderSide(
-                            //                   color: isSelected ? Colors.blueAccent : Colors.transparent,
-                            //                   width: 1.5,
-                            //                 ),
-                            //               ),
-                            //               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            //               backgroundColor: isSelected ? appDashBoardCardColor : appWhiteColor,
-                            //             ),
-                            //           ),
-                            //         );
-                            //       }).toList(),
-                            //     ),
-                            //   ),
-                            // ),
-                            Expanded(
-                              child: Obx(() {
-                                final tags = controller.tags;
-                                return SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
+                            ///Parent tag show
+                            Obx(() {
+                              return Expanded(
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal, // Make it scrollable horizontally
                                   child: Row(
-                                    children: tags.map((tag) {
-                                      final isSelected = controller.selectedParentTag.value == tag;
-                                      return Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                                        child: GestureDetector(
-                                          onTap: () async {
-                                            controller.addTag(tag);
-                                            await setValue("group", tag);
-                                          },
+                                    children: controller.tags.map((tag) {
+                                      final isSelected = controller.selectedTags.contains(tag);
+
+                                      return GestureDetector(
+                                        onTap: () async {
+                                          controller.addTag(tag);
+                                          await setValue("group", tag);
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 4.0), // Add spacing between chips
                                           child: Chip(
                                             label: Text(
                                               "# $tag",
@@ -783,7 +632,7 @@ class GenAIPVScreen extends StatelessWidget {
                                               ),
                                             ),
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius: BorderRadius.circular(8), // adjust the roundness
                                               side: BorderSide(
                                                 color: isSelected ? Colors.blueAccent : Colors.transparent,
                                                 width: 1.5,
@@ -796,9 +645,49 @@ class GenAIPVScreen extends StatelessWidget {
                                       );
                                     }).toList(),
                                   ),
-                                );
-                              }),
-                            ),
+                                ),
+                              );
+                            }),
+                            // Expanded(
+                            //   child: Obx(() {
+                            //     final tags = controller.tags;
+                            //     return SingleChildScrollView(
+                            //       scrollDirection: Axis.horizontal,
+                            //       child: Row(
+                            //         children: tags.map((tag) {
+                            //           final isSelected = controller.selectedParentTag.value == tag;
+                            //           return Padding(
+                            //             padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                            //             child: GestureDetector(
+                            //               onTap: () async {
+                            //                 controller.addTag(tag);
+                            //                 await setValue("group", tag);
+                            //               },
+                            //               child: Chip(
+                            //                 label: Text(
+                            //                   "# $tag",
+                            //                   style: TextStyle(
+                            //                     fontWeight: FontWeight.w500,
+                            //                     color: isSelected ? appBackGroundColor : Colors.black87,
+                            //                   ),
+                            //                 ),
+                            //                 shape: RoundedRectangleBorder(
+                            //                   borderRadius: BorderRadius.circular(8),
+                            //                   side: BorderSide(
+                            //                     color: isSelected ? Colors.blueAccent : Colors.transparent,
+                            //                     width: 1.5,
+                            //                   ),
+                            //                 ),
+                            //                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            //                 backgroundColor: isSelected ? appDashBoardCardColor : appWhiteColor,
+                            //               ),
+                            //             ),
+                            //           );
+                            //         }).toList(),
+                            //       ),
+                            //     );
+                            //   }),
+                            // ),
 
                             Padding(
                               padding: const EdgeInsets.all(8.0),
@@ -985,6 +874,8 @@ class GenAIPVScreen extends StatelessWidget {
                                 child: Center(
                                   // centers the text vertically
                                   child: TextField(
+                                    controller: controller.personalizeController,
+                                    onChanged: controller.updateTextState,
                                     decoration: InputDecoration(
                                       border: InputBorder.none,
                                       hintText: 'Enter the prompt',
@@ -997,29 +888,159 @@ class GenAIPVScreen extends StatelessWidget {
                             SizedBox(width: 2),
 
                             // Send Button with matching height
-                            Container(
-                              height: 48,
-                              width: 48,
-                              decoration: BoxDecoration(
-                                color: appWhiteColor,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.grey.shade300),
-                              ),
-                              child: IconButton(
-                                icon: Icon(Icons.login_outlined, color: appBackGroundColor, size: 20),
-                                onPressed: () {},
-                              ),
-                            ),
+                            Obx(() {
+                              final hasText = controller.isTextNotEmpty.value;
+
+                              return Container(
+                                height: 48,
+                                width: 48,
+                                decoration: BoxDecoration(
+                                  color: hasText ? appBackGroundColor : appWhiteColor,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: IconButton(
+                                  icon: Icon(
+                                    Icons.login_outlined,
+                                    color: hasText ? appWhiteColor : appBackGroundColor,
+                                    size: 20,
+                                  ),
+                                  onPressed: hasText
+                                      ? () {
+                                          log(controller.dataLakeInput.value);
+                                          log(controller.selectedTags);
+                                          log(controller.personalizeController.text);
+                                          if (controller.dataLakeInput.value.isEmpty) {
+                                            toast("Please Include your query.");
+                                            return;
+                                          } else {
+                                            controller
+                                                .additionalNarrative(
+                                                    query: controller.dataLakeInput.value.toString(),
+                                                    SafetyReport: "",
+                                                    checkbox: controller.selectedTags.toList(),
+                                                    narrative: "")
+                                                .then(
+                                              (value) {
+                                                controller.isAdditionalNarrative(true);
+                                              },
+                                            );
+                                          }
+                                        }
+                                      : null,
+                                ),
+                              );
+                            })
                           ],
                         )
                       ],
                     ),
                   ),
                 ),
+                5.height,
+                controller.isAdditionalNarrative.value == true
+                    ? Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: appBackGroundColor.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 15),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                controller.additionalNarrativeRes.value?.output ?? '',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : SizedBox()
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _headerButton(String title) {
+    return InkWell(
+      onTap: () {},
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildSafetyReportCards() {
+    return Obx(() {
+      final reports = controller.safetyReports;
+
+      if (reports.isEmpty) {
+        return const Center(child: Text("No reports found."));
+      }
+
+      return Container(
+        height: 200,
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: reports.length,
+          itemBuilder: (context, index) {
+            return _buildSafetyReportList(index); // each card
+          },
+        ),
+      );
+    });
+  }
+
+  Widget _buildSafetyReportList(int index) {
+    final item = controller.safetyReports[index]; // SqlDataItem
+
+    return Card(
+      color: appDashBoardCardColor,
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _reportRow("Safety Report ID", item.reportMeta["Safety Report ID"] ?? ''),
+            _reportRow("Initial Receipt Date", item.reportMeta["Initial Receipt Date"] ?? ''),
+            _reportRow("Awareness Date", item.reportMeta["Awareness Date"] ?? ''),
+            _reportRow("Study", item.reportMeta["Study"] ?? ''),
+            _reportRow("Primary Product", item.reportMeta["Primary Product"] ?? ''),
+            _reportRow("Primary Event", item.reportMeta["Primary Event"] ?? ''),
+            _reportRow("Occur Country", item.reportMeta["Occur Country"] ?? ''),
+            _reportRow("Seriousness", item.reportMeta["Seriousness"] ?? ''),
+            // _reportRow("Raw XML", item.xmlContent), // Optional
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _reportRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("$label: ", style: const TextStyle(fontWeight: FontWeight.bold)),
+          Expanded(child: Text(value)),
+        ],
       ),
     );
   }

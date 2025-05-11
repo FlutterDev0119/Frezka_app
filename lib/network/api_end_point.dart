@@ -16,6 +16,7 @@ class APIEndPoints {
 
   ///GenAI Clinical
   static const String fetchDocClinical = 'v1/fetch_docs_clinical';
+  static const String fetchAdditionalNarrative = 'v1/additional_narrative';
 
   ///Meta Phrase Pv
   static const String openWorklist = 'v1/open_worklist';
@@ -30,4 +31,6 @@ class APIEndPoints {
 
   /// Translation Memory
   static const String translationMemory = 'v1/translation-memory';
+  /// Recon AI
+  static const String reconciliation = 'v1/reconciliation';
 }
