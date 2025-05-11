@@ -120,10 +120,18 @@ class _GovernAIScreenState extends State<GovernAIScreen> {
                       barTouchData: BarTouchData(
                         enabled: true,
                         touchTooltipData: BarTouchTooltipData(
+                          // getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                          //   final label = categories[rodIndex];
+                          //   return BarTooltipItem(
+                          //     "$label: ${rod.toY.toInt()}",
+                          //     const TextStyle(color: Colors.white),
+                          //   );
+                          // },
                           getTooltipItem: (group, groupIndex, rod, rodIndex) {
                             final label = categories[rodIndex];
+                            final date = data[groupIndex].date; // Get the date for the tooltip
                             return BarTooltipItem(
-                              "$label: ${rod.toY.toInt()}",
+                              "$label: ${rod.toY.toInt()} \nDate: $date", // Display both category and date
                               const TextStyle(color: Colors.white),
                             );
                           },
@@ -136,9 +144,10 @@ class _GovernAIScreenState extends State<GovernAIScreen> {
 
                             final tappedCategory = categories[rodIndex];
                             final tappedValue = data[groupIndex].values[tappedCategory] ?? 0;
-
-                            log('Tapped on: Category=$tappedCategory, Value=$tappedValue');
+                            final tappedDate = data[groupIndex].date;
+                            log('Tapped on: Category=$tappedCategory, Value=$tappedValue, Date=$tappedDate');
                             print(true); // 👈 This prints true on tap
+                            controller.fetchTraces(tappedCategory,tappedDate);
                           }
                         },
                       ),

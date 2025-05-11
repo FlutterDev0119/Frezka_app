@@ -319,14 +319,14 @@ class GovernAIServiceApis {
     }
   }
 
-  static Future<List<Trace>> fetchTracesList() async {
+  static Future<List<Trace>> fetchTracesList(String key,String date) async {
     try {
       final response = await buildHttpResponse(
-        endPoint: "${APIEndPoints.fetchTrace}?key=GenAI%20PV&date=01-04-2025",
+        endPoint: "${APIEndPoints.fetchTrace}?key=$key&date=$date",//GenAI%20PV 01-04-2025
         method: MethodType.get,
       );
 
-      print("API Response: $response"); // <-- Add this line
+      print("API Response: $response");
 
       if (response is Map && response['traces'] is List) {
         return (response['traces'] as List).map((data) => Trace.fromJson(Map<String, dynamic>.from(data))).toList();

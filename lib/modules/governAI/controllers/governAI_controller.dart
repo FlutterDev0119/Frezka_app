@@ -31,15 +31,15 @@ class GovernAIController extends GetxController {
   }
 
   init() async {
-    await fetchTraces();
+    // await fetchTraces();
     await fetchCountTraces();
   }
 
   // Fetch Traces list from API
-  Future<void> fetchTraces() async {
+  Future<void> fetchTraces(String tappedCategory, String tappedDate) async {
     try {
       isLoading(true);
-      final result = await GovernAIServiceApis.fetchTracesList();
+      final result = await GovernAIServiceApis.fetchTracesList(tappedCategory,tappedDate);
       traceList.assignAll(result); // Add the fetched traces to the observable list
     } catch (e) {
       print('Error fetching traces: $e');

@@ -31,6 +31,8 @@ class APIEndPoints {
 
   /// Translation Memory
   static const String translationMemory = 'v1/translation-memory';
+  static const String stagingTranslationMemory = 'v1/staging-translation-memory';
+  static const String aiTranslationMemory = 'v1/ai-translation-memory';
   /// Recon AI
   static const String reconciliation = 'v1/reconciliation';
 }

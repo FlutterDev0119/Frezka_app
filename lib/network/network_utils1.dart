@@ -162,6 +162,7 @@ Future<Map<String, dynamic>> handleSadadResponse(Response res) async {
 }
 
 Future<void> reGenerateToken() async {
+
   log('Regenerating Token');
   Map<String, dynamic> req = {
     ConstantKeys.emailKey: getStringAsync(AppSharedPreferenceKeys.userEmail),

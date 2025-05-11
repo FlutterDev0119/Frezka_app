@@ -183,6 +183,12 @@ Future<void> handleFailRegenerateToken() async {
   get_state.Get.offAll(() => ());
 }
 Future<bool> reGenerateToken() async {
+  await setValue(AppSharedPreferenceKeys.isUserLoggedIn, false);
+  await setValue(AppSharedPreferenceKeys.apiToken, '');
+  await setValue(AppSharedPreferenceKeys.currentUserData, '');
+  await clearSharedPref();
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.clear();
   log('Attempting to regenerate token');
 
   final String email = getStringAsync(AppSharedPreferenceKeys.userEmail);
