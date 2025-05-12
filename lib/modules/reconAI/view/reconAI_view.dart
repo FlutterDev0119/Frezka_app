@@ -121,8 +121,22 @@ class ReconAIScreen extends StatelessWidget {
                                                         if (value == 'view') {
                                                           toast('Viewing ${controller.fileNames[index]}');
                                                         } else if (value == 'remove') {
-                                                          controller.fileNames.removeAt(index);
-                                                          controller.imageFiles.removeAt(index);
+                                                          if (value == 'remove') {
+                                                            final removedName = controller.fileNames[index];
+
+                                                            if (removedName.startsWith('Source')) {
+                                                              controller.sourceCsv.value = "";
+                                                            } else if (removedName.startsWith('Target')) {
+                                                              controller.targetCsv.value = "";
+                                                            } else if (removedName.startsWith('Metadata')) {
+                                                              controller.metadataCsv.value = "";
+                                                            }
+
+                                                            controller.fileNames.removeAt(index);
+                                                            controller.imageFiles.removeAt(index);
+                                                          }
+                                                          // controller.fileNames.removeAt(index);
+                                                          // controller.imageFiles.removeAt(index);
                                                         }
                                                       },
                                                       icon: Icon(Icons.menu, size: 18),
@@ -171,6 +185,10 @@ class ReconAIScreen extends StatelessWidget {
                                                     controller.onSourceSelected(imageSource);
                                                   },
                                                 ),
+                                              ).then(
+                                                (value) {
+                                                  print("-------------source--------------${controller.sourceCsv.value}");
+                                                },
                                               )
                                             : SizedBox();
                                       },
@@ -381,67 +399,6 @@ class ReconAIScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-
-                          // Row(
-                          //   children: [
-                          //     // Dropdown
-                          //     Expanded(
-                          //       child: Container(
-                          //         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                          //         decoration: BoxDecoration(
-                          //           border: Border.all(color: appBackGroundColor),
-                          //           borderRadius: BorderRadius.circular(8),
-                          //         ),
-                          //         child: Obx(() => DropdownButton<String>(
-                          //               value: controller.targetDropdownValue.value,
-                          //               isExpanded: true,
-                          //               underline: SizedBox(),
-                          //               items: ['Upload File', 'Data Lake'].map((String value) {
-                          //                 return DropdownMenuItem<String>(
-                          //                   value: value,
-                          //                   child: Text(value, style: primaryTextStyle()),
-                          //                 );
-                          //               }).toList(),
-                          //               onChanged: (newValue) {
-                          //                 controller.targetDropdownValue.value = newValue!;
-                          //               },
-                          //             )),
-                          //       ),
-                          //     ),
-                          //     10.width,
-                          //     // Query Input
-                          //     Expanded(
-                          //       child: Container(
-                          //         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                          //         decoration: BoxDecoration(
-                          //           color: Colors.white,
-                          //           borderRadius: BorderRadius.circular(8),
-                          //         ),
-                          //         child: Row(
-                          //           children: [
-                          //             Expanded(
-                          //               child: Text(
-                          //                 'Select File',
-                          //                 style: primaryTextStyle(),
-                          //                 overflow: TextOverflow.ellipsis,
-                          //               ),
-                          //             ),
-                          //             GestureDetector(onTap: (){Get.bottomSheet(
-                          //               enableDrag: true,
-                          //               isScrollControlled: true,
-                          //               ImageSourceSelectionComponent(
-                          //                 onSourceSelected: (imageSource) {
-                          //                   hideKeyboard(context);
-                          //                   controller.onSourceSelected(imageSource);
-                          //                 },
-                          //               ),
-                          //             );},child: Icon(Icons.attach_file, color: Colors.blueGrey)),
-                          //           ],
-                          //         ),
-                          //       ),
-                          //     ),
-                          //   ],
-                          // ),
                           12.height,
                           // Buttons
                           Row(
@@ -598,32 +555,63 @@ class ReconAIScreen extends StatelessWidget {
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Column(
-                              children: [
-                                Text("Ready to Use Prompts", style: boldTextStyle(color: appBackGroundColor)),
-                                10.height,
-                                AppButtonWidget(
-                                  elevation: 0,
-                                  text: "Reconcillation",
-                                  buttonColor: appBackGroundColor,
-                                  textStyle: boldTextStyle(color: appWhiteColor),
-                                  onTap: () async{
-                                    String data = await controller.readExcelAsString();
-                                    print("---------------------$data");
-                                    // controller.readExcelAsString();
-                                    // controller.reconReconciliation()
-                                  },
-                                ),
-                                5.height,
-                                AppButtonWidget(
-                                  elevation: 0,
-                                  text: "Recommendation",
-                                  buttonColor: appBackGroundColor,
-                                  textStyle: boldTextStyle(color: appWhiteColor),
-                                  onTap: () => Get.back(),
-                                ),
-                              ],
-                            ),
+                            child: Obx(() {
+                              return Column(
+                                children: [
+                                  Text("Ready to Use Prompts", style: boldTextStyle(color: appBackGroundColor)),
+                                  Obx(
+                                    () => ElevatedButton(
+                                      style: ButtonStyle(
+                                        shape: MaterialStateProperty.all(
+                                          RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8.0), // Adjust the radius as needed
+                                          ),
+                                        ),
+                                        elevation: MaterialStateProperty.all(2.0),
+                                        backgroundColor: MaterialStateProperty.all(
+                                          controller.isReadyToReconcile.value ? appBackGroundColor : appWhiteColor,
+                                        ),
+                                        minimumSize: MaterialStateProperty.all(
+                                          Size(double.infinity, 48.0),
+                                        ),
+                                      ),
+                                      onPressed: controller.isReadyToReconcile.value
+                                          ? () async {
+                                              print("Source CSV:");
+                                              print(controller.sourceCsv.value.toString());
+
+                                              print("Target CSV:");
+                                              print(controller.targetCsv.value.toString());
+
+                                              print("Metadata CSV:");
+                                              print(controller.metadataCsv.value.toString());
+
+                                              controller.reconReconciliation(
+                                                sourceCSV: controller.sourceCsv.value.toString(),
+                                                targetCSV: controller.targetCsv.value.toString(),
+                                                metadataCSV: controller.metadataCsv.value.toString(),
+                                              );
+                                            }
+                                          : null,
+                                      child: Text(
+                                        "Reconciliation",
+                                        style: boldTextStyle(
+                                          color: controller.isReadyToReconcile.value ? appWhiteColor : appBackGroundColor,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  5.height,
+                                  AppButtonWidget(
+                                    elevation: 0,
+                                    text: "Recommendation",
+                                    buttonColor: appWhiteColor,
+                                    textStyle: boldTextStyle(color: appBackGroundColor),
+                                    onTap: () {},
+                                  ),
+                                ],
+                              );
+                            }),
                           ),
                         ],
                       ),

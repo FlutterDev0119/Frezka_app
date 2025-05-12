@@ -45,9 +45,9 @@ class AppDialogueComponent extends StatelessWidget {
       ),
       child: AnimatedCrossFade(
         crossFadeState: CrossFadeState.showFirst,
-        duration: Duration(milliseconds: 200), // Fixed duration unit
+        duration: Duration(milliseconds: 100),
         firstChild: Column(
-          mainAxisSize: MainAxisSize.min, // Ensures height adjusts dynamically
+          mainAxisSize: MainAxisSize.min,
           children: [
             12.height,
             child ??
@@ -87,7 +87,7 @@ class AppDialogueComponent extends StatelessWidget {
                   buttonColor: appBackGroundColor,
                   text: confirmText,
                   onTap: () {
-                    Get.back();
+                    Get.back(result: true);
                     onConfirm.call();
                   },
                 ).expand(),

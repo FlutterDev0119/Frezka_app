@@ -4,6 +4,9 @@ import 'package:apps/utils/library.dart';
 import 'package:get/get.dart';
 import 'package:nb_utils/nb_utils.dart';
 
+import '../model/ai_translation_memory_model.dart';
+import '../model/staging_translation_memory.dart';
+
 enum SortColumn {
   language,
   sourcePhrase,
@@ -13,18 +16,49 @@ enum SortColumn {
 }
 
 class TranslationMemoryController extends BaseController {
-  var allFiles = <TranslationMemory>[].obs;
   var isLoading = false.obs;
+
+  ///all
+  var allFiles = <TranslationMemory>[].obs;
   var showSearchField = false.obs;
   var searchQuery = ''.obs;
   var selectedSearchField = ''.obs;
 
   TextEditingController searchController = TextEditingController();
 
+/// Staging
+
+  var allStagingFiles = <StagingTranslationRes>[].obs;
+  var showStagingSearchField = false.obs;
+  var searchStagingQuery = ''.obs;
+  var selectedStagingSearchField = ''.obs;
+  TextEditingController searchStagingController = TextEditingController();
+  /// AI
+  var allAIFiles = <AiTranslationMemoryRes>[].obs;
+  var showAISearchField = false.obs;
+  var searchAIQuery = ''.obs;
+  var selectedAISearchField = ''.obs;
+
+  TextEditingController searchAIController = TextEditingController();
+
+  var selectedOption = 'Pending Approval'.obs;
+
+  final options = ['Pending Approval', 'AI Suggestions'];
+
+  void setSelected(String value) {
+    selectedOption.value = value;
+  }
+
   @override
   void onInit() {
+    init();
     super.onInit();
-    fetchData();
+  }
+
+  init() async {
+    await fetchStagingTranslationMemoryList();
+    await fetchData();
+    await fetchAITranslationMemoryList();
   }
 
   Future<void> fetchData() async {
@@ -34,6 +68,34 @@ class TranslationMemoryController extends BaseController {
       final result = await TranslationMemoryServiceApis.fetchTranslationMemoryList();
       allFiles.clear();
       allFiles.assignAll(result);
+    } catch (e) {
+      print('Error fetching Translation Memory list: $e');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> fetchStagingTranslationMemoryList() async {
+    if (isLoading.value) return;
+    setLoading(true);
+    try {
+      final result = await TranslationMemoryServiceApis.fetchStagingTranslationMemoryList();
+      allStagingFiles.clear();
+      allStagingFiles.assignAll(result);
+    } catch (e) {
+      print('Error fetching Translation Memory list: $e');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> fetchAITranslationMemoryList() async {
+    if (isLoading.value) return;
+    setLoading(true);
+    try {
+      final result = await TranslationMemoryServiceApis.fetchAITranslationMemoryList();
+      allAIFiles.clear();
+      allAIFiles.assignAll(result);
     } catch (e) {
       print('Error fetching Translation Memory list: $e');
     } finally {
@@ -95,7 +157,40 @@ class TranslationMemoryController extends BaseController {
       }).toList();
     }
   }
-
+  List<StagingTranslationRes> get filteredStagingFiles {
+    if (searchStagingQuery.isEmpty) {
+      return allStagingFiles;
+    } else {
+      return allStagingFiles.where((file) {
+        final query = searchStagingQuery.value.toLowerCase();
+        if (selectedStagingSearchField.value == "Language") {
+          return file.lang.toLowerCase().contains(query);
+        } else if (selectedStagingSearchField.value == "Source Phrase") {
+          return file.en.toLowerCase().contains(query);
+        } else if (selectedStagingSearchField.value == "Approver") {
+          return file.name.toLowerCase().contains(query);
+        }
+        return false;
+      }).toList();
+    }
+  }
+  List<AiTranslationMemoryRes> get filteredAIFiles {
+    if (searchAIQuery.isEmpty) {
+      return allAIFiles;
+    } else {
+      return allAIFiles.where((file) {
+        final query = searchAIQuery.value.toLowerCase();
+        if (selectedAISearchField.value == "Language") {
+          return file.lang.toLowerCase().contains(query);
+        } else if (selectedAISearchField.value == "Source Phrase") {
+          return file.en.toLowerCase().contains(query);
+        } else if (selectedAISearchField.value == "Approver") {
+          return file.name.toLowerCase().contains(query);
+        }
+        return false;
+      }).toList();
+    }
+  }
   void setLoading(bool value) {
     isLoading.value = value;
   }
@@ -103,6 +198,8 @@ class TranslationMemoryController extends BaseController {
   @override
   void onClose() {
     searchController.dispose();
+    searchStagingController.dispose();
+    searchAIController.dispose();
     super.onClose();
   }
 }

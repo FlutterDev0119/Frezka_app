@@ -42,7 +42,7 @@ Widget AppButtonWidget({
         key: key,
         padding: padding,
         margin: margin,
-        color: buttonColor ?? appColorPrimary,
+        color: buttonColor ?? appWhiteColor,
         splashColor: splashColor ?? Colors.transparent,
         hoverElevation: hoverElevation ?? 0.4,
         focusElevation: focusElevation ?? 0.5,

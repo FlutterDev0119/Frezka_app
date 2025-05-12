@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:apps/utils/common/base_controller.dart';
 import 'package:apps/utils/library.dart';
@@ -6,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart';
 import 'package:nb_utils/nb_utils.dart';
 import '../../../utils/component/app_dialogue_component.dart';
+import '../../../utils/shared_prefences.dart';
 import '../model/reconAI_model.dart';
 
 class ReconAIController extends BaseController {
@@ -18,22 +20,263 @@ class ReconAIController extends BaseController {
   var sourceDropdownValue = 'Upload File'.obs;
   var targetDropdownValue = 'Upload File'.obs;
 
-  // RxString selectedFileName = ''.obs;
-  // RxString selectedTargetFileName = ''.obs;
-  // Handle source selection for image upload
-  // void onSourceSelected(dynamic  imageSource) async {
-  //   final pickedFile = await pickFilesFromDevice(allowMultipleFiles: true);
-  //   log("pickedFile-----------------$pickedFile");
-  //   if (pickedFile.isNotEmpty) {
+  RxnString sourceCsv = RxnString();
+  RxnString targetCsv = RxnString();
+  RxnString metadataCsv = RxnString();
+
+  // bool get isReadyToReconcile => sourceCsv.value != null && targetCsv.value != null && metadataCsv.value != null;
+  var isReadyToReconcile = false.obs;
+
+  void checkIfReady() {
+    isReadyToReconcile.value =
+        sourceCsv.value != null &&
+            targetCsv.value != null &&
+            metadataCsv.value != null;
+  }
+  final Map<File, String> fileContents = {};
+  final Map<File, String> targetFileContents = {};
+  final Map<File, String> metaDataFileContents = {};
+
+  @override
+  void onInit() {
+    super.onInit();
+  }
+
+  // void onSourceSelected(File file) async {
+  //   final fileName = file.path.split('/').last;
+  //   final ext = fileName.split('.').last.toLowerCase();
+  //
+  //   String? content;
+  //
+  //   try {
+  //     if (['txt', 'csv', 'json'].contains(ext)) {
+  //       content = await file.readAsString();
+  //     } else if (['xlsx', 'xls'].contains(ext)) {
+  //       content = await decodeExcel(file);
+  //     } else {
+  //       toast('Unsupported file format');
+  //       return;
+  //     }
+  //   } catch (e) {
+  //     toast('Error decoding file: $e');
+  //     return;
+  //   }
+  //
+  //   // Ask user what kind of file it is
+  //   Get.defaultDialog(
+  //     title: 'Assign File',
+  //     content: Column(
+  //       children: [
+  //         ElevatedButton(
+  //           onPressed: () {
+  //             sourceCsv?.value = content!;
+  //             fileNames.add('Source: $fileName');
+  //             imageFiles.add(file);
+  //             Get.back();
+  //           },
+  //           child: Text('Set as Source'),
+  //         ),
+  //         ElevatedButton(
+  //           onPressed: () {
+  //             targetCsv?.value = content!;
+  //             fileNames.add('Target: $fileName');
+  //             imageFiles.add(file);
+  //             Get.back();
+  //           },
+  //           child: Text('Set as Target'),
+  //         ),
+  //         ElevatedButton(
+  //           onPressed: () {
+  //             metadataCsv?.value = content!;
+  //             fileNames.add('Metadata: $fileName');
+  //             imageFiles.add(file);
+  //             Get.back();
+  //           },
+  //           child: Text('Set as Metadata'),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+  Future<String> decodeExcel(File file) async {
+    var bytes = file.readAsBytesSync();
+    var excel = Excel.decodeBytes(bytes);
+    StringBuffer buffer = StringBuffer();
+
+    for (var table in excel.tables.keys) {
+      var rows = excel.tables[table]!.rows;
+      for (var row in rows) {
+        buffer.writeln(row.map((cell) => cell?.value.toString() ?? '').join(','));
+      }
+      break;
+    }
+
+    return buffer.toString();
+  }
+
+  void onSourceSelected(File file) async {
+    final fileName = file.path.split('/').last;
+    final ext = fileName.split('.').last.toLowerCase();
+
+    String? content;
+
+    try {
+      if (['txt', 'csv', 'json'].contains(ext)) {
+        content = await file.readAsString();
+      } else if (['xlsx', 'xls'].contains(ext)) {
+        content = await decodeExcel(file);
+      } else {
+        toast('Unsupported file format: .$ext');
+        return;
+      }
+    } catch (e) {
+      toast('Error decoding file: $e');
+      return;
+    }
+
+    if (fileNames.contains(fileName)) {
+      toast("File '$fileName' already selected.");
+      return;
+    }
+
+    final confirmed = await Get.bottomSheet<bool>(
+      AppDialogueComponent(
+        titleText: "Do you want to upload this attachment?",
+        confirmText: "Upload",
+        onConfirm: () {},
+      ),
+      isScrollControlled: true,
+    );
+    print("content-------------------$content");
+    if (confirmed == true) {
+      fileNames.clear();
+      imageFiles.clear();
+      fileContents.clear();
+      sourceCsv.value = "";
+      print('---------------------1-----------------------');
+      imageFiles.add(file);
+      fileNames.add(fileName);
+      targetFileContents[file] = content;
+      sourceCsv.value = content;
+      checkIfReady();
+    }
+  }
+
+  void onTargetSourceSelected(File file) async {
+    final fileName = file.path.split('/').last;
+    final ext = fileName.split('.').last.toLowerCase();
+
+    String? content;
+
+    try {
+      if (['txt', 'csv', 'json'].contains(ext)) {
+        content = await file.readAsString();
+      } else if (['xlsx', 'xls'].contains(ext)) {
+        content = await decodeExcel(file);
+      } else {
+        toast('Unsupported file format: .$ext');
+        return;
+      }
+    } catch (e) {
+      toast('Error decoding file: $e');
+      return;
+    }
+
+    if (targetFileNames.contains(fileName)) {
+      toast("File '$fileName' already selected.");
+      return;
+    }
+
+    final confirmed = await Get.bottomSheet<bool>(
+      AppDialogueComponent(
+        titleText: "Do you want to upload this attachment?",
+        confirmText: "Upload",
+        onConfirm: () {},
+      ),
+      isScrollControlled: true,
+    );
+    print("content-------------------$content");
+    if (confirmed == true) {
+      targetFileNames.clear();
+      targetImageFiles.clear();
+      targetFileContents.clear();
+      targetCsv.value = "";
+      print('---------------------1-----------------------');
+      targetImageFiles.add(file);
+      targetFileNames.add(fileName);
+      targetFileContents[file] = content;
+      targetCsv.value = content;
+      checkIfReady();
+    }
+  }
+
+  void onMetaSourceSelected(File file) async {
+    final fileName = file.path.split('/').last;
+    final ext = fileName.split('.').last.toLowerCase();
+
+    String? content;
+
+    try {
+      if (['txt', 'csv', 'json'].contains(ext)) {
+        content = await file.readAsString();
+      } else if (['xlsx', 'xls'].contains(ext)) {
+        content = await decodeExcel(file);
+      } else {
+        toast('Unsupported file format: .$ext');
+        return;
+      }
+    } catch (e) {
+      toast('Error decoding file: $e');
+      return;
+    }
+
+    if (metaFileNames.contains(fileName)) {
+      toast("File '$fileName' already selected.");
+      return;
+    }
+
+    final confirmed = await Get.bottomSheet<bool>(
+      AppDialogueComponent(
+        titleText: "Do you want to upload this attachment?",
+        confirmText: "Upload",
+        onConfirm: () {},
+      ),
+      isScrollControlled: true,
+    );
+    print("content-------------------$content");
+    if (confirmed == true) {
+      metaFileNames.clear();
+      metaImageFiles.clear();
+      metaDataFileContents.clear();
+      metadataCsv.value = "";
+      print('---------------------1-----------------------');
+      metaImageFiles.add(file);
+      metaFileNames.add(fileName);
+      metaDataFileContents[file] = content;
+      metadataCsv.value = content;
+      checkIfReady();
+    }
+  }
+
+  // void onTargetSourceSelected(dynamic imageSource) async {
+  //   if (imageSource is File) {
+  //     String fileName = imageSource.path
+  //         .split('/')
+  //         .last;
+  //     bool isDuplicate = targetFileNames.contains(fileName);
+  //
+  //     if (isDuplicate) {
+  //       toast("File already added");
+  //       return;
+  //     }
+  //
   //     Get.bottomSheet(
   //       AppDialogueComponent(
   //         titleText: "Do you want to upload this attachment?",
   //         confirmText: "Upload",
   //         onConfirm: () {
-  //           imageFiles.addAll(pickedFile);
-  //           fileNames.addAll(pickedFile.map((e) => e.path.split('/').last));
-  //           selectedFileName.value = pickedFile.first.path.split('/').last;
-  //           print("Selected File: -----------------${selectedFileName.value}");
+  //           targetImageFiles.add(imageSource);
+  //           targetFileNames.add(fileName);
   //         },
   //       ),
   //       isScrollControlled: true,
@@ -41,122 +284,148 @@ class ReconAIController extends BaseController {
   //   }
   // }
 
-  @override
-  void onInit() {
-    super.onInit();
-  }
-  // Future<void> reconReconciliation({required String query, required String SafetyReport, required List<String> checkbox, required String narrative}) async {
-  //   try {
-  //     isLoading.value = true;
+  // void onMetaSourceSelected(dynamic imageSource) async {
+  //   if (imageSource is File) {
+  //     String fileName = imageSource.path
+  //         .split('/')
+  //         .last;
+  //     bool isDuplicate = metaFileNames.contains(fileName);
   //
-  //     final request = {
-  //       {
-  //         "user_name": "Sandesh Singhal",
-  //         "source_csv": "patientid,name,age,gender\n1,Aqlice,30,F\n2,Bob,25,M\n3,Charlie,40,M",
-  //         "target_csv": "patientid,name,age\n1,Alice,31\n2,Bob,25\n4,Daisy,22",
-  //         "metadata_csv": "source_column,target_column,relationship\npatientid,patientid,primary key\nname,name,\nage,age,"
-  //       }
-  //     };
+  //     if (isDuplicate) {
+  //       toast("File already added");
+  //       return;
+  //     }
   //
-  //     final response = await ReconServiceApi.reconReconciliation(request: request);
-  //     // ReconRes.value = response;
-  //   } catch (e) {
-  //     print('Error fetching Additional Narrative: $e');
-  //   } finally {
-  //     isLoading.value = false;
+  //     Get.bottomSheet(
+  //       AppDialogueComponent(
+  //         titleText: "Do you want to upload this attachment?",
+  //         confirmText: "Upload",
+  //         onConfirm: () {
+  //           metaImageFiles.add(imageSource);
+  //           metaFileNames.add(fileName);
+  //         },
+  //       ),
+  //       isScrollControlled: true,
+  //     );
   //   }
   // }
-  Future<String> readExcelAsString() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['xlsx', 'xls'],
+
+//   Future<void> reconReconciliation(
+//       {required String useName, required String sourceCSV,required String targetCSV,required String metadataCSV}) async {
+//     try {
+//       isLoading.value = true;
+//       String? userJson = getStringAsync(AppSharedPreferenceKeys.userModel);
+//       String Fullname = '';
+//       if (userJson.isNotEmpty) {
+//         var userMap = jsonDecode(userJson);
+//         var userModel = UserModel.fromJson(userMap);
+//         Fullname = "${userModel.firstName} ${userModel.lastName}";
+//       }
+//       final request = {
+//         "user_name": Fullname,
+//         "source_csv": sourceCsv.value.toString(),
+//         "target_csv": targetCsv.value.toString(),
+//         "metadata_csv": metadataCsv.value.toString(),
+//       };
+// print("Request-------------------------------$request");
+//       final response = await ReconServiceApi.reconReconciliation(request: request);
+//       final reconData = ReconRes.fromJson(response);
+//
+//       // Show bottom sheet popup with response messages
+//       Get.bottomSheet(
+//         ReconciliationPopup(messages: reconData.response),
+//         isScrollControlled: true,
+//       );
+//     } catch (e) {
+//       print('Error fetching Additional Narrative: $e');
+//     } finally {
+//       isLoading.value = false;
+//     }
+//   }
+
+  Future<void> reconReconciliation({
+    required String sourceCSV,
+    required String targetCSV,
+    required String metadataCSV,
+  }) async {
+    try {
+      isLoading.value = true;
+
+      // Fetch user data
+      String? userJson = getStringAsync(AppSharedPreferenceKeys.userModel);
+      String fullName = '';
+      if (userJson.isNotEmpty) {
+        var userMap = jsonDecode(userJson);
+        var userModel = UserModel.fromJson(userMap);
+        fullName = "${userModel.firstName} ${userModel.lastName}";
+      }
+
+      final request = {
+        "user_name": fullName,
+        "source_csv": sourceCSV,
+        "target_csv": targetCSV,
+        "metadata_csv": metadataCSV,
+      };
+
+      print("Request-------------------------------$request");
+
+      // Assuming this returns a ReconRes object already
+      final ReconRes reconData = await ReconServiceApi.reconReconciliation(request: request);
+
+      // Show bottom sheet
+      Future.delayed(Duration.zero, () {
+        Get.bottomSheet(
+          ReconciliationPopup(messages: reconData.response),
+          isScrollControlled: true,
+        );
+      });
+    } catch (e, stackTrace) {
+      print('Error in reconciliation: $e');
+      print('Stack trace: $stackTrace');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+}
+
+class ReconciliationPopup extends StatelessWidget {
+  final List<Message> messages;
+
+  ReconciliationPopup({required this.messages});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: appWhiteColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  'Reconciliation Results',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Spacer(),
+                IconButton(onPressed: (){Get.back();}, icon: Icon(Icons.close))
+              ],
+            ),
+            SizedBox(height: 16),
+            ...messages.map((message) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Card(margin: EdgeInsets.all(2),color: appDashBoardCardColor, child: Text(message.message).paddingAll(8)),
+                )),
+          ],
+        ),
+      ),
     );
-
-    if (result != null) {
-      final bytes = File(result.files.single.path!).readAsBytesSync();
-      final excel = Excel.decodeBytes(bytes);
-
-      final buffer = StringBuffer();
-      for (var table in excel.tables.keys) {
-        for (var row in excel.tables[table]!.rows) {
-          buffer.writeln(row.map((cell) => cell?.value ?? '').join('|'));
-
-        }
-      }
-
-      return buffer.toString();
-    }
-
-    return '';
-  }
-  void onSourceSelected(dynamic imageSource) async {
-    if (imageSource is File) {
-      String fileName = imageSource.path.split('/').last;
-
-      if (fileNames.contains(fileName)) {
-        toast("File '$fileName' already selected.");
-        return;
-      }
-
-      Get.bottomSheet(
-        AppDialogueComponent(
-          titleText: "Do you want to upload this attachment?",
-          confirmText: "Upload",
-          onConfirm: () {
-            imageFiles.add(imageSource);
-            fileNames.add(fileName);
-          },
-        ),
-        isScrollControlled: true,
-      );
-    }
-  }
-
-  void onTargetSourceSelected(dynamic imageSource) async {
-    if (imageSource is File) {
-      String fileName = imageSource.path.split('/').last;
-      bool isDuplicate = targetFileNames.contains(fileName);
-
-      if (isDuplicate) {
-        toast("File already added");
-        return;
-      }
-
-      Get.bottomSheet(
-        AppDialogueComponent(
-          titleText: "Do you want to upload this attachment?",
-          confirmText: "Upload",
-          onConfirm: () {
-            targetImageFiles.add(imageSource);
-            targetFileNames.add(fileName);
-          },
-        ),
-        isScrollControlled: true,
-      );
-    }
-  }
-
-  void onMetaSourceSelected(dynamic imageSource) async {
-    if (imageSource is File) {
-      String fileName = imageSource.path.split('/').last;
-      bool isDuplicate = metaFileNames.contains(fileName);
-
-      if (isDuplicate) {
-        toast("File already added");
-        return;
-      }
-
-      Get.bottomSheet(
-        AppDialogueComponent(
-          titleText: "Do you want to upload this attachment?",
-          confirmText: "Upload",
-          onConfirm: () {
-            metaImageFiles.add(imageSource);
-            metaFileNames.add(fileName);
-          },
-        ),
-        isScrollControlled: true,
-      );
-    }
   }
 }

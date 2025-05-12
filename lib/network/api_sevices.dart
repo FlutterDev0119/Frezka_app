@@ -20,6 +20,8 @@ import '../modules/prompt_admin/model/new_prompt_response_model.dart';
 import '../modules/prompt_admin/model/output_model.dart';
 import '../modules/prompt_admin/model/role_model.dart';
 import '../modules/reconAI/model/reconAI_model.dart';
+import '../modules/translation_memory/model/ai_translation_memory_model.dart';
+import '../modules/translation_memory/model/staging_translation_memory.dart';
 import '../utils/common/base_response_model.dart';
 import '../utils/common/common.dart';
 import '../utils/constants.dart';
@@ -258,6 +260,29 @@ class TranslationMemoryServiceApis {
       return response;
     } else {
       throw Exception('Unexpected response format');
+    }
+  }
+
+  static Future<List<StagingTranslationRes>> fetchStagingTranslationMemoryList() async {
+    final response = await buildHttpResponse(
+      endPoint: APIEndPoints.stagingTranslationMemory,
+      method: MethodType.get,
+    );
+    if (response is List) {
+      return response.map((e) => StagingTranslationRes.fromJson(e)).toList();
+    } else {
+      throw Exception('Unexpected response format: ${response.runtimeType}');
+    }
+  }
+  static Future<List<AiTranslationMemoryRes>> fetchAITranslationMemoryList() async {
+    final response = await buildHttpResponse(
+      endPoint: APIEndPoints.aiTranslationMemory,
+      method: MethodType.get,
+    );
+    if (response is List) {
+      return response.map((e) => AiTranslationMemoryRes.fromJson(e)).toList();
+    } else {
+      throw Exception('Unexpected response format: ${response.runtimeType}');
     }
   }
 //---------------------------------------------------------------------------------------------------------------

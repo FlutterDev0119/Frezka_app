@@ -49,3 +49,45 @@
 // "name": "Varun Dua"
 // }
 // ]
+
+class StagingTranslationRes {
+  final int id;
+  final String es;
+  final String en;
+  final String lang;
+  final String name;
+
+  StagingTranslationRes({
+    required this.id,
+    required this.es,
+    required this.en,
+    required this.lang,
+    required this.name,
+  });
+
+  factory StagingTranslationRes.fromJson(Map<String, dynamic> json) {
+    return StagingTranslationRes(
+      id: json['id'],
+      es: json['es'],
+      en: json['en'],
+      lang: json['lang'],
+      name: json['name'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'es': es,
+      'en': en,
+      'lang': lang,
+      'name': name,
+    };
+  }
+
+  static List<StagingTranslationRes> fromJsonList(List<dynamic> jsonList) {
+    return jsonList
+        .map((json) => StagingTranslationRes.fromJson(json))
+        .toList();
+  }
+}
