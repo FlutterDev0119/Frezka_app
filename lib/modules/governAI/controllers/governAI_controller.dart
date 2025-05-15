@@ -29,6 +29,20 @@ class GovernAIController extends GetxController {
     super.onInit();
     init();
   }
+  @override
+  void onClose() {
+    // Clear all data and reset states
+    traceList.clear();
+    countTracesList.clear();
+    allFiles.clear();
+    filteredFiles.clear();
+    executionTime.value = '';
+    selectedReason.value = '';
+    filteredReasons.clear();
+    sortGovernColumn.value = SortGovernColumn.id;
+    isAscending.value = true;
+    super.onClose();
+  }
 
   init() async {
     // await fetchTraces();
@@ -36,11 +50,26 @@ class GovernAIController extends GetxController {
   }
 
   // Fetch Traces list from API
+  // Future<void> fetchTraces(String tappedCategory, String tappedDate) async {
+  //   try {
+  //     isLoading(true);
+  //     final result = await GovernAIServiceApis.fetchTracesList(tappedCategory,tappedDate);
+  //     traceList.assignAll(result); // Add the fetched traces to the observable list
+  //     filteredFiles.value = List.from(result);
+  //   } catch (e) {
+  //     print('Error fetching traces: $e');
+  //   } finally {
+  //     isLoading(false);
+  //   }
+  // }
   Future<void> fetchTraces(String tappedCategory, String tappedDate) async {
     try {
       isLoading(true);
-      final result = await GovernAIServiceApis.fetchTracesList(tappedCategory,tappedDate);
-      traceList.assignAll(result); // Add the fetched traces to the observable list
+      final result = await GovernAIServiceApis.fetchTracesList(tappedCategory, tappedDate);
+
+      allFiles.assignAll(result);
+      filteredFiles.assignAll(result);
+      traceList.assignAll(result);
     } catch (e) {
       print('Error fetching traces: $e');
     } finally {
@@ -54,6 +83,7 @@ class GovernAIController extends GetxController {
       isLoading(true);
       final result = await GovernAIServiceApis.fetchCountTracesList();
       countTracesList.assignAll(result);
+
     } catch (e) {
       print('Error fetching CountTraces: $e'); // This will help debug the error
     } finally {
@@ -65,14 +95,12 @@ class GovernAIController extends GetxController {
   void _applySortAndFilter() {
     List<Trace> tempList = [...allFiles];
 
-    // Apply filter if any
-    if (executionTime.isNotEmpty) {
+    if (executionTime.value.isNotEmpty) {
       tempList = tempList.where((file) => file.executionTime == executionTime.value).toList();
     }
-
-    // Apply sort
+    // 🔃 Apply sort based on selected column
     tempList.sort((a, b) {
-      int compare;
+      int compare = 0;
       switch (sortGovernColumn.value) {
         case SortGovernColumn.id:
           compare = a.id.compareTo(b.id);
@@ -87,10 +115,10 @@ class GovernAIController extends GetxController {
           compare = a.totalCost.compareTo(b.totalCost);
           break;
         case SortGovernColumn.latency:
-          compare = a.latency!.compareTo(b.latency as num);
+          compare = (a.latency ?? 0).compareTo(b.latency ?? 0);
           break;
         case SortGovernColumn.tokens:
-          compare = a.tokens!.compareTo(b.tokens as num);
+          compare = (a.tokens ?? 0).compareTo(b.tokens ?? 0);
           break;
         case SortGovernColumn.user:
           compare = a.user.toLowerCase().compareTo(b.user.toLowerCase());
@@ -99,15 +127,18 @@ class GovernAIController extends GetxController {
           compare = a.recommendedAction.toLowerCase().compareTo(b.recommendedAction.toLowerCase());
           break;
       }
+
       return isAscending.value ? compare : -compare;
     });
-
 
     filteredFiles.assignAll(tempList);
   }
 
+
+
   /// Trigger sorting by a column
   void toggleSort(SortGovernColumn column) {
+    executionTime.value = ''; // Clear filter before sorting
     if (sortGovernColumn.value == column) {
       isAscending.toggle();
     } else {
@@ -122,5 +153,6 @@ class GovernAIController extends GetxController {
     executionTime.value = language;
     _applySortAndFilter();
   }
+
 
 }
