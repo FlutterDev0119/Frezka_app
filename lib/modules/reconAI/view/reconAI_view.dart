@@ -431,7 +431,7 @@ class ReconAIScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Compare Data set", style: boldTextStyle(color: appBackGroundColor)),
+                          Text("MetaData", style: boldTextStyle(color: appBackGroundColor)),
                           12.height,
                           Container(
                             padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
@@ -537,11 +537,90 @@ class ReconAIScreen extends StatelessWidget {
                         ],
                       ),
                     ),
+                    // Container(
+                    //   margin: EdgeInsets.symmetric(vertical: 12),
+                    //   padding: EdgeInsets.all(16),
+                    //   decoration: BoxDecoration(
+                    //     color: appDashBoardCardColor, // Light background
+                    //     borderRadius: BorderRadius.circular(12),
+                    //   ),
+                    //   child: Column(
+                    //     crossAxisAlignment: CrossAxisAlignment.start,
+                    //     children: [
+                    //       Text("Compare Data set", style: boldTextStyle(color: appBackGroundColor)),
+                    //       12.height,
+                    //       Container(
+                    //         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                    //         decoration: BoxDecoration(
+                    //           color: Colors.white,
+                    //           borderRadius: BorderRadius.circular(8),
+                    //         ),
+                    //         child: Obx(() {
+                    //           return Column(
+                    //             children: [
+                    //               Text("Ready to Use Prompts", style: boldTextStyle(color: appBackGroundColor)),
+                    //               Obx(
+                    //                 () => ElevatedButton(
+                    //                   style: ButtonStyle(
+                    //                     shape: MaterialStateProperty.all(
+                    //                       RoundedRectangleBorder(
+                    //                         borderRadius: BorderRadius.circular(8.0), // Adjust the radius as needed
+                    //                       ),
+                    //                     ),
+                    //                     elevation: MaterialStateProperty.all(2.0),
+                    //                     backgroundColor: MaterialStateProperty.all(
+                    //                       controller.isReadyToReconcile.value ? appBackGroundColor : appWhiteColor,
+                    //                     ),
+                    //                     minimumSize: MaterialStateProperty.all(
+                    //                       Size(double.infinity, 48.0),
+                    //                     ),
+                    //                   ),
+                    //                   onPressed: controller.isReadyToReconcile.value
+                    //                       ? () async {
+                    //                           print("Source CSV:");
+                    //                           print(controller.sourceCsv.value.toString());
+                    //
+                    //                           print("Target CSV:");
+                    //                           print(controller.targetCsv.value.toString());
+                    //
+                    //                           print("Metadata CSV:");
+                    //                           print(controller.metadataCsv.value.toString());
+                    //
+                    //                           controller.reconReconciliation(
+                    //                             sourceCSV: controller.sourceCsv.value.toString(),
+                    //                             targetCSV: controller.targetCsv.value.toString(),
+                    //                             metadataCSV: controller.metadataCsv.value.toString(),
+                    //                           );
+                    //                         }
+                    //                       : null,
+                    //                   child: Text(
+                    //                     "Reconciliation",
+                    //                     style: boldTextStyle(
+                    //                       color: controller.isReadyToReconcile.value ? appWhiteColor : appBackGroundColor,
+                    //                     ),
+                    //                   ),
+                    //                 ),
+                    //               ),
+                    //               5.height,
+                    //               AppButtonWidget(
+                    //                 elevation: 0,
+                    //                 text: "Recommendation",
+                    //                 buttonColor: appWhiteColor,
+                    //                 textStyle: boldTextStyle(color: appBackGroundColor),
+                    //                 onTap: () {},
+                    //               ),
+                    //             ],
+                    //           );
+                    //         }),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // )
                     Container(
                       margin: EdgeInsets.symmetric(vertical: 12),
                       padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: appDashBoardCardColor, // Light background
+                        color: appDashBoardCardColor,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
@@ -555,67 +634,62 @@ class ReconAIScreen extends StatelessWidget {
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Obx(() {
-                              return Column(
-                                children: [
-                                  Text("Ready to Use Prompts", style: boldTextStyle(color: appBackGroundColor)),
-                                  Obx(
-                                    () => ElevatedButton(
-                                      style: ButtonStyle(
-                                        shape: MaterialStateProperty.all(
-                                          RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8.0), // Adjust the radius as needed
-                                          ),
-                                        ),
-                                        elevation: MaterialStateProperty.all(2.0),
-                                        backgroundColor: MaterialStateProperty.all(
-                                          controller.isReadyToReconcile.value ? appBackGroundColor : appWhiteColor,
-                                        ),
-                                        minimumSize: MaterialStateProperty.all(
-                                          Size(double.infinity, 48.0),
-                                        ),
+                            child: Column(
+                              children: [
+                                Text("Ready to Use Prompts", style: boldTextStyle(color: appBackGroundColor)),
+                                Obx(
+                                      () => ElevatedButton(
+                                    style: ButtonStyle(
+                                      shape: MaterialStateProperty.all(
+                                        RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
                                       ),
-                                      onPressed: controller.isReadyToReconcile.value
-                                          ? () async {
-                                              print("Source CSV:");
-                                              print(controller.sourceCsv.value.toString());
+                                      elevation: MaterialStateProperty.all(2.0),
+                                      backgroundColor: MaterialStateProperty.all(
+                                        controller.isReadyToReconcile.value ? appBackGroundColor : appWhiteColor,
+                                      ),
+                                      minimumSize: MaterialStateProperty.all(Size(double.infinity, 48.0)),
+                                    ),
+                                    onPressed: controller.isReadyToReconcile.value
+                                        ? () async {
+                                      print("Source CSV:");
+                                      print(controller.sourceCsv.value.toString());
 
-                                              print("Target CSV:");
-                                              print(controller.targetCsv.value.toString());
+                                      print("Target CSV:");
+                                      print(controller.targetCsv.value.toString());
 
-                                              print("Metadata CSV:");
-                                              print(controller.metadataCsv.value.toString());
+                                      print("Metadata CSV:");
+                                      print(controller.metadataCsv.value.toString());
 
-                                              controller.reconReconciliation(
-                                                sourceCSV: controller.sourceCsv.value.toString(),
-                                                targetCSV: controller.targetCsv.value.toString(),
-                                                metadataCSV: controller.metadataCsv.value.toString(),
-                                              );
-                                            }
-                                          : null,
-                                      child: Text(
-                                        "Reconciliation",
-                                        style: boldTextStyle(
-                                          color: controller.isReadyToReconcile.value ? appWhiteColor : appBackGroundColor,
-                                        ),
+                                      controller.reconReconciliation(
+                                        sourceCSV: controller.sourceCsv.value.toString(),
+                                        targetCSV: controller.targetCsv.value.toString(),
+                                        metadataCSV: controller.metadataCsv.value.toString(),
+                                      );
+                                    }
+                                        : null,
+                                    child: Text(
+                                      "Reconciliation",
+                                      style: boldTextStyle(
+                                        color: controller.isReadyToReconcile.value ? appWhiteColor : appBackGroundColor,
                                       ),
                                     ),
                                   ),
-                                  5.height,
-                                  AppButtonWidget(
-                                    elevation: 0,
-                                    text: "Recommendation",
-                                    buttonColor: appWhiteColor,
-                                    textStyle: boldTextStyle(color: appBackGroundColor),
-                                    onTap: () {},
-                                  ),
-                                ],
-                              );
-                            }),
+                                ),
+                                5.height,
+                                AppButtonWidget(
+                                  elevation: 0,
+                                  text: "Recommendation",
+                                  buttonColor: appWhiteColor,
+                                  textStyle: boldTextStyle(color: appBackGroundColor),
+                                  onTap: () {},
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
                     )
+
                   ],
                 ),
               )

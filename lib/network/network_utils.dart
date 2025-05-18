@@ -461,19 +461,19 @@ Future buildHttpResponse({
     );
 
     if (response.statusCode == 401) {//isLoggedIn.value &&
-      bool tokenRegenerated = await reGenerateToken();
-
-      if (tokenRegenerated) {
-        return await handleResponse(
-          await buildHttpResponse(
-            endPoint: endPoint,
-            method: method,
-            request: request,
-            header: null,
-            allowTokenRefresh: false,
-          ),
-        );
-      }
+      // bool tokenRegenerated = await reGenerateToken();
+      //
+      // if (tokenRegenerated) {
+      //   return await handleResponse(
+      //     await buildHttpResponse(
+      //       endPoint: endPoint,
+      //       method: method,
+      //       request: request,
+      //       header: null,
+      //       allowTokenRefresh: false,
+      //     ),
+      //   );
+      // }
     } else {
       return await handleResponse(response);
     }
@@ -544,70 +544,70 @@ Future buildMultiPartResponse({
   }
 }
 
-Future<void> handleFailRegenerateToken() async {
-  isLoggedIn(false);
-  loggedInUser(UserDataResponseModel());
-  apiToken = '';
-  await setValue(AppSharedPreferenceKeys.isUserLoggedIn, false);
-  await setValue(AppSharedPreferenceKeys.currentUserData, '');
-  await setValue(AppSharedPreferenceKeys.userEmail, '');
-  await setValue(AppSharedPreferenceKeys.userPassword, '');
-  await setValue(AppSharedPreferenceKeys.apiToken, '');
-  await setValue(AppSharedPreferenceKeys.userModel, '');
-  // Optionally clear all shared preferences if needed
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.clear();
-  get_state.Get.offAll(() => ());
-}
-Future<bool> reGenerateToken() async {
-  log('Attempting to regenerate token');
-
-  // Do NOT clear shared preferences before retrieving stored credentials
-  final String email = getStringAsync(AppSharedPreferenceKeys.userEmail);
-  final String password = getStringAsync(AppSharedPreferenceKeys.userPassword);
-
-  if (email.isEmpty || password.isEmpty) {
-    log('Missing credentials, cannot regenerate token');
-    await handleFailRegenerateToken();
-    return false;
-  }
-
-  Map<String, dynamic> request = {
-    ConstantKeys.emailKey: email,
-    ConstantKeys.passwordKey: password,
-  };
-
-  try {
-    var loginResponse = await buildHttpResponse(
-      endPoint: APIEndPoints.login,
-      request: request,
-      method: MethodType.post,
-      allowTokenRefresh: false, // Don't retry during login!
-    );
-
-    UserDataResponseModel userDataResponse = UserDataResponseModel.fromJson(loginResponse);
-
-    if (userDataResponse != null && userDataResponse.access != null && userDataResponse.access!.isNotEmpty) {
-      loggedInUser(userDataResponse);
-      apiToken = userDataResponse.access!;
-      await setValue(AppSharedPreferenceKeys.apiToken, userDataResponse.access);
-      await setValue(AppSharedPreferenceKeys.userPassword, request[ConstantKeys.passwordKey]);
-      await setValue(AppSharedPreferenceKeys.isUserLoggedIn, true);
-      await setValue(AppSharedPreferenceKeys.currentUserData, loggedInUser.value.toJson());
-      await setValue(AppSharedPreferenceKeys.userEmail, request['email'].toString());
-      await setValue(AppSharedPreferenceKeys.userModel, jsonEncode(userDataResponse.userModel));
-      isLoggedIn(true);
-      return true;
-    } else {
-      await handleFailRegenerateToken();
-      return false;
-    }
-  } catch (e) {
-    log('Token regeneration failed: $e');
-    await handleFailRegenerateToken();
-    return false;
-  }
-}
+// Future<void> handleFailRegenerateToken() async {
+//   isLoggedIn(false);
+//   loggedInUser(UserDataResponseModel());
+//   apiToken = '';
+//   await setValue(AppSharedPreferenceKeys.isUserLoggedIn, false);
+//   await setValue(AppSharedPreferenceKeys.currentUserData, '');
+//   await setValue(AppSharedPreferenceKeys.userEmail, '');
+//   await setValue(AppSharedPreferenceKeys.userPassword, '');
+//   await setValue(AppSharedPreferenceKeys.apiToken, '');
+//   await setValue(AppSharedPreferenceKeys.userModel, '');
+//   // Optionally clear all shared preferences if needed
+//   final prefs = await SharedPreferences.getInstance();
+//   await prefs.clear();
+//   get_state.Get.offAll(() => ());
+// }
+// Future<bool> reGenerateToken() async {
+//   log('Attempting to regenerate token');
+//
+//   // Do NOT clear shared preferences before retrieving stored credentials
+//   final String email = getStringAsync(AppSharedPreferenceKeys.userEmail);
+//   final String password = getStringAsync(AppSharedPreferenceKeys.userPassword);
+//
+//   if (email.isEmpty || password.isEmpty) {
+//     log('Missing credentials, cannot regenerate token');
+//     // await handleFailRegenerateToken();
+//     return false;
+//   }
+//
+//   Map<String, dynamic> request = {
+//     ConstantKeys.emailKey: email,
+//     ConstantKeys.passwordKey: password,
+//   };
+//
+//   try {
+//     var loginResponse = await buildHttpResponse(
+//       endPoint: APIEndPoints.login,
+//       request: request,
+//       method: MethodType.post,
+//       allowTokenRefresh: false, // Don't retry during login!
+//     );
+//
+//     UserDataResponseModel userDataResponse = UserDataResponseModel.fromJson(loginResponse);
+//
+//     if (userDataResponse != null && userDataResponse.access != null && userDataResponse.access!.isNotEmpty) {
+//       loggedInUser(userDataResponse);
+//       apiToken = userDataResponse.access!;
+//       await setValue(AppSharedPreferenceKeys.apiToken, userDataResponse.access);
+//       await setValue(AppSharedPreferenceKeys.userPassword, request[ConstantKeys.passwordKey]);
+//       await setValue(AppSharedPreferenceKeys.isUserLoggedIn, true);
+//       await setValue(AppSharedPreferenceKeys.currentUserData, loggedInUser.value.toJson());
+//       await setValue(AppSharedPreferenceKeys.userEmail, request['email'].toString());
+//       await setValue(AppSharedPreferenceKeys.userModel, jsonEncode(userDataResponse.userModel));
+//       isLoggedIn(true);
+//       return true;
+//     } else {
+//       await handleFailRegenerateToken();
+//       return false;
+//     }
+//   } catch (e) {
+//     log('Token regeneration failed: $e');
+//     await handleFailRegenerateToken();
+//     return false;
+//   }
+// }
 // Future<bool> reGenerateToken() async {
 //   log('Attempting to regenerate token');
 //

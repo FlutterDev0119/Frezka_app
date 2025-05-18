@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:apps/utils/library.dart';
@@ -7,6 +8,7 @@ import 'package:nb_utils/nb_utils.dart';
 
 import '../../../utils/common/common_base.dart';
 import '../../../utils/component/app_dialogue_component.dart';
+import '../../../utils/shared_prefences.dart';
 import '../../genAI_clinical/model/additional_narrative_model.dart';
 import '../model/doc_language_model.dart';
 import '../model/generate_sql_model.dart';
@@ -42,6 +44,8 @@ class GenAIPVController extends GetxController {
   final TextEditingController personalizeController = TextEditingController();
   final isTextNotEmpty = false.obs;
   RxBool isAdditionalNarrative = false.obs;
+  String Fullname = '';
+  String id = '';
   @override
   void onInit() {
     super.onInit();
@@ -50,6 +54,15 @@ class GenAIPVController extends GetxController {
       filterAttributes(searchController.text);
     });
     isAdditionalNarrative.value = false;
+
+    String? userJson = getStringAsync(AppSharedPreferenceKeys.userModel);
+
+    if (userJson.isNotEmpty) {
+      var userMap = jsonDecode(userJson);
+      var userModel = UserModel.fromJson(userMap); // Replace with your actual model
+      Fullname = "${userModel.firstName} ${userModel.lastName}";
+      id = userModel.id.toString();
+    }
     // tags.assignAll([
     //   "Adverse Event Reporting",
     //   "Aggregate Reporting",
@@ -111,7 +124,10 @@ class GenAIPVController extends GetxController {
       if (data != null && data.output != null) {
         classificationMap.assignAll(data.output!);
         filteredClassificationMap.assignAll(data.output!);
-        tags.assignAll(data.output!.keys.toList());
+        // tags.assignAll(data.output!.keys.toList());
+        tags.assignAll(data.output!.values.expand((list) => list).toList());
+        log("data.output!.keys.toList()----------------${data.output!.keys.toList()}");
+        log("data.output!.value.toList()----------------${data.output!.values.toList()}");
       }
     } catch (e) {
       toast(e.toString());
@@ -246,6 +262,26 @@ class GenAIPVController extends GetxController {
       additionalNarrativeRes.value = response;
     } catch (e) {
       print('Error fetching Additional Narrative: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+  Future<void> narrativeGeneration({required String SafetyReport, required String prompt, required List<String> checkbox, required String userId, required String userName}) async {
+    try {
+      isLoading.value = true;
+
+      final request = {
+        "SafetyReport": [],
+        "prompt": "",
+        "checkbox": checkbox,
+        "userId": userId,
+        "user_name": userName,
+      };
+
+      final response = await GenAIPVServiceApis.fetchAdditionalNarrative(request: request);
+      additionalNarrativeRes.value = response;
+    } catch (e) {
+      print('Error fetching Narrative Generation: $e');
     } finally {
       isLoading.value = false;
     }

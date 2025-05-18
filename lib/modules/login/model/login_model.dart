@@ -1,6 +1,6 @@
 class UserDataResponseModel {
   final String? refresh;
-  late final String? access;
+  String? access;
   final UserModel? userModel;
 
   UserDataResponseModel({

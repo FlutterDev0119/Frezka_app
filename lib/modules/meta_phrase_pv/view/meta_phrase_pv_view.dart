@@ -292,426 +292,796 @@ class MetaPhraseScreen extends StatelessWidget {
                         }).toList());
                   }).paddingOnly(top: 5, bottom: 10),
 
-                  controller.isCredentialsConfirm.value == false
-                      ? Column(
-                          children: [
-                            Card(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              elevation: 5,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Title for Original File
-                                  Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Text("Original File", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                                  ),
-
-                                  // Scrollable content for Original File
-                                  Container(
-                                    height: 150,
-                                    padding: const EdgeInsets.all(16),
-                                    child: Scrollbar(
-                                      thumbVisibility: true,
-                                      controller: controller.translatedScrollController,
-                                      child: SingleChildScrollView(
-                                        controller: controller.translatedScrollController,
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              selectedTranslationReport!.originalFile,
-                                              style: TextStyle(fontSize: 16),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            // Translated File Card with Scrollable content
-                            Card(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              elevation: 5,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Title Row with Fullscreen Icon
-                                  Row(
+                  Obx(
+                     () {
+                      return controller.isCredentialsConfirm.value == false
+                          ? Column(
+                              children: [
+                                Card(
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  elevation: 5,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Expanded(
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                          child: Text(
-                                            controller.isReverse.value == false ? "Translated File" : "Reverse translate",
-                                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                      // Title for Original File
+                                      Padding(
+                                        padding: const EdgeInsets.all(16),
+                                        child: Text("Original File", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                                      ),
+
+                                      // Scrollable content for Original File
+                                      Container(
+                                        height: 150,
+                                        padding: const EdgeInsets.all(16),
+                                        child: Scrollbar(
+                                          thumbVisibility: true,
+                                          controller: controller.translatedScrollController,
+                                          child: SingleChildScrollView(
+                                            controller: controller.translatedScrollController,
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  selectedTranslationReport!.originalFile,
+                                                  style: TextStyle(fontSize: 16),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),
+                                    ],
+                                  ),
+                                ),
+
+                                // Translated File Card with Scrollable content
+                                Card(
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  elevation: 5,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Title Row with Fullscreen Icon
                                       Row(
-                                        mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          controller.selectedMode.value == "Edit" && controller.isReverse.value == false
-                                              ? IconButton(
-                                                  iconSize: 20,
-                                                  visualDensity: VisualDensity.compact,
-                                                  padding: EdgeInsets.zero,
-                                                  icon: Icon(Icons.document_scanner),
-                                                  onPressed: () {
-                                                    controller.isScoreHighlightMode.value = false;
-                                                  },
-                                                )
-                                              : SizedBox(),
-                                          controller.selectedMode.value == "Edit" && controller.isReverse.value == false
-                                              ? IconButton(
-                                                  iconSize: 20,
-                                                  visualDensity: VisualDensity.compact,
-                                                  padding: EdgeInsets.zero,
-                                                  icon: Icon(Icons.score_outlined),
-                                                  onPressed: () {
-                                                    controller.isScoreHighlightMode.value = !controller.isScoreHighlightMode.value;
-                                                    controller.selectedTranslationReport.value = controller.selectedTranslationReport.value;
-                                                  },
-                                                )
-                                              : SizedBox(),
-                                          controller.selectedMode.value == "Edit" && controller.isReverse.value == false
-                                              ? IconButton(
-                                                  iconSize: 20,
-                                                  visualDensity: VisualDensity.compact,
-                                                  padding: EdgeInsets.zero,
-                                                  icon: Icon(Icons.screenshot_monitor_sharp),
-                                                  onPressed: () {},
-                                                )
-                                              : SizedBox(),
-                                          (controller.selectedMode.value == "Review" || controller.selectedMode.value == "Edit")
-                                              ? IconButton(
-                                                  iconSize: 20,
-                                                  visualDensity: VisualDensity.compact,
-                                                  padding: EdgeInsets.zero,
-                                                  icon: Icon(Icons.compare_arrows),
-                                                  onPressed: () async {
+                                          Expanded(
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                              child: Text(
+                                                controller.isReverse.value == false ? "Translated File" : "Reverse translate",
+                                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                              ),
+                                            ),
+                                          ),
+                                          Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              controller.selectedMode.value == "Edit" && controller.isReverse.value == false
+                                                  ? IconButton(
+                                                      iconSize: 20,
+                                                      visualDensity: VisualDensity.compact,
+                                                      padding: EdgeInsets.zero,
+                                                      icon: Icon(Icons.document_scanner),
+                                                      onPressed: () {
+                                                        controller.isScoreHighlightMode.value = false;
+                                                      },
+                                                    )
+                                                  : SizedBox(),
+                                              controller.selectedMode.value == "Edit" && controller.isReverse.value == false
+                                                  ? IconButton(
+                                                      iconSize: 20,
+                                                      visualDensity: VisualDensity.compact,
+                                                      padding: EdgeInsets.zero,
+                                                      icon: Icon(Icons.score_outlined),
+                                                      onPressed: () {
+                                                        controller.isScoreHighlightMode.value = !controller.isScoreHighlightMode.value;
+                                                        controller.selectedTranslationReport.value = controller.selectedTranslationReport.value;
+                                                      },
+                                                    )
+                                                  : SizedBox(),
+                                              (controller.selectedMode.value == "Edit" && controller.isReverse.value == false)|| controller.selectedMode.value == "Certify"
+                                                  ? IconButton(
+                                                      iconSize: 20,
+                                                      visualDensity: VisualDensity.compact,
+                                                      padding: EdgeInsets.zero,
+                                                      icon: Icon(Icons.screenshot_monitor_sharp),
+                                                      onPressed: () {},
+                                                    )
+                                                  : SizedBox(),
+                                              (controller.selectedMode.value == "Review" || controller.selectedMode.value == "Edit"||controller.selectedMode.value == "Certify")
+                                                  ? IconButton(
+                                                      iconSize: 20,
+                                                      visualDensity: VisualDensity.compact,
+                                                      padding: EdgeInsets.zero,
+                                                      icon: Icon(Icons.compare_arrows),
+                                                      // onPressed: () async {
+                                                      //   controller.isReverse.value == false ? controller.isReverse.value = true : controller.isReverse.value = false;
+                                                      //   final text = controller.selectedTranslationReport.value?.translatedFile ?? '';
+                                                      //   await controller.fetchReverseTranslation(text);
+                                                      //   controller.isScoreHighlightMode.value = false;
+                                                      //   controller.isReverse.value = !controller.isReverse.value;
+                                                      //   log('isReverse: ${controller.isReverse.value}');
+                                                      //   // _buildSelectedCard(context, controller.selectedTranslationReport.value,true);
+                                                      // },
+                                                onPressed: () async {
+                                                  if (!controller.isReverse.value) {
                                                     final text = controller.selectedTranslationReport.value?.translatedFile ?? '';
                                                     await controller.fetchReverseTranslation(text);
                                                     controller.isScoreHighlightMode.value = false;
-                                                    // _buildSelectedCard(context, controller.selectedTranslationReport.value,true);
-                                                  },
-                                                )
-                                              : SizedBox(),
-                                          (controller.selectedMode.value == "Review" || controller.selectedMode.value == "Edit")
-                                              ? IconButton(
-                                                  iconSize: 20,
-                                                  visualDensity: VisualDensity.compact,
-                                                  padding: EdgeInsets.zero,
-                                                  icon: Icon(Icons.fullscreen),
-                                                  onPressed: () {
+
+
+                                                  } else {
+                                                    // Revert reverse mode
+                                                    controller.isReverse.value = false;
+                                                    controller.reverseTranslatedText.value = '';
                                                     controller.isScoreHighlightMode.value = false;
-                                                    showDialog(
-                                                      context: context,
-                                                      builder: (context) {
-                                                        return Dialog(
-                                                          insetPadding: EdgeInsets.zero,
-                                                          backgroundColor: Colors.white,
-                                                          child: AppScaffold(
-                                                            automaticallyImplyLeading: false,
-                                                            appBarBackgroundColor: appBackGroundColor,
-                                                            appBarTitleText: "Translation Details",
-                                                            appBarTitleTextStyle: TextStyle(
-                                                              fontSize: 20,
-                                                              color: appWhiteColor,
-                                                            ),
-                                                            actions: [
-                                                              IconButton(
-                                                                icon: Icon(
-                                                                  Icons.close,
+                                                  }
+
+                                                  log('isReverse: ${controller.isReverse.value}');
+                                                },
+
+                                              )
+                                                  : SizedBox(),
+                                              (controller.selectedMode.value == "Review" || controller.selectedMode.value == "Edit" || controller.selectedMode.value == "Certify")
+                                                  ? IconButton(
+                                                      iconSize: 20,
+                                                      visualDensity: VisualDensity.compact,
+                                                      padding: EdgeInsets.zero,
+                                                      icon: Icon(Icons.fullscreen),
+                                                      onPressed: () {
+                                                        controller.isScoreHighlightMode.value = false;
+                                                        showDialog(
+                                                          context: context,
+                                                          builder: (context) {
+                                                            return Dialog(
+                                                              insetPadding: EdgeInsets.zero,
+                                                              backgroundColor: Colors.white,
+                                                              child: AppScaffold(
+                                                                automaticallyImplyLeading: false,
+                                                                appBarBackgroundColor: appBackGroundColor,
+                                                                appBarTitleText: "Translation Details",
+                                                                appBarTitleTextStyle: TextStyle(
+                                                                  fontSize: 20,
                                                                   color: appWhiteColor,
                                                                 ),
-                                                                onPressed: () => Navigator.of(context).pop(),
-                                                              )
-                                                            ],
-                                                            body: Padding(
-                                                              padding: const EdgeInsets.all(16),
-                                                              child: Scrollbar(
-                                                                thumbVisibility: true,
-                                                                child: SingleChildScrollView(
-                                                                  child: Column(
-                                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                                    children: [
-                                                                      Text(
-                                                                        "Original File",
-                                                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                                                actions: [
+                                                                  IconButton(
+                                                                    icon: Icon(
+                                                                      Icons.close,
+                                                                      color: appWhiteColor,
+                                                                    ),
+                                                                    onPressed: () => Navigator.of(context).pop(),
+                                                                  )
+                                                                ],
+                                                                body: Padding(
+                                                                  padding: const EdgeInsets.all(16),
+                                                                  child: Scrollbar(
+                                                                    thumbVisibility: true,
+                                                                    child: SingleChildScrollView(
+                                                                      child: Column(
+                                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                                        children: [
+                                                                          Text(
+                                                                            "Original File",
+                                                                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                                                          ),
+                                                                          const SizedBox(height: 8),
+                                                                          Container(
+                                                                            padding: const EdgeInsets.all(12),
+                                                                            decoration: BoxDecoration(
+                                                                              color: appDashBoardCardColor,
+                                                                              borderRadius: BorderRadius.circular(8),
+                                                                              border: Border.all(color: Colors.grey.shade300),
+                                                                            ),
+                                                                            child: Text(
+                                                                              selectedTranslationReport.originalFile,
+                                                                              style: TextStyle(fontSize: 16),
+                                                                            ),
+                                                                          ),
+                                                                          const SizedBox(height: 24),
+                                                                          Text(
+                                                                            "Translated File",
+                                                                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                                                          ),
+                                                                          const SizedBox(height: 8),
+                                                                          Container(
+                                                                            padding: const EdgeInsets.all(12),
+                                                                            decoration: BoxDecoration(
+                                                                              color: appDashBoardCardColor,
+                                                                              borderRadius: BorderRadius.circular(8),
+                                                                              border: Border.all(color: Colors.grey.shade300),
+                                                                            ),
+                                                                            child: Text(
+                                                                              selectedTranslationReport.translatedFile,
+                                                                              style: TextStyle(fontSize: 16),
+                                                                            ),
+                                                                          ),
+                                                                        ],
                                                                       ),
-                                                                      const SizedBox(height: 8),
-                                                                      Container(
-                                                                        padding: const EdgeInsets.all(12),
-                                                                        decoration: BoxDecoration(
-                                                                          color: appDashBoardCardColor,
-                                                                          borderRadius: BorderRadius.circular(8),
-                                                                          border: Border.all(color: Colors.grey.shade300),
-                                                                        ),
-                                                                        child: Text(
-                                                                          selectedTranslationReport.originalFile,
-                                                                          style: TextStyle(fontSize: 16),
-                                                                        ),
-                                                                      ),
-                                                                      const SizedBox(height: 24),
-                                                                      Text(
-                                                                        "Translated File",
-                                                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                                                                      ),
-                                                                      const SizedBox(height: 8),
-                                                                      Container(
-                                                                        padding: const EdgeInsets.all(12),
-                                                                        decoration: BoxDecoration(
-                                                                          color: appDashBoardCardColor,
-                                                                          borderRadius: BorderRadius.circular(8),
-                                                                          border: Border.all(color: Colors.grey.shade300),
-                                                                        ),
-                                                                        child: Text(
-                                                                          selectedTranslationReport.translatedFile,
-                                                                          style: TextStyle(fontSize: 16),
-                                                                        ),
-                                                                      ),
-                                                                    ],
+                                                                    ),
                                                                   ),
                                                                 ),
                                                               ),
+                                                            );
+                                                          },
+                                                        );
+                                                      },
+                                                    )
+                                                  : SizedBox(),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+
+                                      Container(
+                                        height: 150,
+                                        padding: const EdgeInsets.all(16),
+                                        child: Scrollbar(
+                                          controller: controller.translatedScrollController1,
+                                          thumbVisibility: true,
+                                          child: SingleChildScrollView(
+                                            controller: controller.translatedScrollController1,
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Obx(() {
+                                                  final isScoreHighlight = controller.isScoreHighlightMode.value;
+
+                                                  // Check if we need to show the scored sentences
+                                                  if (isScoreHighlight) {
+                                                    final scoredTexts = controller.selectedTranslationReport.value?.sentenceScore ?? [];
+
+                                                    if (scoredTexts.isEmpty) {
+                                                      return Center(child: Text("No sentences available"));
+                                                    }
+
+                                                    return Wrap(
+                                                      spacing: 4,
+                                                      runSpacing: 4,
+                                                      alignment: WrapAlignment.start,
+                                                      children: scoredTexts.map<Widget>((sentenceScore) {
+                                                        final sentence = sentenceScore.sentence;
+                                                        final score = sentenceScore.score;
+
+                                                        // Color color = score <= 50 ? Colors.yellow : Colors.green;
+                                                        Color color;
+
+                                                        if (score >= 0 && score <= 39) {
+                                                          color = appScore0To39Color;
+                                                        } else if (score >= 40 && score <= 64) {
+                                                          color = appScore40To64Color;
+                                                        } else if (score >= 65 && score <= 100) {
+                                                          color = appScore65To100Color;
+                                                        } else {
+                                                          color = appBackGroundColor;
+                                                        }
+
+                                                        return Tooltip(
+                                                          message: 'Score: $score',
+                                                          decoration: BoxDecoration(
+                                                            color: appDashBoardCardColor,
+                                                            borderRadius: BorderRadius.circular(4),
+                                                          ),
+                                                          textStyle: TextStyle(color: appBackGroundColor),
+                                                          waitDuration: Duration(milliseconds: 500),
+                                                          showDuration: Duration(seconds: 2),
+                                                          child: Container(
+                                                            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                                            color: color,
+                                                            child: Text(
+                                                              sentence,
+                                                              style: TextStyle(fontSize: 16, color: appTextColor),
                                                             ),
                                                           ),
                                                         );
+
+                                                      }).toList(),
+                                                    );
+                                                  }
+
+                                                  // Default behavior if isScoreHighlight is false
+                                                  final displayText = controller.isReverse.value
+                                                      ? controller.reverseTranslatedText.value
+                                                      : controller.selectedTranslationReport.value?.translatedFile ?? '';
+
+                                                  // Check if we are in "Edit" mode
+                                                  final isEditingTranslatedFile =
+                                                      controller.selectedMode.value == "Edit" && controller.isReverse.value == false;
+                                                  if (isEditingTranslatedFile && controller.isEditing.value) {
+                                                    return
+                                                      TextField(
+                                                      controller: controller.translatedTextController,
+                                                      autofocus: true,
+                                                      maxLines: null,
+                                                      style: const TextStyle(fontSize: 16),
+                                                      decoration: const InputDecoration.collapsed(hintText: ''),
+                                                      onEditingComplete: () {
+                                                        log("jjjjjj----------------");
+                                                        controller.exitEditMode();
+                                                        FocusScope.of(Get.context!).unfocus();
+                                                      },
+                                                      onSubmitted: (_) {
+                                                        log("jjjjjj----------------");
+                                                        controller.exitEditMode();
+                                                        FocusScope.of(Get.context!).unfocus();
                                                       },
                                                     );
-                                                  },
-                                                )
-                                              : SizedBox(),
-                                        ],
-                                      ),
+                                                  }
+
+                                                  // Display text as normal if not in edit mode
+                                                  return GestureDetector(
+                                                    onTap: () {
+                                                      if (controller.selectedMode.value == "Edit" && !controller.isReverse.value) {
+                                                        controller.enterEditMode();
+                                                      }
+                                                    },
+                                                    child: Text(
+                                                      displayText,
+                                                      style: const TextStyle(fontSize: 16),
+                                                    ),
+                                                  );
+                                                })
+                                                // Obx(() {
+                                                //   final isScoreHighlight = controller.isScoreHighlightMode.value;
+                                                //
+                                                //   if (isScoreHighlight) {
+                                                //     final isEditing = controller.isEditing.value;
+                                                //     final originalSentenceScoreList =
+                                                //         controller.selectedTranslationReport.value?.sentenceScore ?? [];
+                                                //
+                                                //     final originalText = controller.selectedTranslationReport.value?.translatedFile ?? '';
+                                                //     final originalSentences = originalSentenceScoreList.map((e) => e.sentence.trim()).toList();
+                                                //
+                                                //     // Use edited text if in edit mode, else original
+                                                //     final workingText = isEditing
+                                                //         ? controller.translatedTextController.text
+                                                //         : originalText;
+                                                //
+                                                //     final currentSentences =
+                                                //     workingText.split(RegExp(r'[.!?]\s*')).map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+                                                //
+                                                //     if (currentSentences.isEmpty) {
+                                                //       return Center(child: Text("No sentences available"));
+                                                //     }
+                                                //
+                                                //     return Wrap(
+                                                //       spacing: 4,
+                                                //       runSpacing: 4,
+                                                //       alignment: WrapAlignment.start,
+                                                //       children: currentSentences.map<Widget>((sentence) {
+                                                //         // Check if sentence exists in original list
+                                                //         final matchIndex = originalSentences.indexOf(sentence);
+                                                //         bool isModified = matchIndex == -1;
+                                                //
+                                                //         Color color;
+                                                //         String tooltipMessage;
+                                                //
+                                                //         if (isModified) {
+                                                //           color = Colors.orangeAccent; // You can define your custom edited color
+                                                //           tooltipMessage = "Edited";
+                                                //         } else {
+                                                //           final score = originalSentenceScoreList[matchIndex].score;
+                                                //           tooltipMessage = "Score: $score";
+                                                //
+                                                //           if (score >= 0 && score <= 39) {
+                                                //             color = appScore0To39Color;
+                                                //           } else if (score >= 40 && score <= 64) {
+                                                //             color = appScore40To64Color;
+                                                //           } else if (score >= 65 && score <= 100) {
+                                                //             color = appScore65To100Color;
+                                                //           } else {
+                                                //             color = appBackGroundColor;
+                                                //           }
+                                                //         }
+                                                //
+                                                //         return Tooltip(
+                                                //           message: tooltipMessage,
+                                                //           decoration: BoxDecoration(
+                                                //             color: appDashBoardCardColor,
+                                                //             borderRadius: BorderRadius.circular(4),
+                                                //           ),
+                                                //           textStyle: TextStyle(color: appBackGroundColor),
+                                                //           waitDuration: Duration(milliseconds: 500),
+                                                //           showDuration: Duration(seconds: 2),
+                                                //           child: Container(
+                                                //             padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                                //             color: color,
+                                                //             child: Text(
+                                                //               sentence,
+                                                //               style: TextStyle(fontSize: 16, color: appTextColor),
+                                                //             ),
+                                                //           ),
+                                                //         );
+                                                //       }).toList(),
+                                                //     );
+                                                //   }
+                                                //
+                                                //   // If not in score highlight mode
+                                                //   final displayText = controller.isReverse.value
+                                                //       ? controller.reverseTranslatedText.value
+                                                //       : controller.selectedTranslationReport.value?.translatedFile ?? '';
+                                                //
+                                                //   final isEditingTranslatedFile =
+                                                //       controller.selectedMode.value == "Edit" && controller.isReverse.value == false;
+                                                //
+                                                //   if (isEditingTranslatedFile && controller.isEditing.value) {
+                                                //     return TextField(
+                                                //       controller: controller.translatedTextController,
+                                                //       autofocus: true,
+                                                //       maxLines: null,
+                                                //       style: const TextStyle(fontSize: 16),
+                                                //       decoration: const InputDecoration.collapsed(hintText: ''),
+                                                //       onEditingComplete: () {
+                                                //         controller.exitEditMode();
+                                                //         FocusScope.of(Get.context!).unfocus();
+                                                //       },
+                                                //       onSubmitted: (_) {
+                                                //         controller.exitEditMode();
+                                                //         FocusScope.of(Get.context!).unfocus();
+                                                //       },
+                                                //     );
+                                                //   }
+                                                //
+                                                //   return GestureDetector(
+                                                //     onTap: () {
+                                                //       if (controller.selectedMode.value == "Edit" && !controller.isReverse.value) {
+                                                //         controller.enterEditMode();
+                                                //       }
+                                                //     },
+                                                //     child: Text(
+                                                //       displayText,
+                                                //       style: const TextStyle(fontSize: 16),
+                                                //     ),
+                                                //   );
+                                                // })
+                                                // Obx(() {
+                                                //   final isScoreHighlight = controller.isScoreHighlightMode.value;
+                                                //
+                                                //   if (isScoreHighlight) {
+                                                //     final isEditing = controller.isEditing.value;
+                                                //     final originalSentenceScoreList =
+                                                //         controller.selectedTranslationReport.value?.sentenceScore ?? [];
+                                                //
+                                                //     final originalText = controller.selectedTranslationReport.value?.translatedFile ?? '';
+                                                //     final originalSentences = originalSentenceScoreList.map((e) => e.sentence.trim().toLowerCase()).toList();
+                                                //
+                                                //     final workingText = isEditing
+                                                //         ? controller.translatedTextController.text
+                                                //         : originalText;
+                                                //
+                                                //     final currentSentences = workingText
+                                                //         .split(RegExp(r'[.!?]\s*'))
+                                                //         .map((e) => e.trim())
+                                                //         .where((e) => e.isNotEmpty)
+                                                //         .toList();
+                                                //
+                                                //     if (currentSentences.isEmpty) {
+                                                //       return Center(child: Text("No sentences available"));
+                                                //     }
+                                                //
+                                                //     return Wrap(
+                                                //       spacing: 4,
+                                                //       runSpacing: 4,
+                                                //       alignment: WrapAlignment.start,
+                                                //       children: currentSentences.map<Widget>((sentence) {
+                                                //         final normalizedSentence = sentence.trim().toLowerCase();
+                                                //         final matchIndex = originalSentences.indexOf(normalizedSentence);
+                                                //
+                                                //         bool isModified = matchIndex == -1;
+                                                //         Color color;
+                                                //         String tooltipMessage;
+                                                //
+                                                //         if (isModified) {
+                                                //           color = Colors.orangeAccent; // Mark edited
+                                                //           tooltipMessage = "Edited";
+                                                //         } else {
+                                                //           final score = originalSentenceScoreList[matchIndex].score;
+                                                //           tooltipMessage = "Score: $score";
+                                                //
+                                                //           if (score >= 0 && score <= 39) {
+                                                //             color = appScore0To39Color;
+                                                //           } else if (score >= 40 && score <= 64) {
+                                                //             color = appScore40To64Color;
+                                                //           } else if (score >= 65 && score <= 100) {
+                                                //             color = appScore65To100Color;
+                                                //           } else {
+                                                //             color = appBackGroundColor;
+                                                //           }
+                                                //         }
+                                                //
+                                                //         return Tooltip(
+                                                //           message: tooltipMessage,
+                                                //           decoration: BoxDecoration(
+                                                //             color: appDashBoardCardColor,
+                                                //             borderRadius: BorderRadius.circular(4),
+                                                //           ),
+                                                //           textStyle: TextStyle(color: appBackGroundColor),
+                                                //           waitDuration: Duration(milliseconds: 500),
+                                                //           showDuration: Duration(seconds: 2),
+                                                //           child: Container(
+                                                //             padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                                //             color: color,
+                                                //             child: Text(
+                                                //               sentence,
+                                                //               style: TextStyle(fontSize: 16, color: appTextColor),
+                                                //             ),
+                                                //           ),
+                                                //         );
+                                                //       }).toList(),
+                                                //     );
+                                                //   }
+                                                //
+                                                //   // Non-highlight mode
+                                                //   final displayText = controller.isReverse.value
+                                                //       ? controller.reverseTranslatedText.value
+                                                //       : controller.selectedTranslationReport.value?.translatedFile ?? '';
+                                                //
+                                                //   final isEditingTranslatedFile =
+                                                //       controller.selectedMode.value == "Edit" && controller.isReverse.value == false;
+                                                //
+                                                //   if (isEditingTranslatedFile && controller.isEditing.value) {
+                                                //     return TextField(
+                                                //       controller: controller.translatedTextController,
+                                                //       autofocus: true,
+                                                //       maxLines: null,
+                                                //       style: const TextStyle(fontSize: 16),
+                                                //       decoration: const InputDecoration.collapsed(hintText: ''),
+                                                //       onEditingComplete: () {
+                                                //         controller.exitEditMode();
+                                                //         FocusScope.of(Get.context!).unfocus();
+                                                //       },
+                                                //       onSubmitted: (_) {
+                                                //         controller.exitEditMode();
+                                                //         FocusScope.of(Get.context!).unfocus();
+                                                //       },
+                                                //     );
+                                                //   }
+                                                //
+                                                //   return GestureDetector(
+                                                //     onTap: () {
+                                                //       if (controller.selectedMode.value == "Edit" && !controller.isReverse.value) {
+                                                //         controller.enterEditMode();
+                                                //       }
+                                                //     },
+                                                //     child: Text(
+                                                //       displayText,
+                                                //       style: const TextStyle(fontSize: 16),
+                                                //     ),
+                                                //   );
+                                                // })
+
+                                                // Obx(() {
+                                                //   final isScoreHighlight = controller.isScoreHighlightMode.value;
+                                                //
+                                                //   // ✅ Score Highlight Mode
+                                                //   if (isScoreHighlight) {
+                                                //     // ✅ Check if we're in edit mode
+                                                //     final isEditing = controller.isEditing.value;
+                                                //     final originalText = controller.selectedTranslationReport.value?.translatedFile ?? '';
+                                                //     final originalSentences = originalText.split(RegExp(r'[.!?]\s*')).map((e) => e.trim()).toList();
+                                                //
+                                                //     // ✅ If editing, use edited text from controller
+                                                //     final editedText = controller.translatedTextController.text;
+                                                //     final editedSentences = editedText.split(RegExp(r'[.!?]\s*')).map((e) => e.trim()).toList();
+                                                //
+                                                //     // Show placeholder if empty
+                                                //     if (editedSentences.isEmpty) {
+                                                //       return Center(child: Text("No sentences available"));
+                                                //     }
+                                                //
+                                                //     // ✅ Show highlighted sentences (modified = orange, others = scored color or background)
+                                                //     return Wrap(
+                                                //       spacing: 4,
+                                                //       runSpacing: 4,
+                                                //       alignment: WrapAlignment.start,
+                                                //       children: editedSentences.map<Widget>((sentence) {
+                                                //         if (sentence.isEmpty) return SizedBox.shrink();
+                                                //
+                                                //         // Check if sentence exists in original
+                                                //         bool isModified = !originalSentences.contains(sentence);
+                                                //
+                                                //         Color color;
+                                                //
+                                                //         if (isModified) {
+                                                //           color = Colors.orangeAccent; // Highlight new/modified sentence
+                                                //         } else {
+                                                //           // Try to find its score from sentenceScore list
+                                                //           final scoreEntry = controller.selectedTranslationReport.value?.sentenceScore
+                                                //               ?.firstWhereOrNull((e) => e.sentence.trim() == sentence);
+                                                //
+                                                //           final score = scoreEntry?.score ?? -1;
+                                                //
+                                                //           if (score >= 0 && score <= 39) {
+                                                //             color = appScore0To39Color;
+                                                //           } else if (score >= 40 && score <= 64) {
+                                                //             color = appScore40To64Color;
+                                                //           } else if (score >= 65 && score <= 100) {
+                                                //             color = appScore65To100Color;
+                                                //           } else {
+                                                //             color = appBackGroundColor;
+                                                //           }
+                                                //         }
+                                                //
+                                                //         return Tooltip(
+                                                //           message: isModified ? 'Modified' : 'Score: ${controller.selectedTranslationReport.value?.sentenceScore?.firstWhereOrNull((e) => e.sentence == sentence)?.score ?? "N/A"}',
+                                                //           decoration: BoxDecoration(
+                                                //             color: appDashBoardCardColor,
+                                                //             borderRadius: BorderRadius.circular(4),
+                                                //           ),
+                                                //           textStyle: TextStyle(color: appBackGroundColor),
+                                                //           waitDuration: Duration(milliseconds: 500),
+                                                //           showDuration: Duration(seconds: 2),
+                                                //           child: Container(
+                                                //             padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                                //             color: color,
+                                                //             child: Text(
+                                                //               sentence,
+                                                //               style: TextStyle(fontSize: 16, color: appTextColor),
+                                                //             ),
+                                                //           ),
+                                                //         );
+                                                //       }).toList(),
+                                                //     );
+                                                //   }
+                                                //
+                                                //   // ✅ Default display text
+                                                //   final displayText = controller.isReverse.value
+                                                //       ? controller.reverseTranslatedText.value
+                                                //       : controller.selectedTranslationReport.value?.translatedFile ?? '';
+                                                //
+                                                //   // ✅ Edit mode
+                                                //   final isEditingTranslatedFile =
+                                                //       controller.selectedMode.value == "Edit" && controller.isReverse.value == false;
+                                                //   if (isEditingTranslatedFile && controller.isEditing.value) {
+                                                //     return TextField(
+                                                //       controller: controller.translatedTextController,
+                                                //       autofocus: true,
+                                                //       maxLines: null,
+                                                //       style: const TextStyle(fontSize: 16),
+                                                //       decoration: const InputDecoration.collapsed(hintText: ''),
+                                                //       onEditingComplete: () {
+                                                //         controller.exitEditMode();
+                                                //         FocusScope.of(Get.context!).unfocus();
+                                                //       },
+                                                //       onSubmitted: (_) {
+                                                //         controller.exitEditMode();
+                                                //         FocusScope.of(Get.context!).unfocus();
+                                                //       },
+                                                //     );
+                                                //   }
+                                                //
+                                                //   // ✅ Display static text
+                                                //   return GestureDetector(
+                                                //     onTap: () {
+                                                //       if (controller.selectedMode.value == "Edit" && !controller.isReverse.value) {
+                                                //         controller.enterEditMode();
+                                                //       }
+                                                //     },
+                                                //     child: Text(
+                                                //       displayText,
+                                                //       style: const TextStyle(fontSize: 16),
+                                                //     ),
+                                                //   );
+                                                // })
+
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      )
                                     ],
                                   ),
-
-                                  Container(
-                                    height: 150,
-                                    padding: const EdgeInsets.all(16),
-                                    child: Scrollbar(
-                                      controller: controller.translatedScrollController1,
-                                      thumbVisibility: true,
-                                      child: SingleChildScrollView(
-                                        controller: controller.translatedScrollController1,
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                )
+                              ],
+                            )
+                          : Center(
+                              child: Container(
+                                width: 600,
+                                alignment: Alignment.topLeft,
+                                margin: const EdgeInsets.all(16),
+                                padding: const EdgeInsets.all(24),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      'Certificate of Translation',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: appBackGroundColor,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 20),
+                                    Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: RichText(
+                                        textAlign: TextAlign.start,
+                                        text: TextSpan(
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.black, // Or your theme color
+                                          ),
                                           children: [
-                                            Obx(() {
-                                              final isScoreHighlight = controller.isScoreHighlightMode.value;
-
-                                              // Check if we need to show the scored sentences
-                                              if (isScoreHighlight) {
-                                                final scoredTexts = controller.selectedTranslationReport.value?.sentenceScore ?? [];
-
-                                                if (scoredTexts.isEmpty) {
-                                                  return Center(child: Text("No sentences available"));
-                                                }
-
-                                                return Wrap(
-                                                  spacing: 4,
-                                                  runSpacing: 4,
-                                                  alignment: WrapAlignment.start,
-                                                  children: scoredTexts.map<Widget>((sentenceScore) {
-                                                    final sentence = sentenceScore.sentence;
-                                                    final score = sentenceScore.score;
-
-                                                    // Color color = score <= 50 ? Colors.yellow : Colors.green;
-                                                    Color color;
-
-                                                    if (score >= 0 && score <= 39) {
-                                                      color = appScore0To39Color;
-                                                    } else if (score >= 40 && score <= 64) {
-                                                      color = appScore40To64Color;
-                                                    } else if (score >= 65 && score <= 100) {
-                                                      color = appScore65To100Color;
-                                                    } else {
-                                                      color = appBackGroundColor;
-                                                    }
-
-                                                    return Tooltip(
-                                                      message: 'Score: $score',
-                                                      decoration: BoxDecoration(
-                                                        color: appDashBoardCardColor,
-                                                        borderRadius: BorderRadius.circular(4),
-                                                      ),
-                                                      textStyle: TextStyle(color: appBackGroundColor),
-                                                      waitDuration: Duration(milliseconds: 500),
-                                                      showDuration: Duration(seconds: 2),
-                                                      child: Container(
-                                                        padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                                        color: color,
-                                                        child: Text(
-                                                          sentence,
-                                                          style: TextStyle(fontSize: 16, color: appTextColor),
-                                                        ),
-                                                      ),
-                                                    );
-
-                                                  }).toList(),
-                                                );
-                                              }
-
-                                              // Default behavior if isScoreHighlight is false
-                                              final displayText = controller.isReverse.value
-                                                  ? controller.reverseTranslatedText.value
-                                                  : controller.selectedTranslationReport.value?.translatedFile ?? '';
-
-                                              // Check if we are in "Edit" mode
-                                              final isEditingTranslatedFile =
-                                                  controller.selectedMode.value == "Edit" && controller.isReverse.value == false;
-                                              if (isEditingTranslatedFile && controller.isEditing.value) {
-                                                return TextField(
-                                                  controller: controller.translatedTextController,
-                                                  autofocus: true,
-                                                  maxLines: null,
-                                                  style: const TextStyle(fontSize: 16),
-                                                  decoration: const InputDecoration.collapsed(hintText: ''),
-                                                  onEditingComplete: () {
-                                                    controller.exitEditMode();
-                                                    FocusScope.of(Get.context!).unfocus();
-                                                  },
-                                                  onSubmitted: (_) {
-                                                    controller.exitEditMode();
-                                                    FocusScope.of(Get.context!).unfocus();
-                                                  },
-                                                );
-                                              }
-
-                                              // Display text as normal if not in edit mode
-                                              return GestureDetector(
-                                                onTap: () {
-                                                  if (controller.selectedMode.value == "Edit" && !controller.isReverse.value) {
-                                                    controller.enterEditMode();
-                                                  }
-                                                },
-                                                child: Text(
-                                                  displayText,
-                                                  style: const TextStyle(fontSize: 16),
-                                                ),
-                                              );
-                                            })
+                                            const TextSpan(text: 'I, '),
+                                            TextSpan(text: firstName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                            const TextSpan(text: ', certify that I am competent to translate between English and '),
+                                            const TextSpan(text: 'Japanese (ja)', style: TextStyle(fontWeight: FontWeight.bold)),
+                                            const TextSpan(text: '. I further certify that I translated the document titled '),
+                                            TextSpan(text: '"$fileName"', style: TextStyle(fontWeight: FontWeight.bold)),
+                                            const TextSpan(text: ', and the translation is true and accurate to the best of my abilities.'),
                                           ],
                                         ),
                                       ),
                                     ),
-                                  )
-                                ],
-                              ),
-                            )
-                          ],
-                        )
-                      : Center(
-                          child: Container(
-                            width: 600,
-                            alignment: Alignment.topLeft,
-                            margin: const EdgeInsets.all(16),
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
-                              ],
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Text(
-                                  'Certificate of Translation',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: appBackGroundColor,
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: RichText(
-                                    textAlign: TextAlign.start,
-                                    text: TextSpan(
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.black, // Or your theme color
-                                      ),
+                                    const SizedBox(height: 20),
+                                    const Divider(thickness: 1),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const TextSpan(text: 'I, '),
-                                        TextSpan(text: firstName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                        const TextSpan(text: ', certify that I am competent to translate between English and '),
-                                        const TextSpan(text: 'Japanese (ja)', style: TextStyle(fontWeight: FontWeight.bold)),
-                                        const TextSpan(text: '. I further certify that I translated the document titled '),
-                                        TextSpan(text: '"$fileName"', style: TextStyle(fontWeight: FontWeight.bold)),
-                                        const TextSpan(text: ', and the translation is true and accurate to the best of my abilities.'),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text('Name:', style: TextStyle(fontWeight: FontWeight.bold)),
+                                              SizedBox(height: 8),
+                                              Text('Signature:', style: TextStyle(fontWeight: FontWeight.bold)),
+                                              SizedBox(height: 8),
+                                              Text('Phone Number:', style: TextStyle(fontWeight: FontWeight.bold)),
+                                              SizedBox(height: 8),
+                                              Text('Address:', style: TextStyle(fontWeight: FontWeight.bold)),
+                                            ],
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.end,
+                                            children: [
+                                              Marquee(child: Text(firstName.toString())),
+                                              SizedBox(height: 8),
+                                              Marquee(child: Text(email.toString())),
+                                              SizedBox(height: 8),
+                                              Text('123456789'),
+                                              SizedBox(height: 8),
+                                              Text('India'),
+                                            ],
+                                          ),
+                                        ),
                                       ],
                                     ),
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                const Divider(thickness: 1),
-                                const SizedBox(height: 12),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text('Name:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                          SizedBox(height: 8),
-                                          Text('Signature:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                          SizedBox(height: 8),
-                                          Text('Phone Number:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                          SizedBox(height: 8),
-                                          Text('Address:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                        ],
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.end,
-                                        children: [
-                                          Marquee(child: Text(firstName.toString())),
-                                          SizedBox(height: 8),
-                                          Marquee(child: Text(email.toString())),
-                                          SizedBox(height: 8),
-                                          Text('123456789'),
-                                          SizedBox(height: 8),
-                                          Text('India'),
-                                        ],
+                                    const SizedBox(height: 24),
+                                    SizedBox(
+                                      height: 40,
+                                      child: ElevatedButton.icon(
+                                        onPressed: () async {
+                                          log("--------------");
+                                          await generateAndDownloadCertificate(firstName!, email!, fileName);
+                                        },
+                                        icon: const Icon(
+                                          Icons.download,
+                                          color: appWhiteColor,
+                                        ),
+                                        label: const Text('Download'),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: appBackGroundColor,
+                                          foregroundColor: appWhiteColor,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                        ),
                                       ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 24),
-                                SizedBox(
-                                  height: 40,
-                                  child: ElevatedButton.icon(
-                                    onPressed: () async {
-                                      log("--------------");
-                                      await generateAndDownloadCertificate(firstName!, email!, fileName);
-                                    },
-                                    icon: const Icon(
-                                      Icons.download,
-                                      color: appWhiteColor,
-                                    ),
-                                    label: const Text('Download'),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: appBackGroundColor,
-                                      foregroundColor: appWhiteColor,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                              ),
+                            );
+                    }
+                  ),
 
                   /// Dropdown styled like a button
                   Obx(() {
@@ -790,6 +1160,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                                   items: isCertify
                                                       ? certifyOptions.map((option) {
+                                                    log("option----1------$option");
                                                           return PopupMenuItem<String>(
                                                             value: option,
                                                             child: InkWell(
@@ -961,6 +1332,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                                   items: isCertify
                                                       ? certifyOptions.map((option) {
+                                                        log("option----------$option");
                                                           return PopupMenuItem<String>(
                                                             value: option,
                                                             child: InkWell(

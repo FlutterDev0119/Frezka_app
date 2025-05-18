@@ -60,10 +60,18 @@ class LoginController extends BaseController {
   Future<void> loginUser() async {
     if (isLoading.value) return;
     setLoading(true);
+    await setValue(AppSharedPreferenceKeys.isUserLoggedIn, false);
+    await setValue(AppSharedPreferenceKeys.apiToken, '');
+    await setValue(AppSharedPreferenceKeys.currentUserData, '');
+    await setValue(AppSharedPreferenceKeys.refreshToken, "");
+    loggedInUser.value.access ='';
 
+    await clearSharedPref();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
     Map<String, dynamic> request = {
-      ConstantKeys.emailKey:  emailCont.text.trim(),//"sandesh.singhal@pvanalytica.com",
-      ConstantKeys.passwordKey:  passwordCont.text.trim(),//"Pvana@123",
+      ConstantKeys.emailKey:  "sandesh.singhal@pvanalytica.com",//emailCont.text.trim(),//"sandesh.singhal@pvanalytica.com",
+      ConstantKeys.passwordKey:  "Pvana@123",//passwordCont.text.trim(),//"Pvana@123",
     };
     print(request);
     print(request[ConstantKeys.passwordKey]);

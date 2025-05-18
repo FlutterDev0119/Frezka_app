@@ -414,6 +414,15 @@ class GenAIPVServiceApis {
     );
     return AdditionalNarrativeRes.fromJson(response);
   }
+  /// Narrative Generation
+  static Future<AdditionalNarrativeRes> fetchNarrativeGeneration({required Map request}) async {
+    final response = await buildHttpResponse(
+      endPoint: APIEndPoints.fetchNarrativeGeneration,
+      request: request,
+      method: MethodType.post,
+    );
+    return AdditionalNarrativeRes.fromJson(response);
+  }
 }
 
 //---------------------------------------------------------------------------------------------------------------

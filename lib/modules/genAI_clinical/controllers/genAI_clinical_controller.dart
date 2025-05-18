@@ -1,84 +1,9 @@
-// import 'dart:io';
-//
-// import 'package:apps/utils/library.dart';
-// import 'package:get/get_core/src/get_main.dart';
-// import 'package:image_picker/image_picker.dart';
-// import 'package:nb_utils/nb_utils.dart';
-//
-// import '../../../utils/common/common_base.dart';
-// import '../../../utils/component/app_dialogue_component.dart';
-//
-// class GenAIClinicalController extends GetxController {
-//   RxList<File> imageFiles = <File>[].obs;
-//   RxList<String> fileNames = <String>[].obs;
-//
-//   RxMap<String, List<String>> classificationMap = <String, List<String>>{}.obs;
-//   RxSet<String> selectedChips = <String>{}.obs;
-//   RxSet<String> selectedTags = <String>{}.obs;
-//   RxBool isLoading = false.obs;
-//
-//   @override
-//   void onInit() {
-//     getDocsClinical();
-//     super.onInit();
-//   }
-//
-//
-//
-//   // Method to add a tag (or toggle selection)
-//   void addTag(String category) {
-//     if (selectedTags.contains(category)) {
-//       selectedTags.remove(category);
-//     } else {
-//       selectedTags.add(category);
-//     }
-//   }
-//   Future<void> getDocsClinical() async {
-//     if (isLoading.value) return;
-//     isLoading.value = true;
-//
-//     try {
-//       final data = await ClinicalPromptServiceApis.getDocsClinical();
-//       if (data != null && data.output != null) {
-//         classificationMap.assignAll(data.output!);
-//       }
-//     } catch (e) {
-//       toast(e.toString());
-//     } finally {
-//       isLoading.value = false;
-//     }
-//   }
-//
-//   void toggleChip(String label) {
-//     selectedChips.contains(label) ? selectedChips.remove(label) : selectedChips.add(label);
-//   }
-//
-//   void onSourceSelected(ImageSource imageSource) async {
-//     final pickedFile = await pickFilesFromDevice(allowMultipleFiles: true);
-//     if (pickedFile.isNotEmpty) {
-//       Get.bottomSheet(
-//         AppDialogueComponent(
-//           titleText: "Do you want to upload this attachment?",
-//           confirmText: "Upload",
-//           onConfirm: () {
-//             imageFiles.addAll(pickedFile);
-//             fileNames.addAll(pickedFile.map((e) => e.path.split('/').last));
-//           },
-//         ),
-//         isScrollControlled: true,
-//       );
-//     }
-//   }
-// }
 import 'dart:io';
-
 import 'package:apps/utils/library.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
-
-import '../../../utils/common/common_base.dart';
 import '../../../utils/component/app_dialogue_component.dart';
+import '../../genAI_pv/model/generate_sql_model.dart';
 import '../model/additional_narrative_model.dart';
 
 class GenAIClinicalController extends GetxController {
@@ -102,6 +27,10 @@ class GenAIClinicalController extends GetxController {
   var tags = <String>[].obs;
   final RxString selectedParentTag = ''.obs;
   var additionalNarrativeRes = Rxn<AdditionalNarrativeRes>();
+  var generateSQLQuery = ''.obs;
+  final RxString sqlQuery = ''.obs;
+  var errorMessage = ''.obs;
+  RxList<SqlDataItem> safetyReports = <SqlDataItem>[].obs;
 
   @override
   void onInit() {
@@ -145,7 +74,10 @@ class GenAIClinicalController extends GetxController {
       if (data != null && data.output != null) {
         classificationMap.assignAll(data.output!);
         filteredClassificationMap.assignAll(data.output!);
-        tags.assignAll(data.output!.keys.toList());
+        // tags.assignAll(data.output!.keys.toList());
+        tags.assignAll(data.output!.values.expand((list) => list).toList());
+        log("data.output!.keys.toList()----------------${data.output!.keys.toList()}");
+        log("data.output!.value.toList()----------------${data.output!.values.toList()}");
       }
     } catch (e) {
       toast(e.toString());
@@ -153,6 +85,33 @@ class GenAIClinicalController extends GetxController {
       isLoading.value = false;
     }
   }
+  Future<void> fetchGenerateSQL(String query, {String? userId, required String userName}) async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+
+      final request = {
+        "query": query,
+        "userId": userId,
+        "user_name": userName,
+      };
+
+      final response = await GenAIPVServiceApis.getGenerateSQL(request: request);
+      generateSQLQuery.value = response.sqlQuery;
+
+      sqlQuery.value = response.sqlQuery;
+
+      // Extract safety report list from the response
+      safetyReports.value = response.data;
+
+    } catch (e) {
+      print('Error fetching GenerateSQL: $e');
+      errorMessage.value = 'Error occurred while fetching data.';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
 
   Future<void> additionalNarrative({required String query, required String SafetyReport, required List<String> checkbox, required String narrative}) async {
     try {
@@ -174,25 +133,6 @@ class GenAIClinicalController extends GetxController {
     }
   }
 
-  // Future<void> additionalNarrativeRes(String query, {String? userId, required String userName}) async {
-  //   try {
-  //     isLoading.value = true;
-  //
-  //     final request = {
-  //       "query": query,
-  //       "SafetyReport": [],
-  //       "checkbox": [],
-  //       "narrative": '',
-  //     };
-  //
-  //     final response = await ClinicalPromptServiceApis.fetchAdditionalNarrative(request: request);
-  //     AdditionalNarrativeRes.value = response;
-  //   } catch (e) {
-  //     print('Error fetching Additional Narrative: $e');
-  //   } finally {
-  //     isLoading.value = false;
-  //   }
-  // }
   void onSourceSelected(dynamic imageSource) async {
     if (imageSource is File) {
       String fileName = imageSource.path.split('/').last;

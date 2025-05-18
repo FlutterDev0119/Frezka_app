@@ -35,6 +35,7 @@ class PromptAdminController extends BaseController {
   final selectedTags = <String>[].obs;
   final selectedTagsInherit = <String>[].obs;
   final classificationMap = <String, List<String>>{}.obs;
+  final lockStates = <String, bool>{}.obs;
   List<String> tags = [
     "Adverse Event Reporting",
     "Aggregate Reporting",

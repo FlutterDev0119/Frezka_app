@@ -442,7 +442,7 @@ class GenAIClinicalScreen extends StatelessWidget {
                           value: controller.genAIDropdownValue.value,
                           isExpanded: true,
                           underline: SizedBox(),
-                          items: ['Upload File', 'Data Lake'].map((String value) {
+                          items: ['Upload File', 'API'].map((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
                               child: Text(value, style: primaryTextStyle()),
@@ -610,19 +610,19 @@ class GenAIClinicalScreen extends StatelessWidget {
                                                   return;
                                                 }
         
-                                                // if (controller.dataLakeInput.value.isNotEmpty) {
-                                                //   controller
-                                                //       .fetchGenerateSQL(
-                                                //     controller.dataLakeInput.value,
-                                                //     userId: id,
-                                                //     userName: Fullname,
-                                                //   )
-                                                //       .then(
-                                                //         (value) {
-                                                //       controller.isShowSqlIcon.value = true;
-                                                //     },
-                                                //   );
-                                                // }
+                                                if (controller.dataLakeInput.value.isNotEmpty) {
+                                                  controller
+                                                      .fetchGenerateSQL(
+                                                    controller.dataLakeInput.value,
+                                                    userId: id,
+                                                    userName: Fullname,
+                                                  )
+                                                      .then(
+                                                        (value) {
+                                                      controller.isShowSqlIcon.value = true;
+                                                    },
+                                                  );
+                                                }
                                               }
                                               // Handle translation
                                             },
@@ -666,28 +666,53 @@ class GenAIClinicalScreen extends StatelessWidget {
                                                         child: IconButton(
                                                           icon: Icon(Icons.file_copy_rounded, color: appWhiteColor, size: 20),
                                                           onPressed: () {
-                                                            // final sqlText = controller.generateSQLResponse.value?.sqlQuery ?? 'No SQL generated';
-                                                            //
-                                                            // showDialog(
-                                                            //   context: Get.context!,
-                                                            //   builder: (_) => AlertDialog(
-                                                            //     title: Text("Generated SQL"),
-                                                            //     content: SingleChildScrollView(
-                                                            //       child: Text(sqlText),
-                                                            //     ),
-                                                            //     actions: [
-                                                            //       AppButton(
-                                                            //         color: appBackGroundColor,
-                                                            //         onTap:  () => Get.back(),
-                                                            //         child: Text(
-                                                            //           'Close',
-                                                            //           style: TextStyle(color: white),
-                                                            //         ),
-                                                            //       )
-                                                            //     ],
-                                                            //   ),
-                                                            // );
+                                                            final sqlText = controller.generateSQLQuery.value.isNotEmpty
+                                                                ? controller.generateSQLQuery.value
+                                                                : 'No SQL generated';
+                                                            showDialog(
+                                                              context: Get.context!,
+                                                              builder: (_) =>
+                                                                  AlertDialog(
+                                                                    title: Text("Generated SQL"),
+                                                                    content: SingleChildScrollView(
+                                                                      child: Text(sqlText),
+                                                                    ),
+                                                                    actions: [
+                                                                      AppButton(
+                                                                        color: appBackGroundColor,
+                                                                        onTap: () => Get.back(),
+                                                                        child: Text(
+                                                                          'Close',
+                                                                          style: TextStyle(color: white),
+                                                                        ),
+                                                                      )
+                                                                    ],
+                                                                  ),
+                                                            );
                                                           },
+                                                          // onPressed: () {
+                                                          //   final sqlText = controller.generateSQLResponse.value?.sqlQuery ?? 'No SQL generated';
+                                                          //
+                                                          //   showDialog(
+                                                          //     context: Get.context!,
+                                                          //     builder: (_) => AlertDialog(
+                                                          //       title: Text("Generated SQL"),
+                                                          //       content: SingleChildScrollView(
+                                                          //         child: Text(sqlText),
+                                                          //       ),
+                                                          //       actions: [
+                                                          //         AppButton(
+                                                          //           color: appBackGroundColor,
+                                                          //           onTap:  () => Get.back(),
+                                                          //           child: Text(
+                                                          //             'Close',
+                                                          //             style: TextStyle(color: white),
+                                                          //           ),
+                                                          //         )
+                                                          //       ],
+                                                          //     ),
+                                                          //   );
+                                                          // },
                                                         ),
                                                       )
                                                     : SizedBox(),
@@ -1092,7 +1117,7 @@ class GenAIClinicalScreen extends StatelessWidget {
                                                       children: [
                                                         Center(
                                                           child: Text(
-                                                            category,
+                                                            "# ${category}",
                                                             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: appWhiteColor),
                                                           ),
                                                         ),
@@ -1181,10 +1206,10 @@ class GenAIClinicalScreen extends StatelessWidget {
                                 log(controller.dataLakeInput.value);
                                 log(controller.selectedTags);
                                 log(controller.personalizeController.text);
-                                if (controller.dataLakeInput.value.isEmpty) {
-                                  toast("Please Include your query.");
-                                  return;
-                                } else {
+                                // if (controller.dataLakeInput.value.isEmpty) {
+                                //   toast("Please Include your query.");
+                                //   return;
+                                // } else {
                                   controller
                                       .additionalNarrative(
                                           query: controller.dataLakeInput.value.toString(),
@@ -1196,7 +1221,7 @@ class GenAIClinicalScreen extends StatelessWidget {
                                       controller.isAdditionalNarrative(true);
                                     },
                                   );
-                                }
+                                // }
                                 // Handle translation
                               },
                             ),
@@ -1208,8 +1233,10 @@ class GenAIClinicalScreen extends StatelessWidget {
                 ),
               ),
               5.height,
-              controller.isAdditionalNarrative.value
-                  ? Container(
+              Obx(
+                      () {
+                    return controller.isAdditionalNarrative.value == true
+                        ? Container(
                       width: double.infinity,
                       padding: EdgeInsets.all(10),
                       decoration: BoxDecoration(
@@ -1221,6 +1248,80 @@ class GenAIClinicalScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // Row(children: [
+                            //   Text("AI Powered Response",style: TextStyle(fontWeight: FontWeight.w600)),
+                            //
+                            // ],),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.auto_awesome, size: 18),      // sparkle icon
+                                  const SizedBox(width: 4),
+                                  const Text(
+                                    'AI Powered Response',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                  const SizedBox(width: 8),
+
+                                  // copy response
+                                  IconButton(
+                                    icon: const Icon(Icons.content_copy),
+                                    tooltip: 'Copy response',
+                                    onPressed: (){},//copyResponse,                     // TODO: implement
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                  ),
+
+                                  // show prompt
+                                  IconButton(
+                                    icon: const Icon(Icons.visibility),
+                                    tooltip: 'Show prompt',
+                                    onPressed:(){},// showPrompt,                       // TODO: implement
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                  ),
+
+                                  // download as .txt
+                                  IconButton(
+                                    icon: const Icon(Icons.description_outlined),
+                                    tooltip: 'Download as .txt',
+                                    onPressed: (){},//downloadTxt,                      // TODO: implement
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                  ),
+
+                                  // download as .xlsx
+                                  IconButton(
+                                    icon: const Icon(Icons.table_chart_outlined),
+                                    tooltip: 'Download as .xlsx',
+                                    onPressed:(){},// downloadXlsx,                     // TODO: implement
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                  ),
+
+                                  // download as .pdf
+                                  IconButton(
+                                    icon: const Icon(Icons.picture_as_pdf),
+                                    tooltip: 'Download as .pdf',
+                                    onPressed: (){},//downloadPdf,                      // TODO: implement
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                  ),
+
+                                  // expand / collapse
+                                  IconButton(
+                                    icon: const Icon(Icons.open_in_full),
+                                    tooltip: 'Expand response',
+                                    onPressed:(){},// toggleExpand,
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            10.height,
                             Text(
                               controller.additionalNarrativeRes.value?.output ?? '',
                               style: TextStyle(fontSize: 16),
@@ -1229,7 +1330,31 @@ class GenAIClinicalScreen extends StatelessWidget {
                         ),
                       ),
                     )
-                  : SizedBox()
+                        : SizedBox();
+                  }
+              )
+              // controller.isAdditionalNarrative.value
+              //     ? Container(
+              //         width: double.infinity,
+              //         padding: EdgeInsets.all(10),
+              //         decoration: BoxDecoration(
+              //           color: appBackGroundColor.withOpacity(0.3),
+              //           borderRadius: BorderRadius.circular(15),
+              //         ),
+              //         child: Padding(
+              //           padding: const EdgeInsets.only(top: 15),
+              //           child: Column(
+              //             crossAxisAlignment: CrossAxisAlignment.start,
+              //             children: [
+              //               Text(
+              //                 controller.additionalNarrativeRes.value?.output ?? '',
+              //                 style: TextStyle(fontSize: 16),
+              //               ),
+              //             ],
+              //           ),
+              //         ),
+              //       )
+              //     : SizedBox()
             ],
           ),
         ),
