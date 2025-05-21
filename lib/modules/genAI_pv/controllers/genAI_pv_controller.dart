@@ -37,8 +37,9 @@ class GenAIPVController extends GetxController {
   var errorMessage = ''.obs;
   var dataLakeInput = ''.obs;
   RxString selectedFileName = ''.obs;
-
+  RxList<SqlDataItem> selectedReports = <SqlDataItem>[].obs;
   RxList<SqlDataItem> safetyReports = <SqlDataItem>[].obs;
+  RxList<SqlDataItem> selectedXmlContents = <SqlDataItem>[].obs;
   final RxString sqlQuery = ''.obs;
   var additionalNarrativeRes = Rxn<AdditionalNarrativeRes>();
   final TextEditingController personalizeController = TextEditingController();

@@ -385,6 +385,15 @@ class GenAIPVScreen extends StatelessWidget {
                    () {
                     return controller.safetyReports.isNotEmpty ? 10.height : SizedBox();
                   }
+                ), Obx(
+                   () {
+                    return controller.selectedReports.length.toString().isNotEmpty ?  Text('${controller.selectedReports.length} File Selected') : SizedBox();
+                  }
+                ),
+                  Obx(
+                   () {
+                    return controller.safetyReports.isNotEmpty ? 10.height : SizedBox();
+                  }
                 ),
                 Obx(
                   () {
@@ -711,7 +720,7 @@ class GenAIPVScreen extends StatelessWidget {
                                               padding: const EdgeInsets.symmetric(horizontal: 4.0), // Add spacing between chips
                                               child: Chip(
                                                 label: Text(
-                                                  "# $tag",
+                                                  "+ $tag",
                                                   style: TextStyle(
                                                     fontWeight: FontWeight.w500,
                                                     color: isSelected ? appBackGroundColor : Colors.black87,
@@ -1166,7 +1175,7 @@ class GenAIPVScreen extends StatelessWidget {
       }
 
       return Container(
-        height: 200,
+        height: 220,
         child: ListView.builder(
           shrinkWrap: true,
           itemCount: reports.length,
@@ -1178,6 +1187,33 @@ class GenAIPVScreen extends StatelessWidget {
     });
   }
 
+  // Widget _buildSafetyReportList(int index) {
+  //   final item = controller.safetyReports[index]; // SqlDataItem
+  //
+  //   return Card(
+  //     color: appDashBoardCardColor,
+  //     margin: const EdgeInsets.symmetric(vertical: 6),
+  //     elevation: 2,
+  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12),side: BorderSide(color: appBackGroundColor)),
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(12),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           _reportRow("Safety Report ID", item.reportMeta["Safety Report ID"] ?? ''),
+  //           _reportRow("Initial Receipt Date", item.reportMeta["Initial Receipt Date"] ?? ''),
+  //           _reportRow("Awareness Date", item.reportMeta["Awareness Date"] ?? ''),
+  //           _reportRow("Study", item.reportMeta["Study"] ?? ''),
+  //           _reportRow("Primary Product", item.reportMeta["Primary Product"] ?? ''),
+  //           _reportRow("Primary Event", item.reportMeta["Primary Event"] ?? ''),
+  //           _reportRow("Occur Country", item.reportMeta["Occur Country"] ?? ''),
+  //           _reportRow("Seriousness", item.reportMeta["Seriousness"] ?? ''),
+  //           // _reportRow("Raw XML", item.xmlContent), // Optional
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
   Widget _buildSafetyReportList(int index) {
     final item = controller.safetyReports[index]; // SqlDataItem
 
@@ -1185,27 +1221,62 @@ class GenAIPVScreen extends StatelessWidget {
       color: appDashBoardCardColor,
       margin: const EdgeInsets.symmetric(vertical: 6),
       elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12),side: BorderSide(color: appBackGroundColor)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: appBackGroundColor)),
       child: Padding(
         padding: const EdgeInsets.all(12),
-        child: Column(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _reportRow("Safety Report ID", item.reportMeta["Safety Report ID"] ?? ''),
-            _reportRow("Initial Receipt Date", item.reportMeta["Initial Receipt Date"] ?? ''),
-            _reportRow("Awareness Date", item.reportMeta["Awareness Date"] ?? ''),
-            _reportRow("Study", item.reportMeta["Study"] ?? ''),
-            _reportRow("Primary Product", item.reportMeta["Primary Product"] ?? ''),
-            _reportRow("Primary Event", item.reportMeta["Primary Event"] ?? ''),
-            _reportRow("Occur Country", item.reportMeta["Occur Country"] ?? ''),
-            _reportRow("Seriousness", item.reportMeta["Seriousness"] ?? ''),
-            // _reportRow("Raw XML", item.xmlContent), // Optional
+            Obx(() {
+              return Checkbox(
+                activeColor: appBackGroundColor,
+                value: controller.selectedReports.contains(item),
+                onChanged: (isSelected) {
+                  if (isSelected == true) {
+                    controller.selectedReports.add(item);
+                      final selectedReport = controller.selectedReports.firstWhere(
+                      (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
+                      orElse: () => item,
+                    );
+                    log("--------------${selectedReport.xmlContent}");
+                    if (isSelected == true) {
+                      controller.selectedReports.add(item);
+                      final selectedReport = controller.selectedReports.firstWhere(
+                            (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
+                        orElse: () => item,
+                      );
+                      log("--------------${selectedReport.xmlContent}");
+                      controller.selectedXmlContents.add(selectedReport); // Add the entire SqlDataItem to the list
+                    } else {
+                      controller.selectedReports.remove(item);
+                      controller.selectedXmlContents.remove(item); // Remove the entire SqlDataItem from the list
+                    }
+                  } else {
+                    controller.selectedReports.remove(item);
+                  }
+                },
+              );
+            }),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _reportRow("Safety Report ID", item.reportMeta["Safety Report ID"] ?? ''),
+                  _reportRow("Initial Receipt Date", item.reportMeta["Initial Receipt Date"] ?? ''),
+                  _reportRow("Awareness Date", item.reportMeta["Awareness Date"] ?? ''),
+                  _reportRow("Study", item.reportMeta["Study"] ?? ''),
+                  _reportRow("Primary Product", item.reportMeta["Primary Product"] ?? ''),
+                  _reportRow("Primary Event", item.reportMeta["Primary Event"] ?? ''),
+                  _reportRow("Occur Country", item.reportMeta["Occur Country"] ?? ''),
+                  _reportRow("Seriousness", item.reportMeta["Seriousness"] ?? ''),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
-
   Widget _reportRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
