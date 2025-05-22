@@ -37,9 +37,16 @@ class ReconAIController extends BaseController {
   final Map<File, String> targetFileContents = {};
   final Map<File, String> metaDataFileContents = {};
 
+  RxBool isReconAIResponse = false.obs;
+  var reconAIRes = Rxn<ReconRes>();
+  RxString lastMessage = ''.obs;
+  RxBool isExpanded = false.obs;
+  RxBool isLastMessageShow = false.obs;
+
   @override
   void onInit() {
     super.onInit();
+    isLastMessageShow.value =false;
   }
 
   // void onSourceSelected(File file) async {
@@ -371,14 +378,22 @@ class ReconAIController extends BaseController {
 
       // Assuming this returns a ReconRes object already
       final ReconRes reconData = await ReconServiceApi.reconReconciliation(request: request);
-
+      reconAIRes.value = reconData;
+     // Get the last message from the response, if available
+      if (reconData.response.isNotEmpty) {
+         lastMessage.value = reconData.response.last.message;
+        print('Last message: $lastMessage');
+      }
       // Show bottom sheet
       Future.delayed(Duration.zero, () {
         Get.bottomSheet(
+
           ReconciliationPopup(messages: reconData.response),
           isScrollControlled: true,
         );
-      });
+      }).then((value) {
+        isLastMessageShow.value = true;
+      },);
     } catch (e, stackTrace) {
       print('Error in reconciliation: $e');
       print('Stack trace: $stackTrace');
@@ -392,7 +407,7 @@ class ReconciliationPopup extends StatelessWidget {
   final List<Message> messages;
 
   ReconciliationPopup({required this.messages});
-
+  final ReconAIController controller = Get.put(ReconAIController());
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -405,18 +420,45 @@ class ReconciliationPopup extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Text(
-                  'Reconciliation Results',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+            // Row(
+            //   children: [
+            //
+            //     Text(
+            //       'Reconciliation Results',
+            //       style: TextStyle(
+            //         fontSize: 18,
+            //         fontWeight: FontWeight.bold,
+            //       ),
+            //     ),
+            //     Spacer(),
+            //     IconButton(onPressed: (){Get.back();
+            //     controller. isLastMessageShow.value =true;
+            //       }, icon: Icon(Icons.close))
+            //   ],
+            // ),
+            Container(
+              color: appBackGroundColor,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Text(
+                    'Reconciliation Results',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white, // Match AppBar text color
+                    ),
                   ),
-                ),
-                Spacer(),
-                IconButton(onPressed: (){Get.back();}, icon: Icon(Icons.close))
-              ],
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () {
+                      Get.back();
+                      controller.isLastMessageShow.value = true;
+                    },
+                    icon: const Icon(Icons.close, color: Colors.white), // Match AppBar icon color
+                  ),
+                ],
+              ),
             ),
             SizedBox(height: 16),
             ...messages.map((message) => Padding(

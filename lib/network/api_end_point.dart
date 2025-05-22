@@ -1,39 +1,39 @@
 class APIEndPoints {
   ///Auth & User
-  static const String login = 'v1/login/';
-  static const String forgotPassword = 'v1/password-reset-request/';
+  static const String login = 'login/';
+  static const String forgotPassword = 'password-reset-request/';
   static const String socialLogin = 'google/';
 
   ///Prompt Admin
-  static const String fetchDoc = 'v1/fetch_docs';
-  static const String rolePromptResponse = 'v1/role_select';
-  static const String newPrompt = 'v1/new_prompt';
+  static const String fetchDoc = 'fetch_docs';
+  static const String rolePromptResponse = 'role_select';
+  static const String newPrompt = 'new_prompt';
 
   ///GenAI PV
-  static const String fetchGenAIDocs = 'v1/fetch_docs';
-  static const String fetchGenerateSQL = 'v1/generate_sql';
-  static const String fetchDocsLanguage = 'v1/fetch_docs_language';
+  static const String fetchGenAIDocs = 'fetch_docs';
+  static const String fetchGenerateSQL = 'generate_sql';
+  static const String fetchDocsLanguage = 'fetch_docs_language';
 
   ///GenAI Clinical
-  static const String fetchDocClinical = 'v1/fetch_docs_clinical';
-  static const String fetchAdditionalNarrative = 'v1/additional_narrative';
-  static const String fetchNarrativeGeneration = 'v1/narrative_generation';
+  static const String fetchDocClinical = 'fetch_docs_clinical';
+  static const String fetchAdditionalNarrative = 'additional_narrative';
+  static const String fetchNarrativeGeneration = 'narrative_generation';
 
   ///Meta Phrase Pv
-  static const String openWorklist = 'v1/open_worklist';
-  static const String reverseTranslate = 'v1/reverse_translate';
+  static const String openWorklist = 'open_worklist';
+  static const String reverseTranslate = 'reverse_translate';
 
   ///GovernAI
-  static const String countTraces = 'v1/count_traces';
-  static const String fetchTrace = 'v1/fetch_trace';
+  static const String countTraces = 'count_traces';
+  static const String fetchTrace = 'fetch_trace';
 
   /// Engage AI
-  static const String chat = 'v1/chat';
+  static const String chat = 'chat';
 
   /// Translation Memory
-  static const String translationMemory = 'v1/translation-memory';
-  static const String stagingTranslationMemory = 'v1/staging-translation-memory';
-  static const String aiTranslationMemory = 'v1/ai-translation-memory';
+  static const String translationMemory = 'translation-memory';
+  static const String stagingTranslationMemory = 'staging-translation-memory';
+  static const String aiTranslationMemory = 'ai-translation-memory';
   /// Recon AI
-  static const String reconciliation = 'v1/reconciliation';
+  static const String reconciliation = 'reconciliation';
 }

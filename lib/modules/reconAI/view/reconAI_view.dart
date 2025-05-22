@@ -1,10 +1,17 @@
+import 'dart:io';
+
 import 'package:apps/utils/library.dart';
+import 'package:flutter/services.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:open_file/open_file.dart';
 import '../../../utils/app_scaffold.dart';
 import '../../../utils/component/app_widgets.dart';
 import '../../../utils/component/image_source_selection_component.dart';
 import '../controllers/reconAI_controller.dart';
 
+import 'package:pdf/widgets.dart' as pw;
+import 'package:path_provider/path_provider.dart';
+import 'package:excel/excel.dart' as ex;
 class ReconAIScreen extends StatelessWidget {
   final ReconAIController controller = Get.put(ReconAIController());
 
@@ -675,7 +682,7 @@ class ReconAIScreen extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                5.height,
+                                15.height,
                                 AppButtonWidget(
                                   elevation: 0,
                                   text: "Recommendation",
@@ -686,10 +693,239 @@ class ReconAIScreen extends StatelessWidget {
                               ],
                             ),
                           ),
+                          Obx(
+                                () {
+                              return controller.isLastMessageShow.value == true
+                                  ? Container(
+                                width: double.infinity,
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: appBackGroundColor.withOpacity(0.3),
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 15),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(Icons.auto_awesome, size: 18), // sparkle icon
+                                            const SizedBox(width: 4),
+                                            const Text(
+                                              'AI Powered Response',
+                                              style: TextStyle(fontWeight: FontWeight.w600),
+                                            ),
+                                            const SizedBox(width: 8),
+
+                                            // Copy response
+                                            IconButton(
+                                              icon: const Icon(Icons.content_copy),
+                                              tooltip: 'Copy response',
+                                              onPressed: () {
+                                                final text = controller.lastMessage.value ?? '';
+                                                if (text.isNotEmpty) {
+                                                  Clipboard.setData(ClipboardData(text: text));
+                                                  toast('Response copied!');
+                                                }
+                                              },
+                                              padding: EdgeInsets.zero,
+                                              constraints: const BoxConstraints(),
+                                            ),
+
+                                            // Show prompt
+                                            // IconButton(
+                                            //   icon: const Icon(Icons.visibility),
+                                            //   tooltip: 'Show prompt',
+                                            //   onPressed: () {
+                                            //     final prompt = controller.personalizeController.text;
+                                            //     showDialog(
+                                            //       context: Get.context!,
+                                            //       builder: (_) => AlertDialog(
+                                            //         title: Text('Prompt'),
+                                            //         content: Text(prompt.isNotEmpty ? prompt : 'No prompt available.'),
+                                            //         actions: [
+                                            //           AppButton(
+                                            //             onTap: () => Get.back(),
+                                            //             child: Text('Close',style:TextStyle(color: appWhiteColor),),
+                                            //             color: appBackGroundColor,
+                                            //           ),
+                                            //         ],
+                                            //       ),
+                                            //     );
+                                            //   },
+                                            //   padding: EdgeInsets.zero,
+                                            //   constraints: const BoxConstraints(),
+                                            // ),
+
+                                            // Download as .txt
+                                            IconButton(
+                                              icon: const Icon(Icons.description_outlined),
+                                              tooltip: 'Download as .txt',
+                                              onPressed: () async {
+                                                final text = controller.lastMessage.value ?? '';
+                                                if (text.isEmpty) {
+                                                  toast('No response to download.');
+                                                  return;
+                                                }
+                                                final directory = await getTemporaryDirectory();
+                                                final file = File('${directory.path}/response.txt');
+                                                await file.writeAsString(text);
+                                                toast('TXT downloaded to ${file.path}');
+                                                await OpenFile.open(file.path);
+                                              },
+                                              padding: EdgeInsets.zero,
+                                              constraints: const BoxConstraints(),
+                                            ),
+
+                                            // Download as .xlsx
+                                            IconButton(
+                                              icon: const Icon(Icons.table_chart_outlined),
+                                              tooltip: 'Download as .xlsx',
+                                              onPressed: () async {
+                                                final text = controller.lastMessage.value ?? '';
+                                                if (text.isEmpty) {
+                                                  toast('No response to download.');
+                                                  return;
+                                                }
+                                                // Simple xlsx: one cell with the response
+                                                // You may want to use a package like excel: ^2.0.0
+
+                                                final excel = ex.Excel.createExcel();
+                                                final sheet = excel['Sheet1'];
+                                                sheet.appendRow([ex.TextCellValue(text)]);
+                                                // sheet.appendRow([text]);
+                                                final directory = await getTemporaryDirectory();
+                                                final file = File('${directory.path}/response.xlsx');
+                                                await file.writeAsBytes(excel.encode()!);
+                                                toast('XLSX downloaded to ${file.path}');
+                                                await OpenFile.open(file.path);
+                                              },
+                                              padding: EdgeInsets.zero,
+                                              constraints: const BoxConstraints(),
+                                            ),
+
+                                            // Download as .pdf
+                                            IconButton(
+                                              icon: const Icon(Icons.picture_as_pdf),
+                                              tooltip: 'Download as .pdf',
+                                              onPressed: () async {
+                                                final text = controller.lastMessage.value ?? '';
+                                                if (text.isEmpty) {
+                                                  toast('No response to download.');
+                                                  return;
+                                                }
+                                                // Use pdf package
+
+                                                final pdf = pw.Document();
+                                                pdf.addPage(
+                                                  pw.Page(
+                                                    build: (pw.Context context) => pw.Text(text),
+                                                  ),
+                                                );
+                                                final directory = await getTemporaryDirectory();
+                                                final file = File('${directory.path}/response.pdf');
+                                                await file.writeAsBytes(await pdf.save());
+                                                toast('PDF downloaded to ${file.path}');
+                                                await OpenFile.open(file.path);
+                                              },
+                                              padding: EdgeInsets.zero,
+                                              constraints: const BoxConstraints(),
+                                            ),
+
+                                            // // Expand / collapse
+                                            // IconButton(
+                                            //   icon: Obx(() => Icon(controller.isExpanded.value ? Icons.close_fullscreen : Icons.open_in_full)),
+                                            //   tooltip: controller.isExpanded.value ? 'Collapse response' : 'Expand response',
+                                            //   onPressed: () {
+                                            //     controller.isExpanded.toggle();
+                                            //   },
+                                            //   padding: EdgeInsets.zero,
+                                            //   constraints: const BoxConstraints(),
+                                            // ),
+
+                                            // Show response in full screen dialog
+                                            IconButton(
+                                              icon: const Icon(Icons.fullscreen),
+                                              tooltip: 'Show response fullscreen',
+                                              onPressed: () {
+                                                final text = controller.lastMessage.value ?? '';
+                                                showDialog(
+                                                  context: Get.context!,
+                                                  barrierDismissible: true,
+                                                  builder: (context) {
+                                                    return Dialog(
+                                                      insetPadding: EdgeInsets.zero,
+                                                      backgroundColor: Colors.transparent,
+                                                      child: Container(
+                                                        width: double.infinity,
+                                                        height: double.infinity,
+                                                        color: Colors.white,
+                                                        child: Column(
+                                                          children: [
+                                                            AppBar(
+                                                              backgroundColor: appBackGroundColor,
+                                                              automaticallyImplyLeading: false,
+                                                              title: const Text('AI Powered Response', style: TextStyle(color: Colors.white)),
+                                                              actions: [
+                                                                IconButton(
+                                                                  icon: const Icon(Icons.close, color: Colors.white),
+                                                                  onPressed: () => Navigator.of(context).pop(),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            Expanded(
+                                                              child: Padding(
+                                                                padding: const EdgeInsets.all(16.0),
+                                                                child: SingleChildScrollView(
+                                                                  child: Text(
+                                                                    text,
+                                                                    style: const TextStyle(fontSize: 16),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                );
+                                              },
+                                              padding: EdgeInsets.zero,
+                                              constraints: const BoxConstraints(),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      10.height,
+                                      Obx(() => controller.isExpanded.value
+                                          ? SingleChildScrollView(
+                                        scrollDirection: Axis.vertical,
+                                        child: Text(
+                                          controller.lastMessage.value ?? '',
+                                          style: TextStyle(fontSize: 16),
+                                        ),
+                                      )
+                                          : Text(
+                                        controller.lastMessage.value ?? '',
+                                        style: TextStyle(fontSize: 16),
+                                        maxLines: 5,
+                                        overflow: TextOverflow.ellipsis,
+                                      )),
+                                    ],
+                                  ),
+                                ),
+                              )
+                               : SizedBox();
+                            },
+                          ),
                         ],
                       ),
                     )
-
                   ],
                 ),
               )

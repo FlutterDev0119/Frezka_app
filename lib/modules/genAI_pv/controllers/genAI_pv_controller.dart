@@ -44,6 +44,7 @@ class GenAIPVController extends GetxController {
   var additionalNarrativeRes = Rxn<AdditionalNarrativeRes>();
   final TextEditingController personalizeController = TextEditingController();
   final isTextNotEmpty = false.obs;
+  RxBool isExpanded = false.obs;
   RxBool isAdditionalNarrative = false.obs;
   String Fullname = '';
   String id = '';

@@ -31,6 +31,7 @@ class GenAIClinicalController extends GetxController {
   final RxString sqlQuery = ''.obs;
   var errorMessage = ''.obs;
   RxList<SqlDataItem> safetyReports = <SqlDataItem>[].obs;
+  RxBool isExpanded = false.obs;
 
   @override
   void onInit() {
