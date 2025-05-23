@@ -555,7 +555,7 @@ class TranslationMemoryScreen extends StatelessWidget {
                 } else if (value == 'remove') {
                   controller.deleteTranslation(item.id).then(
                     (value) async {
-                      await controller.fetchData();
+                      await controller.fetchStagingTranslationMemoryList();
                     },
                   );
                 }
@@ -640,8 +640,7 @@ class TranslationMemoryScreen extends StatelessWidget {
               icon: const Icon(Icons.more_vert),
               onSelected: (value) {
                 if (value == 'approve') {
-
-                  showCredentialsDialog(context,controller ,item.en,item.es);
+                  showCredentialsStagingDialog(context ,item.id,item.en,item.es);
                 } else if (value == 'annotation') {
                   // controller.deleteTranslation(item.id).then(
                   //   (value) async {
@@ -651,7 +650,11 @@ class TranslationMemoryScreen extends StatelessWidget {
                 }else if(value == 'view annotation'){
 
                 }else if(value == 'reject'){
-
+                  controller.deleteStagingTranslationMemory(item.id).then(
+                        (value) async {
+                          await controller.fetchStagingTranslationMemoryList();
+                        },
+                      );
                 }
               },
               itemBuilder: (BuildContext context) => [
@@ -753,7 +756,7 @@ class TranslationMemoryScreen extends StatelessWidget {
               onSelected: (value) {
                 if (value == 'approve') {
 
-                  showCredentialsDialog(context,controller ,item.en,item.es);
+                  showCredentialsAIDialog(context,controller ,item.en,item.es);
                 } else if (value == 'annotation') {
                   // controller.deleteTranslation(item.id).then(
                   //   (value) async {
@@ -898,7 +901,7 @@ class TranslationMemoryScreen extends StatelessWidget {
               )
                   .then(
                 (value) async {
-                  await controller.fetchData();
+                  await controller.fetchStagingTranslationMemoryList();
                 },
               );
             },
@@ -916,7 +919,9 @@ class TranslationMemoryScreen extends StatelessWidget {
       ),
     );
   }
-  void showCredentialsDialog(BuildContext context, controller,String es,String en) {
+
+  void showCredentialsStagingDialog(BuildContext context,int id,String es,String en) {
+    final TranslationMemoryController controller = Get.put(TranslationMemoryController());
     final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
     final ValueNotifier<bool> obscurePassword = ValueNotifier<bool>(true);
@@ -954,6 +959,141 @@ class TranslationMemoryScreen extends StatelessWidget {
                 // Email Field
                 TextField(
                   controller: emailController,
+                  readOnly: true,
+                  decoration: const InputDecoration(
+                    hintText: "Enter your email",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Password Field with visibility toggle
+                ValueListenableBuilder<bool>(
+                  valueListenable: obscurePassword,
+                  builder: (context, isObscure, child) {
+                    return TextField(
+                      controller: passwordController,
+                      obscureText: isObscure,
+                      decoration: InputDecoration(
+                        hintText: "Enter your password",
+                        border: const OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            isObscure ? Icons.visibility_off : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            obscurePassword.value = !obscurePassword.value;
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+
+                // Error message display
+                ValueListenableBuilder<String?>(
+                  valueListenable: errorMessage,
+                  builder: (context, message, child) {
+                    if (message == null) return const SizedBox.shrink();
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        message,
+                        style: const TextStyle(color: Colors.red, fontSize: 13),
+                      ),
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 24),
+
+                // Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    AppButton(
+                      textStyle: const TextStyle(color: Colors.white),
+                      onTap: () {
+                        Get.back();
+                      },
+                      child: const Text('Cancel'),
+                    ),
+                    const SizedBox(width: 8),
+                    AppButton(
+                      color: appBackGroundColor,
+                      onTap: () {
+                        final email = emailController.text.trim();
+                        final password = passwordController.text;
+                       final loginPassword =  getStringAsync(AppSharedPreferenceKeys.userPassword);
+                       log(loginPassword);
+                        if (email.isEmpty || password.isEmpty ) {
+                          errorMessage.value = "Please enter both email and password.";
+                        } else if (password != loginPassword) {
+                          errorMessage.value = "Incorrect password.";
+                        }else {
+                          errorMessage.value = null;
+                          controller.updateStaging(id: id, en: es, es: en).then(
+                            (value) async {
+                              await controller.fetchStagingTranslationMemoryList();
+                            },
+                          );
+                        }
+                      },
+                      child: const Text(
+                        'Confirm',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    )
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void showCredentialsAIDialog(BuildContext context, controller,String es,String en) {
+    final TextEditingController emailController = TextEditingController();
+    final TextEditingController passwordController = TextEditingController();
+    final ValueNotifier<bool> obscurePassword = ValueNotifier<bool>(true);
+    final ValueNotifier<String?> errorMessage = ValueNotifier<String?>(null);
+
+    String storedEmail = getStringAsync(AppSharedPreferenceKeys.userEmail);
+    String storedPass = getStringAsync(ConstantKeys.passwordKey);
+
+    emailController.text = storedEmail.toString();
+    passwordController.text = storedPass.toString();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Credentials",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Email Field
+                TextField(
+                  controller: emailController,
+                  readOnly: true,
                   decoration: const InputDecoration(
                     hintText: "Enter your email",
                     border: OutlineInputBorder(),
@@ -1024,14 +1164,8 @@ class TranslationMemoryScreen extends StatelessWidget {
                           errorMessage.value = "Please enter both email and password.";
                         } else {
                           errorMessage.value = null;
-                          // controller.isCredentialsConfirm.value = true;
-                          controller
-                              .updateTranslation(
-                            en: es,
-                            es: en,
-                          )
-                              .then(
-                                (value) async {
+                          controller.updateS(en: es, es: en).then(
+                            (value) async {
                               await controller.fetchData();
                             },
                           );

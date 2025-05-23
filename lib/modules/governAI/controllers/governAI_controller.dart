@@ -12,15 +12,15 @@ enum SortGovernColumn {
   recommendedAction
 }
 class GovernAIController extends GetxController {
-  var traceList = <Trace>[].obs;
+  var traceList = <TraceData>[].obs;
   var countTracesList = <CountTracesModel>[].obs;
   var isLoading = true.obs;
   final sortGovernColumn = SortGovernColumn.id.obs;
   final isAscending = true.obs;
   var filteredReasons = <String>[].obs;
   var selectedReason = ''.obs;
-  final allFiles = <Trace>[].obs;
-  final filteredFiles = <Trace>[].obs;
+  final allFiles = <TraceData>[].obs;
+  final filteredFiles = <TraceData>[].obs;
 
   final executionTime = ''.obs;
 
@@ -93,7 +93,7 @@ class GovernAIController extends GetxController {
 
   /// Sort and filter list together
   void _applySortAndFilter() {
-    List<Trace> tempList = [...allFiles];
+    List<TraceData> tempList = [...allFiles];
 
     if (executionTime.value.isNotEmpty) {
       tempList = tempList.where((file) => file.executionTime == executionTime.value).toList();

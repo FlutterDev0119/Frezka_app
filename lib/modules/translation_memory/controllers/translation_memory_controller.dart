@@ -19,20 +19,25 @@ class TranslationMemoryController extends BaseController {
   var isLoading = false.obs;
 
   ///all
-  var allFiles = <TranslationMemory>[].obs;
+
   var showSearchField = false.obs;
   var searchQuery = ''.obs;
   var selectedSearchField = ''.obs;
 
   TextEditingController searchController = TextEditingController();
 
-/// Staging
+/// Staging (Pending)
 
   var allStagingFiles = <StagingTranslationRes>[].obs;
   var showStagingSearchField = false.obs;
   var searchStagingQuery = ''.obs;
   var selectedStagingSearchField = ''.obs;
   TextEditingController searchStagingController = TextEditingController();
+
+  /// Approve Translation
+  var allFiles = <TranslationMemory>[].obs;
+
+
   /// AI
   var allAIFiles = <AiTranslationMemoryRes>[].obs;
   var showAISearchField = false.obs;
@@ -61,20 +66,8 @@ class TranslationMemoryController extends BaseController {
     await fetchAITranslationMemoryList();
   }
 
-  Future<void> fetchData() async {
-    if (isLoading.value) return;
-    setLoading(true);
-    try {
-      final result = await TranslationMemoryServiceApis.fetchTranslationMemoryList();
-      allFiles.clear();
-      allFiles.assignAll(result);
-    } catch (e) {
-      print('Error fetching Translation Memory list: $e');
-    } finally {
-      setLoading(false);
-    }
-  }
-
+  /// Staging (Pending)
+  //========================================================================================
   Future<void> fetchStagingTranslationMemoryList() async {
     if (isLoading.value) return;
     setLoading(true);
@@ -88,6 +81,61 @@ class TranslationMemoryController extends BaseController {
       setLoading(false);
     }
   }
+
+  Future<void> updateStaging({required int id, required String en, required String es}) async {
+    try {
+      setLoading(true);
+      var response = await TranslationMemoryServiceApis.updateStagingMemory(id: id, en: en, es: es);
+
+      if (response['success'] != null) {
+        toast(response['success'].toString());
+      }
+      await fetchData();
+      Get.back();
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to update translation');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> deleteStagingTranslationMemory(id) async {
+    if (isLoading.value) return;
+    setLoading(true);
+    try {
+      final result = await TranslationMemoryServiceApis.fetchStagingTranslationMemoryListDelete(id);
+
+    } catch (e) {
+      print('Error Delete Translation Memory list: $e');
+    } finally {
+      setLoading(false);
+    }
+  }
+  //========================================================================================
+
+
+
+
+  /// Staging (Pending)
+  //========================================================================================
+  Future<void> fetchData() async {
+    if (isLoading.value) return;
+    setLoading(true);
+    try {
+      final result = await TranslationMemoryServiceApis.fetchTranslationMemoryList();
+      allFiles.clear();
+      allFiles.assignAll(result);
+    } catch (e) {
+      print('Error fetching Translation Memory list: $e');
+    } finally {
+      setLoading(false);
+    }
+  }
+  //========================================================================================
+
+
+
+
 
   Future<void> fetchAITranslationMemoryList() async {
     if (isLoading.value) return;

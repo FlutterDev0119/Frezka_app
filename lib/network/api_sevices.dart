@@ -224,6 +224,9 @@ class MetaPhrasePVServiceApis {
 //---------------------------------------------------------------------------------------------------------------
 /// Translation Memory PV
 class TranslationMemoryServiceApis {
+
+  // ==========================================================================
+  ///Staging Fetch
   static Future<List<TranslationMemory>> fetchTranslationMemoryList() async {
     final response = await buildHttpResponse(
       endPoint: APIEndPoints.translationMemory,
@@ -235,7 +238,45 @@ class TranslationMemoryServiceApis {
       throw Exception('Unexpected response format: ${response.runtimeType}');
     }
   }
+  static Future<List<StagingTranslationRes>> fetchStagingTranslationMemoryList() async {
+    final response = await buildHttpResponse(
+      endPoint: APIEndPoints.stagingTranslationMemory,
+      method: MethodType.get,
+    );
+    if (response is List) {
+      return response.map((e) => StagingTranslationRes.fromJson(e)).toList();
+    } else {
+      throw Exception('Unexpected response format: ${response.runtimeType}');
+    }
+  }
+  static Future<Map<String, dynamic>> updateStagingMemory({required int id, required String en, required String es}) async {
+    final response = await buildHttpResponse(
+      endPoint: '${APIEndPoints.translationMemory}/$id',
+      method: MethodType.post,
+      request: {'en': en, 'es': es},
+    );
 
+    if (response is Map<String, dynamic>) {
+      return response;
+    } else {
+      throw Exception('Unexpected response format');
+    }
+  }
+  static Future<Map<String, dynamic>> saveStagingMemory({required int id, required String en, required String es}) async {
+    final response = await buildHttpResponse(
+      endPoint: '${APIEndPoints.translationMemory}/$id',
+      method: MethodType.post,
+      request: {'en': en, 'es': es},
+    );
+
+    if (response is Map<String, dynamic>) {
+      return response;
+    } else {
+      throw Exception('Unexpected response format');
+    }
+  }
+
+  // ==========================================================================
   static Future<Map<String, dynamic>> updateTranslationMemory({required int id, required String en, required String es}) async {
     final response = await buildHttpResponse(
       endPoint: '${APIEndPoints.translationMemory}/$id',
@@ -249,6 +290,7 @@ class TranslationMemoryServiceApis {
       throw Exception('Unexpected response format');
     }
   }
+
   // DELETE method to remove a translation memory entry
   static Future<Map<String, dynamic>> deleteTranslationMemory({required int id}) async {
     final response = await buildHttpResponse(
@@ -263,10 +305,12 @@ class TranslationMemoryServiceApis {
     }
   }
 
-  static Future<List<StagingTranslationRes>> fetchStagingTranslationMemoryList() async {
+
+
+  static Future<List<StagingTranslationRes>> fetchStagingTranslationMemoryListDelete(int id) async {
     final response = await buildHttpResponse(
-      endPoint: APIEndPoints.stagingTranslationMemory,
-      method: MethodType.get,
+      endPoint: '${APIEndPoints.stagingTranslationMemory}/$id',
+      method: MethodType.delete,
     );
     if (response is List) {
       return response.map((e) => StagingTranslationRes.fromJson(e)).toList();
@@ -344,24 +388,46 @@ class GovernAIServiceApis {
     }
   }
 
-  static Future<List<Trace>> fetchTracesList(String key,String date) async {
+  // static Future<List<TraceData>> fetchTracesList(String key,String date) async {
+  //   try {
+  //     final response = await buildHttpResponse(
+  //       endPoint: "${APIEndPoints.fetchTrace}?key=$key&date=$date",//GenAI%20PV 01-04-2025
+  //       method: MethodType.get,
+  //     );
+  //
+  //     print("API Response: $response");
+  //
+  //     if (response is Map && response['traces'] is List) {
+  //       return (response['traces'] as List).map((data) => TraceData.fromJson(Map<String, dynamic>.from(data))).toList();
+  //     } else {
+  //       throw Exception('Failed to load Traces');
+  //     }
+  //   } catch (e) {
+  //     throw Exception('Error fetching TracesList:----------- $e');
+  //   }
+  // }
+  static Future<List<TraceData>> fetchTracesList(String key, String date) async {
     try {
       final response = await buildHttpResponse(
-        endPoint: "${APIEndPoints.fetchTrace}?key=$key&date=$date",//GenAI%20PV 01-04-2025
+        endPoint: "${APIEndPoints.fetchTrace}?key=$key&date=$date",
         method: MethodType.get,
       );
 
       print("API Response: $response");
 
-      if (response is Map && response['traces'] is List) {
-        return (response['traces'] as List).map((data) => Trace.fromJson(Map<String, dynamic>.from(data))).toList();
+      // ✅ Correct key is "data", not "traces"
+      if (response is Map && response['data'] is List) {
+        return (response['data'] as List)
+            .map((data) => TraceData.fromJson(Map<String, dynamic>.from(data)))
+            .toList();
       } else {
-        throw Exception('Failed to load Traces');
+        throw Exception('Failed to load Traces — Expected "data" key with List.');
       }
     } catch (e) {
       throw Exception('Error fetching TracesList:----------- $e');
     }
   }
+
 }
 
 //---------------------------------------------------------------------------------------------------------------
