@@ -18,6 +18,7 @@ class APIEndPoints {
   static const String fetchDocClinical = 'fetch_docs_clinical';
   static const String fetchAdditionalNarrative = 'additional_narrative';
   static const String fetchNarrativeGeneration = 'narrative_generation';
+  static const String executePrompt = 'execute_prompt';
 
   ///Meta Phrase Pv
   static const String openWorklist = 'open_worklist';

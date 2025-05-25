@@ -38,7 +38,7 @@ class MetaPhraseController extends BaseController {
 
   late ScrollController translatedScrollController = ScrollController();
   late ScrollController translatedScrollController1 = ScrollController();
-  final List<String> modes = ['Review', 'Edit', 'Peer Review', 'Certify'];
+  final List<String> modes = ['Review', 'Edit', 'Peer Review', 'Finalize'];
 
   RxString reverseTranslatedText = ''.obs;
   var isEditing = false.obs;
@@ -49,6 +49,7 @@ class MetaPhraseController extends BaseController {
   RxList<File> imageFiles = <File>[].obs;
   var isScoreHighlightMode = false.obs;
   var selected = 'Review'.obs;
+  RxBool isShowDowanlaodButton = false.obs;
 
   ///Return
   var returnReson = [
@@ -78,6 +79,7 @@ class MetaPhraseController extends BaseController {
   final TextEditingController rejectTextController = TextEditingController();
   final TextEditingController returnTextController = TextEditingController();
   RxBool isReturnSelected = false.obs;
+  RxString changedData = ''.obs;
 
   @override
   void onInit() {
@@ -89,6 +91,7 @@ class MetaPhraseController extends BaseController {
     filteredReasons.assignAll(reasons);
     filteredReturnReasons.assignAll(returnReson);
     isEditing.value = false;
+    isShowDowanlaodButton.value = false;
   }
 
   void onSearchTextChanged(String text) {
@@ -115,11 +118,11 @@ class MetaPhraseController extends BaseController {
     }
   }
 
-  void startEditing() {
-    // Set the text in the controller based on the `translatedFile`
-    translatedTextController.text = selectedTranslationReport.value?.translatedFile ?? '';
-    isEditing.value = true; // Mark the edit mode as active
-  }
+  // void startEditing() {
+  //   // Set the text in the controller based on the `translatedFile`
+  //   translatedTextController.text = selectedTranslationReport.value?.translatedFile ?? '';
+  //   isEditing.value = true; // Mark the edit mode as active
+  // }
 
   void enterEditMode() {
     // Get the current value from wherever necessary

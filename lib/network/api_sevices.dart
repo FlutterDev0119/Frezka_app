@@ -6,6 +6,7 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:apps/utils/library.dart';
 
 import '../modules/genAI_clinical/model/additional_narrative_model.dart';
+import '../modules/genAI_clinical/model/execute_prompt_model.dart';
 import '../modules/genAI_clinical/model/fetch_docs_clinical.dart';
 import '../modules/genAI_pv/model/doc_language_model.dart';
 import '../modules/genAI_pv/model/generate_sql_model.dart';
@@ -520,6 +521,16 @@ class ClinicalPromptServiceApis {
       method: MethodType.post,
     );
     return AdditionalNarrativeRes.fromJson(response);
+  }
+
+  /// Execute Prompt
+  static Future<ExecutePromptRes> executePrompt({required Map request}) async {
+    final response = await buildHttpResponse(
+      endPoint: APIEndPoints.executePrompt,
+      request: request,
+      method: MethodType.post,
+    );
+    return ExecutePromptRes.fromJson(response);
   }
 }
 

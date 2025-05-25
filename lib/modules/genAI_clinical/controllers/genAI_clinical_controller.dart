@@ -1,10 +1,13 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:apps/utils/library.dart';
 import 'package:get/get.dart';
 import 'package:nb_utils/nb_utils.dart';
 import '../../../utils/component/app_dialogue_component.dart';
+import '../../../utils/shared_prefences.dart';
 import '../../genAI_pv/model/generate_sql_model.dart';
 import '../model/additional_narrative_model.dart';
+import '../model/execute_prompt_model.dart';
 
 class GenAIClinicalController extends GetxController {
   RxList<File> imageFiles = <File>[].obs;
@@ -27,6 +30,7 @@ class GenAIClinicalController extends GetxController {
   var tags = <String>[].obs;
   final RxString selectedParentTag = ''.obs;
   var additionalNarrativeRes = Rxn<AdditionalNarrativeRes>();
+  var executePromptRes = Rxn<ExecutePromptRes>();
   var generateSQLQuery = ''.obs;
   final RxString sqlQuery = ''.obs;
   var errorMessage = ''.obs;
@@ -127,6 +131,34 @@ class GenAIClinicalController extends GetxController {
 
       final response = await ClinicalPromptServiceApis.fetchAdditionalNarrative(request: request);
       additionalNarrativeRes.value = response;
+    } catch (e) {
+      print('Error fetching Additional Narrative: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+    Future<void> executePrompt({required List<String> studies, required List<String> checkbox}) async {//required String userId,required String user_name
+    try {
+      isLoading.value = true;
+      String? userJson = getStringAsync(AppSharedPreferenceKeys.userModel);
+      String Fullname = '';
+      String id = '';
+      if (userJson.isNotEmpty) {
+        var userMap = jsonDecode(userJson);
+        var userModel = UserModel.fromJson(userMap); // Replace with your actual model
+        Fullname = "${userModel.firstName} ${userModel.lastName}";
+        id = userModel.id.toString();
+      }
+      final request = {
+        "studies": studies,
+        "checkbox": checkbox,
+        "userId": id,
+        "user_name": Fullname,
+      };
+
+      final response = await ClinicalPromptServiceApis.executePrompt(request: request);
+      executePromptRes.value = response;
     } catch (e) {
       print('Error fetching Additional Narrative: $e');
     } finally {

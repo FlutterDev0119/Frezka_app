@@ -631,9 +631,18 @@ class GenAIPVScreen extends StatelessWidget {
                                   child: IconButton(
                                     icon: Icon(Icons.login_outlined, color:controller.selectedTags.isEmpty ? appBackGroundColor: appWhiteColor, size: 20),
                                     onPressed: () {
+                                      final xmlContents = controller.selectedXmlContents
+                                          .map((e) => e.xmlContent ?? "")
+                                          .where((content) => content.isNotEmpty)
+                                          .toList();
+
+                                      log("--------only check----------$xmlContents");
+                                      // xmlContents.forEach((element) {
+                                      //   log(element);
+                                      // });
                                       if(controller.selectedTags.isNotEmpty)   {controller
                                           .narrativeGeneration(
-                                          SafetyReport: "",
+                                          SafetyReport:xmlContents,
                                           prompt: controller.dataLakeInput.value.toString(),
 
                                           checkbox: controller.selectedTags.toList(),
@@ -1011,21 +1020,44 @@ class GenAIPVScreen extends StatelessWidget {
                                         log(controller.dataLakeInput.value);
                                         log(controller.selectedTags);
                                         log(controller.personalizeController.text);
-                                        // if (controller.dataLakeInput.value.isEmpty) {
-                                        //   toast("Please Include your query.");
-                                        //   return;
-                                        // } else {
+                                        // Collect xmlContent from all selectedXmlContents into a List<String>
+                                        final xmlContents = controller.selectedXmlContents
+                                            .map((e) => e.xmlContent ?? "")
+                                            .where((content) => content.isNotEmpty)
+                                            .toList();
+
+                                        log("--------only check----------$xmlContents");
+                                        xmlContents.forEach((element) {
+                                          log(element);
+                                        });
+
                                         controller
                                             .additionalNarrative(
-                                            query: controller.dataLakeInput.value.toString(),
-                                            SafetyReport: "",
-                                            checkbox: controller.selectedTags.toList(),
-                                            narrative: "")
+                                          query: controller.dataLakeInput.value.toString(),
+                                          SafetyReport: xmlContents, // Pass as List<String>
+                                          checkbox: controller.selectedTags.toList(),
+                                          narrative: "",
+                                        )
                                             .then(
                                               (value) {
                                             controller.isAdditionalNarrative(true);
                                           },
                                         );
+                                        // log("--------only check----------${controller.selectedXmlContents.map((e) => e.xmlContent).toList()}");
+                                        // controller.selectedXmlContents.forEach((element) {
+                                        //   log(element.xmlContent.toString());
+                                        // });
+                                        // controller
+                                        //     .additionalNarrative(
+                                        //     query: controller.dataLakeInput.value.toString(),
+                                        //     SafetyReport: controller.selectedXmlContents.toString(),
+                                        //     checkbox: controller.selectedTags.toList(),
+                                        //     narrative: "")
+                                        //     .then(
+                                        //       (value) {
+                                        //     controller.isAdditionalNarrative(true);
+                                        //   },
+                                        // );
                                         // }
                                       }
                                           : null,
@@ -1350,20 +1382,105 @@ class GenAIPVScreen extends StatelessWidget {
                               ),
                             ),
                             10.height,
-                            Obx(() => controller.isExpanded.value
-                                ? SingleChildScrollView(
-                              scrollDirection: Axis.vertical,
-                              child: Text(
-                                controller.additionalNarrativeRes.value?.output ?? '',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                            )
-                                : Text(
-                              controller.additionalNarrativeRes.value?.output ?? '',
-                              style: TextStyle(fontSize: 16),
-                              maxLines: 5,
-                              overflow: TextOverflow.ellipsis,
-                            )),
+                            // Obx(() => controller.isExpanded.value
+                            //     ? SingleChildScrollView(
+                            //   scrollDirection: Axis.vertical,
+                            //   child: Text(
+                            //     controller.additionalNarrativeRes.value?.output ?? '',
+                            //     style: TextStyle(fontSize: 16),
+                            //   ),
+                            // )
+                            //     : Text(
+                            //   controller.additionalNarrativeRes.value?.output ?? '',
+                            //   style: TextStyle(fontSize: 16),
+                            //   // maxLines: 5,
+                            //   // overflow: TextOverflow.ellipsis,
+                            // )),
+                            Obx(() {
+                              final output = controller.additionalNarrativeRes.value?.output ?? '';
+                              // final output = controller.otput;
+
+                              if (controller.isTableData(output)) {
+                                // Parse markdown table
+                                final lines = output.trim().split('\n');
+                                final rows = <List<String>>[];
+
+                                for (var line in lines) {
+                                  final trimmed = line.trim();
+                                  if (trimmed.startsWith('|') && !RegExp(r'^\|[\s\-|:]+\|$').hasMatch(trimmed)) {
+                                    final cells = trimmed
+                                        .split('|')
+                                        .map((e) => e.trim())
+                                        .where((e) => e.isNotEmpty)
+                                        .toList();
+                                    rows.add(cells);
+                                  }
+                                }
+
+                                if (rows.isEmpty) {
+                                  return Text(output, style: TextStyle(fontSize: 16));
+                                }
+
+                                final maxCols = rows.map((r) => r.length).fold<int>(0, (a, b) => a > b ? a : b);
+
+                                final horizontalController = ScrollController();
+                                final verticalController = ScrollController();
+
+                                return Scrollbar(
+                                  controller: horizontalController,
+                                  thumbVisibility: true,
+                                  interactive: true,
+                                  child: SingleChildScrollView(
+                                    controller: horizontalController,
+                                    scrollDirection: Axis.horizontal,
+                                    child: Scrollbar(
+                                      controller: verticalController,
+                                      thumbVisibility: true,
+                                      interactive: true,
+                                      child: SingleChildScrollView(
+                                        controller: verticalController,
+                                        scrollDirection: Axis.vertical,
+                                        child: Table(
+                                          border: TableBorder.all(),
+                                          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                                          columnWidths: {
+                                            for (int i = 0; i < maxCols; i++) i: IntrinsicColumnWidth(),
+                                          },
+                                          children: rows.map((row) {
+                                            final padded = List<String>.from(row);
+                                            while (padded.length < maxCols) {
+                                              padded.add('');
+                                            }
+                                            return TableRow(
+                                              children: padded.map((cell) {
+                                                return Padding(
+                                                  padding: const EdgeInsets.all(8.0),
+                                                  child: Text(cell, style: TextStyle(fontSize: 16)),
+                                                );
+                                              }).toList(),
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                final verticalController = ScrollController();
+                                return Scrollbar(
+                                  controller: verticalController,
+                                  thumbVisibility: true,
+                                  interactive: true,
+                                  child: SingleChildScrollView(
+                                    controller: verticalController,
+                                    scrollDirection: Axis.vertical,
+                                    child: Text(output, style: TextStyle(fontSize: 16)),
+                                  ),
+                                );
+                              }
+                            })
+
+
                           ],
                         ),
                       ),
@@ -1401,26 +1518,26 @@ class GenAIPVScreen extends StatelessWidget {
     );
   }
 
-  Widget buildSafetyReportCards() {
-    return Obx(() {
-      final reports = controller.safetyReports;
-
-      if (reports.isEmpty) {
-        return const Center(child: Text("No reports found."));
-      }
-
-      return Container(
-        height: 220,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: reports.length,
-          itemBuilder: (context, index) {
-            return _buildSafetyReportList(index); // each card
-          },
-        ),
-      );
-    });
-  }
+  // Widget buildSafetyReportCards() {
+  //   return Obx(() {
+  //     final reports = controller.safetyReports;
+  //
+  //     if (reports.isEmpty) {
+  //       return const Center(child: Text("No reports found."));
+  //     }
+  //
+  //     return Container(
+  //       height: 220,
+  //       child: ListView.builder(
+  //         shrinkWrap: true,
+  //         itemCount: reports.length,
+  //         itemBuilder: (context, index) {
+  //           return _buildSafetyReportList(index); // each card
+  //         },
+  //       ),
+  //     );
+  //   });
+  // }
 
   // Widget _buildSafetyReportList(int index) {
   //   final item = controller.safetyReports[index]; // SqlDataItem
@@ -1449,6 +1566,186 @@ class GenAIPVScreen extends StatelessWidget {
   //     ),
   //   );
   // }
+  // Widget _buildSafetyReportList(int index) {
+  //   final item = controller.safetyReports[index]; // SqlDataItem
+  //
+  //   return Card(
+  //     color: appDashBoardCardColor,
+  //     margin: const EdgeInsets.symmetric(vertical: 6),
+  //     elevation: 2,
+  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: appBackGroundColor)),
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(12),
+  //       child: Row(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           Obx(() {
+  //             return Checkbox(
+  //               activeColor: appBackGroundColor,
+  //               value: controller.selectedReports.contains(item),
+  //               onChanged: (isSelected) {
+  //                 if (isSelected == true) {
+  //                 //   controller.selectedReports.add(item);
+  //                 //     final selectedReport = controller.selectedReports.firstWhere(
+  //                 //     (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
+  //                 //     orElse: () => item,
+  //                 //   );
+  //                 //   log("--------------${selectedReport.xmlContent}");
+  //                 //   if (isSelected == true) {
+  //                 //     controller.selectedReports.add(item);
+  //                 //     final selectedReport = controller.selectedReports.firstWhere(
+  //                 //           (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
+  //                 //       orElse: () => item,
+  //                 //     );
+  //                 //     log("--------------${selectedReport.xmlContent}");
+  //                 //     controller.selectedXmlContents.add(selectedReport); // Add the entire SqlDataItem to the list
+  //                 //   } else {
+  //                 //     controller.selectedReports.remove(item);
+  //                 //     controller.selectedXmlContents.remove(item); // Remove the entire SqlDataItem from the list
+  //                 //   }
+  //                 // } else {
+  //                 //   controller.selectedReports.remove(item);
+  //                 // }
+  //                   if (!controller.selectedReports.contains(item)) {
+  //                     controller.selectedReports.add(item);
+  //                     final selectedReport = controller.selectedReports.firstWhere(
+  //                       (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
+  //                       orElse: () => item,
+  //                     );
+  //                     log("--------------${selectedReport.xmlContent}");
+  //                     if (!controller.selectedXmlContents.contains(selectedReport)) {
+  //                       controller.selectedXmlContents.add(selectedReport); // Add the entire SqlDataItem to the list
+  //                     }
+  //                   }
+  //                 } else {
+  //                   controller.selectedReports.remove(item);
+  //                   controller.selectedXmlContents.removeWhere(
+  //                     (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
+  //                   );
+  //                 }
+  //               },
+  //             );
+  //           }),
+  //           Expanded(
+  //             child: Column(
+  //               crossAxisAlignment: CrossAxisAlignment.start,
+  //               children: [
+  //                   GestureDetector(
+  //                   onTap: () {
+  //                     // Find the report in safetyReports by Safety Report ID (show for all, not just selected)
+  //                     final report = controller.safetyReports.firstWhereOrNull(
+  //                     (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
+  //                     );
+  //                     if (report != null) {
+  //                     showDialog(
+  //                       context: Get.context!,
+  //                       builder: (_) => AlertDialog(
+  //                       title: Text("XML Content for ID: ${item.reportMeta["Safety Report ID"]}"),
+  //                       content: SingleChildScrollView(
+  //                         child: Text(report.xmlContent ?? "No XML content found."),
+  //                       ),
+  //                       actions: [
+  //                         AppButton(
+  //                         onTap: () { Get.back(); },
+  //                         color: appBackGroundColor,
+  //                         child: Text("Close", style: boldTextStyle(color: appWhiteColor)),
+  //                         ),
+  //                       ],
+  //                       ),
+  //                     );
+  //                     } else {
+  //                     toast("No XML content found for this report.");
+  //                     }
+  //                   },
+  //                   child: _reportRow("Safety Report ID", item.reportMeta["Safety Report ID"] ?? ''),
+  //                   ),
+  //                 // _reportRow("Safety Report ID", item.reportMeta["Safety Report ID"] ?? ''),
+  //                 _reportRow("Initial Receipt Date", item.reportMeta["Initial Receipt Date"] ?? ''),
+  //                 _reportRow("Awareness Date", item.reportMeta["Awareness Date"] ?? ''),
+  //                 _reportRow("Study", item.reportMeta["Study"] ?? ''),
+  //                 _reportRow("Primary Product", item.reportMeta["Primary Product"] ?? ''),
+  //                 _reportRow("Primary Event", item.reportMeta["Primary Event"] ?? ''),
+  //                 _reportRow("Occur Country", item.reportMeta["Occur Country"] ?? ''),
+  //                 _reportRow("Seriousness", item.reportMeta["Seriousness"] ?? ''),
+  //               ],
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+  Widget buildSafetyReportCards() {
+    return Obx(() {
+      final reports = controller.safetyReports;
+
+      if (reports.isEmpty) {
+        return const Center(child: Text("No reports found."));
+      }
+
+      return Container(
+        height: 220,
+        child: Column(
+          children: [
+            // Global Checkbox Row
+            Row(
+              children: [
+                Obx(() {
+                  // true if all are selected, false if none, null if some
+                  bool? isAllSelected;
+                  if (reports.isEmpty) {
+                    isAllSelected = false;
+                  } else if (controller.selectedReports.length == reports.length) {
+                    isAllSelected = true;
+                  } else if (controller.selectedReports.isEmpty) {
+                    isAllSelected = false;
+                  } else {
+                    isAllSelected = null;
+                  }
+                  return Checkbox(
+                    value: isAllSelected,
+                    tristate: true,
+                    activeColor: appBackGroundColor,
+                    onChanged: (checked) {
+                      if (checked == true) {
+                        controller.selectedReports.assignAll(reports);
+                        // Add all to selectedXmlContents as well
+                        for (var item in reports) {
+                          final exists = controller.selectedXmlContents.any(
+                                (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
+                          );
+                          log("-------------------------------${item}");
+                          if (!exists) {
+                            controller.selectedXmlContents.add(item);
+                          }
+                        }
+                      } else {
+                        log("clear");
+                        controller.selectedReports.clear();
+                        controller.selectedXmlContents.clear();
+                      }
+                    },
+                  );
+                }),
+                const SizedBox(width: 8),
+                const Text("Select All"),
+              ],
+            ),
+            Expanded(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: reports.length,
+                itemBuilder: (context, index) {
+                  return _buildSafetyReportList(index); // each card
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
   Widget _buildSafetyReportList(int index) {
     final item = controller.safetyReports[index]; // SqlDataItem
 
@@ -1468,42 +1765,24 @@ class GenAIPVScreen extends StatelessWidget {
                 value: controller.selectedReports.contains(item),
                 onChanged: (isSelected) {
                   if (isSelected == true) {
-                  //   controller.selectedReports.add(item);
-                  //     final selectedReport = controller.selectedReports.firstWhere(
-                  //     (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
-                  //     orElse: () => item,
-                  //   );
-                  //   log("--------------${selectedReport.xmlContent}");
-                  //   if (isSelected == true) {
-                  //     controller.selectedReports.add(item);
-                  //     final selectedReport = controller.selectedReports.firstWhere(
-                  //           (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
-                  //       orElse: () => item,
-                  //     );
-                  //     log("--------------${selectedReport.xmlContent}");
-                  //     controller.selectedXmlContents.add(selectedReport); // Add the entire SqlDataItem to the list
-                  //   } else {
-                  //     controller.selectedReports.remove(item);
-                  //     controller.selectedXmlContents.remove(item); // Remove the entire SqlDataItem from the list
-                  //   }
-                  // } else {
-                  //   controller.selectedReports.remove(item);
-                  // }
                     if (!controller.selectedReports.contains(item)) {
                       controller.selectedReports.add(item);
                       final selectedReport = controller.selectedReports.firstWhere(
-                        (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
+                            (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
                         orElse: () => item,
                       );
-                      log("--------------${selectedReport.xmlContent}");
                       if (!controller.selectedXmlContents.contains(selectedReport)) {
-                        controller.selectedXmlContents.add(selectedReport); // Add the entire SqlDataItem to the list
+                        controller.selectedXmlContents.add(selectedReport);
+                        // log("--------only check----------${controller.selectedXmlContents.map((e) => e.xmlContent).toList()}");
+                        // controller.selectedXmlContents.forEach((element) {
+                        //   log(element.xmlContent.toString());
+                        // });
                       }
                     }
                   } else {
                     controller.selectedReports.remove(item);
                     controller.selectedXmlContents.removeWhere(
-                      (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
+                          (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
                     );
                   }
                 },
@@ -1513,36 +1792,37 @@ class GenAIPVScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                    GestureDetector(
+                  GestureDetector(
                     onTap: () {
                       // Find the report in safetyReports by Safety Report ID (show for all, not just selected)
                       final report = controller.safetyReports.firstWhereOrNull(
-                      (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
+                            (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
                       );
                       if (report != null) {
-                      showDialog(
-                        context: Get.context!,
-                        builder: (_) => AlertDialog(
-                        title: Text("XML Content for ID: ${item.reportMeta["Safety Report ID"]}"),
-                        content: SingleChildScrollView(
-                          child: Text(report.xmlContent ?? "No XML content found."),
-                        ),
-                        actions: [
-                          AppButton(
-                          onTap: () { Get.back(); },
-                          color: appBackGroundColor,
-                          child: Text("Close", style: boldTextStyle(color: appWhiteColor)),
+                        showDialog(
+                          context: Get.context!,
+                          builder: (_) => AlertDialog(
+                            title: Text("XML Content for ID: ${item.reportMeta["Safety Report ID"]}"),
+                            content: SingleChildScrollView(
+                              child: Text(report.xmlContent ?? "No XML content found."),
+                            ),
+                            actions: [
+                              AppButton(
+                                onTap: () {
+                                  Get.back();
+                                },
+                                color: appBackGroundColor,
+                                child: Text("Close", style: boldTextStyle(color: appWhiteColor)),
+                              ),
+                            ],
                           ),
-                        ],
-                        ),
-                      );
+                        );
                       } else {
-                      toast("No XML content found for this report.");
+                        toast("No XML content found for this report.");
                       }
                     },
                     child: _reportRow("Safety Report ID", item.reportMeta["Safety Report ID"] ?? ''),
-                    ),
-                  // _reportRow("Safety Report ID", item.reportMeta["Safety Report ID"] ?? ''),
+                  ),
                   _reportRow("Initial Receipt Date", item.reportMeta["Initial Receipt Date"] ?? ''),
                   _reportRow("Awareness Date", item.reportMeta["Awareness Date"] ?? ''),
                   _reportRow("Study", item.reportMeta["Study"] ?? ''),
