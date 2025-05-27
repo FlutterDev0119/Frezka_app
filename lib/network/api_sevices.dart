@@ -27,6 +27,7 @@ import '../modules/reconAI/model/reconAI_model.dart';
 import '../modules/translation_memory/model/ai_translation_memory_model.dart';
 import '../modules/translation_memory/model/save_annotations.dart';
 import '../modules/translation_memory/model/staging_translation_memory.dart';
+import '../modules/translation_memory/model/view_annotation.dart';
 import '../utils/common/base_response_model.dart';
 import '../utils/common/common.dart';
 import '../utils/constants.dart';
@@ -343,6 +344,14 @@ class TranslationMemoryServiceApis {
       method: MethodType.post,
     );
     return SaveAnnotationRes.fromJson(response);
+  }
+
+  static Future<ViewAnnotationRes> getAnnotation({required int id}) async {
+    final response = await buildHttpResponse(
+      endPoint: '${APIEndPoints.getAnnotation}?translation_edits_id=$id',
+      method: MethodType.get,
+    );
+    return ViewAnnotationRes.fromJson(response);
   }
 //---------------------------------------------------------------------------------------------------------------
   static Future<List<TranslationReport>> fetchMetaPhraseListById(String id) async {
