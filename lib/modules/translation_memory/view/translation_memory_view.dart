@@ -104,7 +104,7 @@ class TranslationMemoryScreen extends StatelessWidget {
                             );
                           }
                           final item = controller.filteredStagingFiles[index];
-                          return _buildStagingListItem(context,item, index);
+                          return _buildStagingListItem(context, item, index);
                         },
                       );
                     }),
@@ -156,7 +156,7 @@ class TranslationMemoryScreen extends StatelessWidget {
                             );
                           }
                           final item = controller.filteredAIFiles[index];
-                          return _buildAIListItem(context,item, index);
+                          return _buildAIListItem(context, item, index);
                         },
                       ),
                     );
@@ -586,7 +586,7 @@ class TranslationMemoryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStagingListItem(BuildContext context,StagingTranslationRes item, int index) {
+  Widget _buildStagingListItem(BuildContext context, StagingTranslationRes item, int index) {
     return Card(
       color: appDashBoardCardColor,
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
@@ -640,21 +640,53 @@ class TranslationMemoryScreen extends StatelessWidget {
               icon: const Icon(Icons.more_vert),
               onSelected: (value) {
                 if (value == 'approve') {
-                  showCredentialsStagingDialog(context ,item.id,item.en,item.es);
+                  showCredentialsStagingDialog(context, item.id, item.en, item.es);
                 } else if (value == 'annotation') {
-                  // controller.deleteTranslation(item.id).then(
-                  //   (value) async {
-                  //     await controller.fetchStagingTranslationMemoryList();
-                  //   },
+                  showDialog(
+                    context: Get.context!,
+                    builder: (_) => AlertDialog(
+                      title: Text("Add Your Annotation here"),
+                      content: TextField(
+                        // controller: ,
+                        decoration: InputDecoration(
+                          hintText: "Enter annotation...",
+                          border: OutlineInputBorder(),
+                        ),
+                        maxLines: 2,
+                      ),
+                      actions: [
+                        AppButton(
+                          textStyle: TextStyle(color: appBackGroundColor),
+                          onTap: () => Get.back(),
+                          child: Text("Close"),
+                        ),
+                        5.width,
+                        AppButton(
+                          color: appBackGroundColor,
+                          onTap: () {
+                            controller.saveAnnotation(item.id);
+                          },
+                          child: Text(
+                            "save",
+                            style: TextStyle(color: white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                  // controller.saveAnnotation(item.id);
+                  //   .then(
+                  // (value) async {
+                  //   await controller.fetchStagingTranslationMemoryList();
+                  // },
                   // );
-                }else if(value == 'view annotation'){
-
-                }else if(value == 'reject'){
+                } else if (value == 'view annotation') {
+                } else if (value == 'reject') {
                   controller.deleteStagingTranslationMemory(item.id).then(
-                        (value) async {
-                          await controller.fetchStagingTranslationMemoryList();
-                        },
-                      );
+                    (value) async {
+                      await controller.fetchStagingTranslationMemoryList();
+                    },
+                  );
                 }
               },
               itemBuilder: (BuildContext context) => [
@@ -674,7 +706,8 @@ class TranslationMemoryScreen extends StatelessWidget {
                     'Annotation',
                     style: TextStyle(color: appColorPrimary, fontWeight: FontWeight.bold, fontSize: 12),
                   ),
-                ),const PopupMenuDivider(
+                ),
+                const PopupMenuDivider(
                   height: 0,
                 ),
                 const PopupMenuItem<String>(
@@ -683,7 +716,8 @@ class TranslationMemoryScreen extends StatelessWidget {
                     'View Annotation',
                     style: TextStyle(color: appButtonColor, fontWeight: FontWeight.bold, fontSize: 12),
                   ),
-                ),const PopupMenuDivider(
+                ),
+                const PopupMenuDivider(
                   height: 0,
                 ),
                 const PopupMenuItem<String>(
@@ -701,7 +735,7 @@ class TranslationMemoryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAIListItem(BuildContext context,AiTranslationMemoryRes item, int index) {
+  Widget _buildAIListItem(BuildContext context, AiTranslationMemoryRes item, int index) {
     return Card(
       color: appDashBoardCardColor,
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
@@ -755,19 +789,16 @@ class TranslationMemoryScreen extends StatelessWidget {
               icon: const Icon(Icons.more_vert),
               onSelected: (value) {
                 if (value == 'approve') {
-
-                  showCredentialsAIDialog(context,controller ,item.en,item.es);
+                  showCredentialsAIDialog(context, controller, item.en, item.es);
                 } else if (value == 'annotation') {
+                  toast("approv");
                   // controller.deleteTranslation(item.id).then(
                   //   (value) async {
                   //     await controller.fetchStagingTranslationMemoryList();
                   //   },
                   // );
-                }else if(value == 'view annotation'){
-
-                }else if(value == 'reject'){
-
-                }
+                } else if (value == 'view annotation') {
+                } else if (value == 'reject') {}
               },
               itemBuilder: (BuildContext context) => [
                 const PopupMenuItem<String>(
@@ -786,7 +817,8 @@ class TranslationMemoryScreen extends StatelessWidget {
                     'Annotation',
                     style: TextStyle(color: appColorPrimary, fontWeight: FontWeight.bold, fontSize: 12),
                   ),
-                ),const PopupMenuDivider(
+                ),
+                const PopupMenuDivider(
                   height: 0,
                 ),
                 const PopupMenuItem<String>(
@@ -795,7 +827,8 @@ class TranslationMemoryScreen extends StatelessWidget {
                     'View Annotation',
                     style: TextStyle(color: appButtonColor, fontWeight: FontWeight.bold, fontSize: 12),
                   ),
-                ),const PopupMenuDivider(
+                ),
+                const PopupMenuDivider(
                   height: 0,
                 ),
                 const PopupMenuItem<String>(
@@ -920,7 +953,7 @@ class TranslationMemoryScreen extends StatelessWidget {
     );
   }
 
-  void showCredentialsStagingDialog(BuildContext context,int id,String es,String en) {
+  void showCredentialsStagingDialog(BuildContext context, int id, String es, String en) {
     final TranslationMemoryController controller = Get.put(TranslationMemoryController());
     final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
@@ -1025,13 +1058,13 @@ class TranslationMemoryScreen extends StatelessWidget {
                       onTap: () {
                         final email = emailController.text.trim();
                         final password = passwordController.text;
-                       final loginPassword =  getStringAsync(AppSharedPreferenceKeys.userPassword);
-                       log(loginPassword);
-                        if (email.isEmpty || password.isEmpty ) {
+                        final loginPassword = getStringAsync(AppSharedPreferenceKeys.userPassword);
+                        log(loginPassword);
+                        if (email.isEmpty || password.isEmpty) {
                           errorMessage.value = "Please enter both email and password.";
                         } else if (password != loginPassword) {
                           errorMessage.value = "Incorrect password.";
-                        }else {
+                        } else {
                           errorMessage.value = null;
                           controller.updateStaging(id: id, en: es, es: en).then(
                             (value) async {
@@ -1055,7 +1088,7 @@ class TranslationMemoryScreen extends StatelessWidget {
     );
   }
 
-  void showCredentialsAIDialog(BuildContext context, controller,String es,String en) {
+  void showCredentialsAIDialog(BuildContext context, controller, String es, String en) {
     final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
     final ValueNotifier<bool> obscurePassword = ValueNotifier<bool>(true);

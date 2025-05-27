@@ -1,9 +1,13 @@
+import 'dart:convert';
+
+import 'package:apps/modules/translation_memory/model/save_annotations.dart';
 import 'package:apps/modules/translation_memory/model/translation_model.dart';
 import 'package:apps/utils/common/base_controller.dart';
 import 'package:apps/utils/library.dart';
 import 'package:get/get.dart';
 import 'package:nb_utils/nb_utils.dart';
 
+import '../../../utils/shared_prefences.dart';
 import '../model/ai_translation_memory_model.dart';
 import '../model/staging_translation_memory.dart';
 
@@ -53,7 +57,9 @@ class TranslationMemoryController extends BaseController {
   void setSelected(String value) {
     selectedOption.value = value;
   }
-
+  String Fullname = '';
+  String id = '';
+  var editPendingAnnotation = ''.obs;
   @override
   void onInit() {
     init();
@@ -61,6 +67,14 @@ class TranslationMemoryController extends BaseController {
   }
 
   init() async {
+    String? userJson = getStringAsync(AppSharedPreferenceKeys.userModel);
+
+    if (userJson.isNotEmpty) {
+      var userMap = jsonDecode(userJson);
+      var userModel = UserModel.fromJson(userMap); // Replace with your actual model
+      Fullname = "${userModel.firstName} ${userModel.lastName}";
+      id = userModel.id.toString();
+    }
     await fetchStagingTranslationMemoryList();
     await fetchData();
     await fetchAITranslationMemoryList();
@@ -184,6 +198,44 @@ class TranslationMemoryController extends BaseController {
       toast(e.toString());
     } finally {
       setLoading(false); // Stop the loading indicator
+    }
+  }
+
+  // Future<void> saveAnnotation(int id) async {
+  //   try {
+  //     setLoading(true);
+  //     var response = await TranslationMemoryServiceApis.saveAnnotation(request: );
+  //
+  //     // Check for success response
+  //     if (response['success'] != null) {
+  //       toast(response['success'].toString());
+  //     }
+  //
+  //     await fetchData();
+  //   } catch (e) {
+  //     toast(e.toString());
+  //   } finally {
+  //     setLoading(false); // Stop the loading indicator
+  //   }
+  // }
+  Future<void> saveAnnotation(id) async {
+    try {
+      isLoading.value = true;
+
+      final request = {
+        "comment":"test",
+        "translation_edits_id":id,
+        "user_id":id,
+        "username":Fullname,
+      };
+
+      final response = await TranslationMemoryServiceApis.saveAnnotation(request: request);
+      editPendingAnnotation.value = response.success;
+      fetchData();
+    } catch (e) {
+      print('Error fetching GenerateSQL: $e');
+    } finally {
+      isLoading.value = false;
     }
   }
 

@@ -7,9 +7,12 @@ import 'package:apps/utils/library.dart';
 
 import '../modules/genAI_clinical/model/additional_narrative_model.dart';
 import '../modules/genAI_clinical/model/execute_prompt_model.dart';
+import '../modules/genAI_clinical/model/fetch_clinical_data.dart';
 import '../modules/genAI_clinical/model/fetch_docs_clinical.dart';
 import '../modules/genAI_pv/model/doc_language_model.dart';
+import '../modules/genAI_pv/model/fetch_last_queries.dart';
 import '../modules/genAI_pv/model/generate_sql_model.dart';
+import '../modules/genAI_pv/model/narrative_generation_model.dart';
 import '../modules/governAI/model/count_traces_model.dart';
 import '../modules/governAI/model/fetch_traces_model.dart';
 import '../modules/login/model/google_social_login_model.dart';
@@ -22,6 +25,7 @@ import '../modules/prompt_admin/model/output_model.dart';
 import '../modules/prompt_admin/model/role_model.dart';
 import '../modules/reconAI/model/reconAI_model.dart';
 import '../modules/translation_memory/model/ai_translation_memory_model.dart';
+import '../modules/translation_memory/model/save_annotations.dart';
 import '../modules/translation_memory/model/staging_translation_memory.dart';
 import '../utils/common/base_response_model.dart';
 import '../utils/common/common.dart';
@@ -319,6 +323,7 @@ class TranslationMemoryServiceApis {
       throw Exception('Unexpected response format: ${response.runtimeType}');
     }
   }
+
   static Future<List<AiTranslationMemoryRes>> fetchAITranslationMemoryList() async {
     final response = await buildHttpResponse(
       endPoint: APIEndPoints.aiTranslationMemory,
@@ -329,6 +334,15 @@ class TranslationMemoryServiceApis {
     } else {
       throw Exception('Unexpected response format: ${response.runtimeType}');
     }
+  }
+
+  static Future<SaveAnnotationRes> saveAnnotation({required Map request}) async {
+    final response = await buildHttpResponse(
+      endPoint: APIEndPoints.saveAnnotation,
+      request: request,
+      method: MethodType.post,
+    );
+    return SaveAnnotationRes.fromJson(response);
   }
 //---------------------------------------------------------------------------------------------------------------
   static Future<List<TranslationReport>> fetchMetaPhraseListById(String id) async {
@@ -410,7 +424,7 @@ class GovernAIServiceApis {
   static Future<List<TraceData>> fetchTracesList(String key, String date) async {
     try {
       final response = await buildHttpResponse(
-        endPoint: "${APIEndPoints.fetchTrace}?key=$key&date=$date",
+        endPoint: "${APIEndPoints.fetchTrace}?key=$key&date=$date&page=1",
         method: MethodType.get,
       );
 
@@ -434,6 +448,15 @@ class GovernAIServiceApis {
 //---------------------------------------------------------------------------------------------------------------
 /// GenAI PV
 class GenAIPVServiceApis {
+  static Future<FetchLastQueriesRes> fetchLast5Queries({required String userName, required String userId}) async {
+    final response = await buildHttpResponse(
+      endPoint: "${APIEndPoints.fetchLastQueries}?userId=$userId&user_name=$userName&key=datalake",
+      method: MethodType.get,
+    );
+    return FetchLastQueriesRes.fromJson(response);
+  }
+
+
   static Future<FetchDocsClinical?> fetchGenAIDocs() async {
     List<String> params = [];
 
@@ -482,13 +505,13 @@ class GenAIPVServiceApis {
     return AdditionalNarrativeRes.fromJson(response);
   }
   /// Narrative Generation
-  static Future<AdditionalNarrativeRes> fetchNarrativeGeneration({required Map request}) async {
+  static Future<NarrativeGenerationRes> fetchNarrativeGeneration({required Map request}) async {
     final response = await buildHttpResponse(
       endPoint: APIEndPoints.fetchNarrativeGeneration,
       request: request,
       method: MethodType.post,
     );
-    return AdditionalNarrativeRes.fromJson(response);
+    return NarrativeGenerationRes.fromJson(response);
   }
 }
 
@@ -513,6 +536,15 @@ class ClinicalPromptServiceApis {
       return null;
     }
   }
+  /// Fetch clinical Data
+  static Future<FetchClinicalDataRes> fetchClinicalData({required String query, required String userName, required String userId}) async {
+    final response = await buildHttpResponse(
+      endPoint: "${APIEndPoints.fetchClinicalData}?query=$query&user_name=$userName&userId=$userId",
+      method: MethodType.get,
+    );
+    return FetchClinicalDataRes.fromJson(response);
+  }
+
   /// Additional Narrative
   static Future<AdditionalNarrativeRes> fetchAdditionalNarrative({required Map request}) async {
     final response = await buildHttpResponse(

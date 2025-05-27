@@ -619,7 +619,7 @@ class GenAIClinicalScreen extends StatelessWidget {
         
                                                 if (controller.dataLakeInput.value.isNotEmpty) {
                                                   controller
-                                                      .fetchGenerateSQL(
+                                                      .fetchClinical(
                                                     controller.dataLakeInput.value,
                                                     userId: id,
                                                     userName: Fullname,
@@ -673,29 +673,31 @@ class GenAIClinicalScreen extends StatelessWidget {
                                                         child: IconButton(
                                                           icon: Icon(Icons.file_copy_rounded, color: appWhiteColor, size: 20),
                                                           onPressed: () {
-                                                            final sqlText = controller.generateSQLQuery.value.isNotEmpty
-                                                                ? controller.generateSQLQuery.value
-                                                                : 'No SQL generated';
-                                                            showDialog(
-                                                              context: Get.context!,
-                                                              builder: (_) =>
-                                                                  AlertDialog(
-                                                                    title: Text("Generated SQL"),
-                                                                    content: SingleChildScrollView(
-                                                                      child: Text(sqlText),
-                                                                    ),
-                                                                    actions: [
-                                                                      AppButton(
-                                                                        color: appBackGroundColor,
-                                                                        onTap: () => Get.back(),
-                                                                        child: Text(
-                                                                          'Close',
-                                                                          style: TextStyle(color: white),
-                                                                        ),
-                                                                      )
-                                                                    ],
-                                                                  ),
-                                                            );
+                                                            controller.fileCopyTap(true);
+
+                                                            // final sqlText = controller.generateSQLQuery.value.isNotEmpty
+                                                            //     ? controller.generateSQLQuery.value
+                                                            //     : 'No SQL generated';
+                                                            // showDialog(
+                                                            //   context: Get.context!,
+                                                            //   builder: (_) =>
+                                                            //       AlertDialog(
+                                                            //         title: Text("Generated SQL"),
+                                                            //         content: SingleChildScrollView(
+                                                            //           child: Text(sqlText),
+                                                            //         ),
+                                                            //         actions: [
+                                                            //           AppButton(
+                                                            //             color: appBackGroundColor,
+                                                            //             onTap: () => Get.back(),
+                                                            //             child: Text(
+                                                            //               'Close',
+                                                            //               style: TextStyle(color: white),
+                                                            //             ),
+                                                            //           )
+                                                            //         ],
+                                                            //       ),
+                                                            // );
                                                           },
                                                           // onPressed: () {
                                                           //   final sqlText = controller.generateSQLResponse.value?.sqlQuery ?? 'No SQL generated';
@@ -737,119 +739,45 @@ class GenAIClinicalScreen extends StatelessWidget {
                 ],
               ),
               10.height,
-              // // Upload File Section
-              // Row(
-              //   children: [
-              //     GestureDetector(
-              //       onTap: () {
-              //         Get.bottomSheet(
-              //           enableDrag: true,
-              //           isScrollControlled: true,
-              //           ImageSourceSelectionComponent(
-              //             onSourceSelected: (imageSource) {
-              //               hideKeyboard(context);
-              //               controller.onSourceSelected(imageSource);
-              //             },
-              //           ),
-              //         );
-              //       },
-              //       child: Container(
-              //         padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-              //         decoration: BoxDecoration(
-              //           border: Border.all(color: appBackGroundColor),
-              //           borderRadius: BorderRadius.circular(8.0),
-              //         ),
-              //         child: Text(
-              //           'Upload File',
-              //           style: TextStyle(
-              //             color: appBackGroundColor,
-              //             fontSize: 16.0,
-              //           ),
-              //         ),
-              //       ),
-              //     ),
-              //     10.width,
-              //     Expanded(
-              //       child: Obx(() {
-              //         if (controller.fileNames.isEmpty) {
-              //           return Text('No files selected');
-              //         }
-              //         return Container(
-              //           padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-              //           decoration: BoxDecoration(
-              //             border: Border.all(color: appBackGroundColor),
-              //             borderRadius: BorderRadius.circular(12),
-              //           ),
-              //           child: SingleChildScrollView(
-              //             scrollDirection: Axis.horizontal,
-              //             child: Row(
-              //               children: controller.fileNames.asMap().entries.map((entry) {
-              //                 final index = entry.key;
-              //                 final fileName = entry.value;
-              //
-              //                 return Container(
-              //                   margin: EdgeInsets.only(right: 8),
-              //                   decoration: BoxDecoration(
-              //                     color: Colors.blue.shade100,
-              //                     borderRadius: BorderRadius.circular(6),
-              //                   ),
-              //                   child: Row(
-              //                     mainAxisSize: MainAxisSize.min,
-              //                     children: [
-              //                       Padding(
-              //                         padding: EdgeInsets.only(left: 8),
-              //                         child: Text(
-              //                           fileName,
-              //                           overflow: TextOverflow.ellipsis,
-              //                           style: TextStyle(color: Colors.black),
-              //                         ),
-              //                       ),
-              //                       PopupMenuButton<String>(
-              //                         padding: EdgeInsets.zero,
-              //                         onSelected: (value) {
-              //                           if (value == 'view') {
-              //                             toast('Viewing ${controller.fileNames[index]}');
-              //                           } else if (value == 'remove') {
-              //                             controller.fileNames.removeAt(index);
-              //                             controller.imageFiles.removeAt(index);
-              //                           }
-              //                         },
-              //                         icon: Icon(Icons.menu, size: 18),
-              //                         itemBuilder: (context) => [
-              //                           PopupMenuItem(
-              //                             value: 'view',
-              //                             child: Row(
-              //                               children: [
-              //                                 Icon(Icons.remove_red_eye, size: 18),
-              //                                 SizedBox(width: 8),
-              //                                 Text('View'),
-              //                               ],
-              //                             ),
-              //                           ),
-              //                           PopupMenuItem(
-              //                             value: 'remove',
-              //                             child: Row(
-              //                               children: [
-              //                                 Icon(Icons.close, size: 18, color: Colors.red),
-              //                                 SizedBox(width: 8),
-              //                                 Text('Remove', style: TextStyle(color: Colors.red)),
-              //                               ],
-              //                             ),
-              //                           ),
-              //                         ],
-              //                       ),
-              //                     ],
-              //                   ),
-              //                 );
-              //               }).toList(),
-              //             ),
-              //           ),
-              //         );
-              //       }),
-              //     ),
-              //   ],
-              // ),
-        
+
+        /// Show data of FetchClinicalDataRes with image and scrollable in both axes
+        Obx(() {
+          if (controller.fileCopyTap == true) {
+            final res = controller.fetchClinicalData.value;
+            if (res == null || res.data.isEmpty) {
+              return SizedBox.shrink();
+            }
+            // Show the full JSON response in a scrollable box
+            final prettyJson = const JsonEncoder.withIndent('  ').convert(
+              res.data.map((e) => e.toJson()).toList(),
+            );
+            return Container(
+              width: double.infinity,
+              height: 300,
+              margin: EdgeInsets.symmetric(vertical: 10),
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: appWhiteColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: appBackGroundColor.withOpacity(0.2)),
+              ),
+              child: Scrollbar(
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: SelectableText(
+                      prettyJson,
+                      style: TextStyle(fontFamily: 'monospace', fontSize: 13),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
+          return SizedBox.shrink();
+        }),
               // Curate the Response Section
               Container(
                 padding: EdgeInsets.all(10),

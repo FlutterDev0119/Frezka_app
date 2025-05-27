@@ -8,6 +8,7 @@ import '../../../utils/shared_prefences.dart';
 import '../../genAI_pv/model/generate_sql_model.dart';
 import '../model/additional_narrative_model.dart';
 import '../model/execute_prompt_model.dart';
+import '../model/fetch_clinical_data.dart';
 
 class GenAIClinicalController extends GetxController {
   RxList<File> imageFiles = <File>[].obs;
@@ -30,12 +31,14 @@ class GenAIClinicalController extends GetxController {
   var tags = <String>[].obs;
   final RxString selectedParentTag = ''.obs;
   var additionalNarrativeRes = Rxn<AdditionalNarrativeRes>();
+  var fetchClinicalData = Rxn<FetchClinicalDataRes>();
   var executePromptRes = Rxn<ExecutePromptRes>();
   var generateSQLQuery = ''.obs;
   final RxString sqlQuery = ''.obs;
   var errorMessage = ''.obs;
   RxList<SqlDataItem> safetyReports = <SqlDataItem>[].obs;
   RxBool isExpanded = false.obs;
+  RxBool fileCopyTap = false.obs;
 
   @override
   void onInit() {
@@ -52,6 +55,7 @@ class GenAIClinicalController extends GetxController {
     //   "Clinical Trials Details",
     // ]);
     isAdditionalNarrative.value = false;
+    fileCopyTap.value = false;
   }
 
   // Method to toggle selection for both chips and attributes (unified logic)
@@ -118,6 +122,25 @@ class GenAIClinicalController extends GetxController {
   }
 
 
+  Future<void> fetchClinical(String query, {String? userId, required String userName}) async {
+    try {
+      isLoading.value = true;
+      if (userId == null) {
+        log('Error fetching Clinical Data: userId is null');
+        errorMessage.value = 'User ID cannot be null.';
+        return;
+      }
+      final response = await ClinicalPromptServiceApis.fetchClinicalData(query: query, userName: userName, userId: userId);
+      fetchClinicalData.value = response;
+    } catch (e) {
+      log('Error fetching Clinical Data: $e');
+      errorMessage.value = 'Error occurred while fetching clinical data.';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
   Future<void> additionalNarrative({required String query, required String SafetyReport, required List<String> checkbox, required String narrative}) async {
     try {
       isLoading.value = true;
@@ -138,7 +161,7 @@ class GenAIClinicalController extends GetxController {
     }
   }
 
-    Future<void> executePrompt({required List<String> studies, required List<String> checkbox}) async {//required String userId,required String user_name
+  Future<void> executePrompt({required List<String> studies, required List<String> checkbox}) async {//required String userId,required String user_name
     try {
       isLoading.value = true;
       String? userJson = getStringAsync(AppSharedPreferenceKeys.userModel);
@@ -220,3 +243,4 @@ class GenAIClinicalController extends GetxController {
     filteredClassificationMap.assignAll(newFiltered);
   }
 }
+

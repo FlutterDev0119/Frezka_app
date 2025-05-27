@@ -12,6 +12,7 @@ import '../controllers/reconAI_controller.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:excel/excel.dart' as ex;
+
 class ReconAIScreen extends StatelessWidget {
   final ReconAIController controller = Get.put(ReconAIController());
 
@@ -852,7 +853,11 @@ class ReconAIScreen extends StatelessWidget {
                                               icon: const Icon(Icons.fullscreen),
                                               tooltip: 'Show response fullscreen',
                                               onPressed: () {
-                                                final text = controller.lastMessage.value ?? '';
+                                                final messages = controller.reconAIRes.value?.response ?? [];
+                                                if (messages.isEmpty) {
+                                                  toast('No response to show.');
+                                                  return;
+                                                }
                                                 showDialog(
                                                   context: Get.context!,
                                                   barrierDismissible: true,
@@ -881,9 +886,18 @@ class ReconAIScreen extends StatelessWidget {
                                                               child: Padding(
                                                                 padding: const EdgeInsets.all(16.0),
                                                                 child: SingleChildScrollView(
-                                                                  child: Text(
-                                                                    text,
-                                                                    style: const TextStyle(fontSize: 16),
+                                                                  child: Column(
+                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                    children: messages
+                                                                        .map((message) => Padding(
+                                                                      padding: const EdgeInsets.only(bottom: 8),
+                                                                      child: Card(
+                                                                        margin: EdgeInsets.all(2),
+                                                                        color: appDashBoardCardColor,
+                                                                        child: Text(message.message).paddingAll(8),
+                                                                      ),
+                                                                    ))
+                                                                        .toList(),
                                                                   ),
                                                                 ),
                                                               ),
@@ -906,6 +920,8 @@ class ReconAIScreen extends StatelessWidget {
                                           ? SingleChildScrollView(
                                         scrollDirection: Axis.vertical,
                                         child: Text(
+                                          // controller.reconAIRes.value?.response.toString() ?? '',
+                                          // controller.reconAIRes.value?.response ?? '',
                                           controller.lastMessage.value ?? '',
                                           style: TextStyle(fontSize: 16),
                                         ),
@@ -920,7 +936,7 @@ class ReconAIScreen extends StatelessWidget {
                                   ),
                                 ),
                               )
-                               : SizedBox();
+                                  : SizedBox();
                             },
                           ),
                         ],

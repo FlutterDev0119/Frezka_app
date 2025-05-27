@@ -88,138 +88,185 @@ class GenAIPVScreen extends StatelessWidget {
                               children: [
                                 Expanded(
                                     child: controller.genAIDropdownValue.value == 'Upload File'
-                                        ? Obx(() {
-                                      final files = controller.fileNames;
+                                      ? Obx(() {
+                                        final files = controller.fileNames;
 
-                                      if (files.isEmpty) {
+                                        if (files.isEmpty) {
                                         return Text('Select File', style: primaryTextStyle());
-                                      }
+                                        }
 
-                                      return SingleChildScrollView(
+                                        return SingleChildScrollView(
                                         scrollDirection: Axis.horizontal,
                                         child: Row(
                                           children: List.generate(files.length, (index) {
-                                            final fileName = files[index];
-                                            return Container(
-                                              margin: EdgeInsets.only(right: 8),
-                                              decoration: BoxDecoration(
-                                                color: Colors.blue.shade100,
-                                                borderRadius: BorderRadius.circular(6),
+                                          final fileName = files[index];
+                                          return Container(
+                                            margin: EdgeInsets.only(right: 8),
+                                            decoration: BoxDecoration(
+                                            color: Colors.blue.shade100,
+                                            borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Padding(
+                                              padding: EdgeInsets.only(left: 8),
+                                              child: Text(
+                                                fileName,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(color: Colors.black),
                                               ),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Padding(
-                                                    padding: EdgeInsets.only(left: 8),
-                                                    child: Text(
-                                                      fileName,
-                                                      overflow: TextOverflow.ellipsis,
-                                                      style: TextStyle(color: Colors.black),
-                                                    ),
-                                                  ),
-                                                  PopupMenuButton<String>(
-                                                    padding: EdgeInsets.zero,
-                                                    shape: RoundedRectangleBorder(
-                                                      borderRadius: BorderRadius.circular(10), // Rounded corners
-                                                    ),
-                                                    onSelected: (value) async {
-                                                      if (value == 'view') {
-                                                        // toast('Viewing ${controller.fileNames[index]}');
+                                              ),
+                                              PopupMenuButton<String>(
+                                              padding: EdgeInsets.zero,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(10),
+                                              ),
+                                              onSelected: (value) async {
+                                                if (value == 'view') {
+                                                File file = controller.imageFiles[index];
+                                                String filePath = file.path;
+                                                String extension = filePath.split('.').last.toLowerCase();
 
-
-                                                        File file = controller.imageFiles[index];
-                                                        String filePath = file.path;
-                                                        String extension = filePath
-                                                            .split('.')
-                                                            .last
-                                                            .toLowerCase();
-
-                                                        if (['txt', 'xml', 'csv'].contains(extension)) {
-                                                          String content = await file.readAsString();
-                                                          showDialog(
-                                                            context: context,
-                                                            builder: (_) =>
-                                                                AlertDialog(
-                                                                  title: Text('$extension File'),
-                                                                  content: SingleChildScrollView(child: Text(content)),
-                                                                  actions: [
-                                                                    TextButton(onPressed: () => Navigator.pop(context), child: Text('Close')),
-                                                                  ],
-                                                                ),
-                                                          );
-                                                        } else if (extension == 'pdf') {
-                                                          Navigator.push(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                              builder: (_) => PDFViewerPage(filePath: filePath),
-                                                            ),
-                                                          );
-                                                        } else if (['png', 'jpg'].contains(extension)) {
-                                                          showDialog(
-                                                            context: context,
-                                                            builder: (_) =>
-                                                                AlertDialog(
-                                                                  title: Text('Image Preview'),
-                                                                  content: Image.file(file),
-                                                                  actions: [
-                                                                    TextButton(onPressed: () => Navigator.pop(context), child: Text('Close')),
-                                                                  ],
-                                                                ),
-                                                          );
-                                                        } else if (['docx', 'xlsx', 'xls'].contains(extension)) {
-                                                          final result = await ofx.OpenFile.open(filePath);
-
-                                                          if (result.type != ofx.ResultType.done) {
-                                                            toast("Can't open this file on your device.");
-                                                          }
-                                                        } else {
-                                                          toast("Unsupported file type.");
-                                                        }
-                                                      } else if (value == 'remove') {
-                                                        controller.fileNames.removeAt(index);
-                                                        controller.imageFiles.removeAt(index);
-                                                      }
-                                                    },
-                                                    icon: Icon(Icons.menu, size: 18),
-                                                    itemBuilder: (context) =>
-                                                    [
-                                                      PopupMenuItem(
-                                                        value: 'view',
-                                                        child: Row(
-                                                          children: [
-                                                            Icon(Icons.remove_red_eye, size: 18),
-                                                            SizedBox(width: 8),
-                                                            Text('View'),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      PopupMenuDivider(), // Adds a horizontal divider
-                                                      PopupMenuItem(
-                                                        value: 'remove',
-                                                        child: Row(
-                                                          children: [
-                                                            Icon(Icons.close, size: 18, color: Colors.red),
-                                                            SizedBox(width: 8),
-                                                            Text('Remove', style: TextStyle(color: Colors.red)),
-                                                          ],
-                                                        ),
-                                                      ),
+                                                if (['txt', 'xml', 'csv'].contains(extension)) {
+                                                  String content = await file.readAsString();
+                                                  showDialog(
+                                                  context: context,
+                                                  builder: (_) => AlertDialog(
+                                                    title: Text('$extension File'),
+                                                    content: SingleChildScrollView(child: Text(content)),
+                                                    actions: [
+                                                    TextButton(onPressed: () => Navigator.pop(context), child: Text('Close')),
                                                     ],
                                                   ),
+                                                  );
+                                                } else if (extension == 'pdf') {
+                                                  Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (_) => PDFViewerPage(filePath: filePath),
+                                                  ),
+                                                  );
+                                                } else if (['png', 'jpg'].contains(extension)) {
+                                                  showDialog(
+                                                  context: context,
+                                                  builder: (_) => AlertDialog(
+                                                    title: Text('Image Preview'),
+                                                    content: Image.file(file),
+                                                    actions: [
+                                                    TextButton(onPressed: () => Navigator.pop(context), child: Text('Close')),
+                                                    ],
+                                                  ),
+                                                  );
+                                                } else if (['docx', 'xlsx', 'xls'].contains(extension)) {
+                                                  final result = await ofx.OpenFile.open(filePath);
+
+                                                if (result.type != ofx.ResultType.done) {
+                                                toast("Can't open this file on your device.");
+                                                }
+                                              } else {
+                                                toast("Unsupported file type.");
+                                              }
+                                              } else if (value == 'remove') {
+                                              controller.fileNames.removeAt(index);
+                                              controller.imageFiles.removeAt(index);
+                                              }
+                                            },
+                                            icon: Icon(Icons.menu, size: 18),
+                                            itemBuilder: (context) =>
+                                            [
+                                              PopupMenuItem(
+                                              value: 'view',
+                                              child: Row(
+                                                children: [
+                                                Icon(Icons.remove_red_eye, size: 18),
+                                                SizedBox(width: 8),
+                                                Text('View'),
                                                 ],
                                               ),
-                                            );
-                                          }),
-                                        ),
+                                              ),
+                                              PopupMenuDivider(), // Adds a horizontal divider
+                                              PopupMenuItem(
+                                              value: 'remove',
+                                              child: Row(
+                                                children: [
+                                                Icon(Icons.close, size: 18, color: Colors.red),
+                                                SizedBox(width: 8),
+                                                Text('Remove', style: TextStyle(color: Colors.red)),
+                                                ],
+                                              ),
+                                              ),
+                                            ],
+                                            ),
+                                          ],
+                                          ),
+                                        );
+                                        }),
+                                      ),
                                       );
                                     })
-                                        : TextField(
-                                      decoration: InputDecoration(
-                                        hintText: 'Include your query',
-                                        border: OutlineInputBorder(),
-                                      ),
-                                      onChanged: (value) => controller.dataLakeInput.value = value,
-                                    )),
+                                        : Obx(() {
+                                          // Defensive: If fetchLastQueriesData is null, show nothing
+                                          final lastQueries = controller.fetchLastQueriesData.value?.queries ?? [];
+                                          final suggestions = controller.dataLakeInput.value.isNotEmpty
+                                            ? lastQueries
+                                              .where((q) => q.toLowerCase().contains(controller.dataLakeInput.value.toLowerCase()))
+                                              .toList()
+                                            : [];
+
+                                          return Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                            TextField(
+                                              controller: controller.dataLakeTextController,
+                                              decoration: InputDecoration(
+                                              hintText: 'Include your query',
+                                              border: OutlineInputBorder(),
+                                              ),
+                                              onChanged: (val) {
+                                              controller.dataLakeInput.value = val;
+                                              if(val.length==0) controller.lastQueryTap(false);
+                                              },
+                                            ),
+                                            if (controller.dataLakeInput.value.isNotEmpty && suggestions.isNotEmpty && !controller.lastQueryTap.value)
+                                              Container(
+                                              margin: EdgeInsets.only(top: 4),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                border: Border.all(color: Colors.grey.shade300),
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              constraints: BoxConstraints(maxHeight: 150),
+                                              child: ListView.builder(
+                                                shrinkWrap: true,
+                                                itemCount: suggestions.length,
+                                                itemBuilder: (context, idx) {
+                                                final item = suggestions[idx];
+                                                return ListTile(
+                                                  title: Text(item),
+                                                  onTap: () {
+                                                    controller.lastQueryTap(true);
+                                                  controller.dataLakeTextController.text = item;
+                                                  controller.dataLakeTextController.selection = TextSelection.fromPosition(
+                                                    TextPosition(offset: item.length),
+                                                  );
+                                                  controller.dataLakeInput.value = item;
+                                                  },
+                                                );
+                                                },
+                                              ),
+                                              ),
+                                            if (controller.fetchLastQueriesData.value == null)
+                                              Padding(
+                                              padding: const EdgeInsets.only(top: 8.0),
+                                              child: Text(
+                                                'No recent queries found.',
+                                                style: TextStyle(color: Colors.grey),
+                                              ),
+                                              ),
+                                            ],
+                                          );
+                                          })),
                                 5.width,
                                 Obx(() {
                                   // Icon changes dynamically
@@ -390,9 +437,10 @@ class GenAIPVScreen extends StatelessWidget {
                    () {
                     return controller.safetyReports.isNotEmpty ? 10.height : SizedBox();
                   }
-                ), Obx(
+                ),
+                Obx(
                    () {
-                    return controller.selectedReports.length != 0  ?  Text('${controller.selectedReports.length} File Selected') : SizedBox();
+                    return controller.selectedReports.isNotEmpty  ?  Text('${controller.selectedReports.length} File Selected') : SizedBox();
                   }
                 ),
                   Obx(
@@ -640,20 +688,21 @@ class GenAIPVScreen extends StatelessWidget {
                                       // xmlContents.forEach((element) {
                                       //   log(element);
                                       // });
-                                      if(controller.selectedTags.isNotEmpty)   {controller
+                                      log("--------643---------narrativeGeneration---------");
+                                      // if(controller.selectedTags.isNotEmpty)   {
+                                        controller
                                           .narrativeGeneration(
-                                          SafetyReport:xmlContents,
+                                            query: controller.dataLakeInput.value.toString(),
+                                          safetyReport: xmlContents,
                                           prompt: controller.dataLakeInput.value.toString(),
-
                                           checkbox: controller.selectedTags.toList(),
-                                          userId: controller.id,
-                                          userName: controller.Fullname)
+                                         )
                                           .then(
                                             (value) {
-                                          controller.isAdditionalNarrative(true);
+                                          controller.isNarrativeGeneration(true);
                                         },
                                       );}
-                                    },
+                                    // },
                                   ),
                                 ),
                               ],
@@ -1027,6 +1076,8 @@ class GenAIPVScreen extends StatelessWidget {
                                             .toList();
 
                                         log("--------only check----------$xmlContents");
+                                        log("--------1030---------additionalNarrative---------");
+
                                         xmlContents.forEach((element) {
                                           log(element);
                                         });
@@ -1036,7 +1087,7 @@ class GenAIPVScreen extends StatelessWidget {
                                           query: controller.dataLakeInput.value.toString(),
                                           SafetyReport: xmlContents, // Pass as List<String>
                                           checkbox: controller.selectedTags.toList(),
-                                          narrative: "",
+                                          narrative: "null",
                                         )
                                             .then(
                                               (value) {
@@ -1073,109 +1124,9 @@ class GenAIPVScreen extends StatelessWidget {
                   }
                 ),
                 5.height,
-                // Obx(
-                //         () {
-                //       return controller.isAdditionalNarrative.value == true
-                //           ? Container(
-                //         width: double.infinity,
-                //         padding: EdgeInsets.all(10),
-                //         decoration: BoxDecoration(
-                //           color: appBackGroundColor.withOpacity(0.3),
-                //           borderRadius: BorderRadius.circular(15),
-                //         ),
-                //         child: Padding(
-                //           padding: const EdgeInsets.only(top: 15),
-                //           child: Column(
-                //             crossAxisAlignment: CrossAxisAlignment.start,
-                //             children: [
-                //               // Row(children: [
-                //               //   Text("AI Powered Response",style: TextStyle(fontWeight: FontWeight.w600)),
-                //               //
-                //               // ],),
-                //               SingleChildScrollView(
-                //                 scrollDirection: Axis.horizontal,
-                //                 child: Row(
-                //                   mainAxisSize: MainAxisSize.min,
-                //                   children: [
-                //                     const Icon(Icons.auto_awesome, size: 18),      // sparkle icon
-                //                     const SizedBox(width: 4),
-                //                     const Text(
-                //                       'AI Powered Response',
-                //                       style: TextStyle(fontWeight: FontWeight.w600),
-                //                     ),
-                //                     const SizedBox(width: 8),
-                //
-                //                     // copy response
-                //                     IconButton(
-                //                       icon: const Icon(Icons.content_copy),
-                //                       tooltip: 'Copy response',
-                //                       onPressed: (){},//copyResponse,                     // TODO: implement
-                //                       padding: EdgeInsets.zero,
-                //                       constraints: const BoxConstraints(),
-                //                     ),
-                //
-                //                     // show prompt
-                //                     IconButton(
-                //                       icon: const Icon(Icons.visibility),
-                //                       tooltip: 'Show prompt',
-                //                       onPressed:(){},// showPrompt,                       // TODO: implement
-                //                       padding: EdgeInsets.zero,
-                //                       constraints: const BoxConstraints(),
-                //                     ),
-                //
-                //                     // download as .txt
-                //                     IconButton(
-                //                       icon: const Icon(Icons.description_outlined),
-                //                       tooltip: 'Download as .txt',
-                //                       onPressed: (){},//downloadTxt,                      // TODO: implement
-                //                       padding: EdgeInsets.zero,
-                //                       constraints: const BoxConstraints(),
-                //                     ),
-                //
-                //                     // download as .xlsx
-                //                     IconButton(
-                //                       icon: const Icon(Icons.table_chart_outlined),
-                //                       tooltip: 'Download as .xlsx',
-                //                       onPressed:(){},// downloadXlsx,                     // TODO: implement
-                //                       padding: EdgeInsets.zero,
-                //                       constraints: const BoxConstraints(),
-                //                     ),
-                //
-                //                     // download as .pdf
-                //                     IconButton(
-                //                       icon: const Icon(Icons.picture_as_pdf),
-                //                       tooltip: 'Download as .pdf',
-                //                       onPressed: (){},//downloadPdf,                      // TODO: implement
-                //                       padding: EdgeInsets.zero,
-                //                       constraints: const BoxConstraints(),
-                //                     ),
-                //
-                //                     // expand / collapse
-                //                     IconButton(
-                //                       icon: const Icon(Icons.open_in_full),
-                //                       tooltip: 'Expand response',
-                //                       onPressed:(){},// toggleExpand,
-                //                       padding: EdgeInsets.zero,
-                //                       constraints: const BoxConstraints(),
-                //                     ),
-                //                   ],
-                //                 ),
-                //               ),
-                //               10.height,
-                //               Text(
-                //                 controller.additionalNarrativeRes.value?.output ?? '',
-                //                 style: TextStyle(fontSize: 16),
-                //               ),
-                //             ],
-                //           ),
-                //         ),
-                //       )
-                //           : SizedBox();
-                //     }
-                // )
                 Obx(
                       () {
-                    return controller.isAdditionalNarrative.value == true
+                    return controller.isNarrativeGeneration.value == true
                         ? Container(
                       width: double.infinity,
                       padding: EdgeInsets.all(10),
@@ -1206,7 +1157,7 @@ class GenAIPVScreen extends StatelessWidget {
                                     icon: const Icon(Icons.content_copy),
                                     tooltip: 'Copy response',
                                     onPressed: () {
-                                      final text = controller.additionalNarrativeRes.value?.output ?? '';
+                                      final text = controller.narrativeGenerationRes.value?.output ?? '';
                                       if (text.isNotEmpty) {
                                         Clipboard.setData(ClipboardData(text: text));
                                         toast('Response copied!');
@@ -1246,7 +1197,7 @@ class GenAIPVScreen extends StatelessWidget {
                                     icon: const Icon(Icons.description_outlined),
                                     tooltip: 'Download as .txt',
                                     onPressed: () async {
-                                      final text = controller.additionalNarrativeRes.value?.output ?? '';
+                                      final text = controller.narrativeGenerationRes.value?.output ?? '';
                                       if (text.isEmpty) {
                                         toast('No response to download.');
                                         return;
@@ -1266,7 +1217,7 @@ class GenAIPVScreen extends StatelessWidget {
                                     icon: const Icon(Icons.table_chart_outlined),
                                     tooltip: 'Download as .xlsx',
                                     onPressed: () async {
-                                      final text = controller.additionalNarrativeRes.value?.output ?? '';
+                                      final text = controller.narrativeGenerationRes.value?.output ?? '';
                                       if (text.isEmpty) {
                                         toast('No response to download.');
                                         return;
@@ -1293,7 +1244,7 @@ class GenAIPVScreen extends StatelessWidget {
                                     icon: const Icon(Icons.picture_as_pdf),
                                     tooltip: 'Download as .pdf',
                                     onPressed: () async {
-                                      final text = controller.additionalNarrativeRes.value?.output ?? '';
+                                      final text = controller.narrativeGenerationRes.value?.output ?? '';
                                       if (text.isEmpty) {
                                         toast('No response to download.');
                                         return;
@@ -1332,7 +1283,7 @@ class GenAIPVScreen extends StatelessWidget {
                                   icon: const Icon(Icons.fullscreen),
                                   tooltip: 'Show response fullscreen',
                                   onPressed: () {
-                                    final text = controller.additionalNarrativeRes.value?.output ?? '';
+                                    final text = controller.narrativeGenerationRes.value?.output ?? '';
                                     showDialog(
                                     context: Get.context!,
                                     barrierDismissible: true,
@@ -1397,7 +1348,7 @@ class GenAIPVScreen extends StatelessWidget {
                             //   // overflow: TextOverflow.ellipsis,
                             // )),
                             Obx(() {
-                              final output = controller.additionalNarrativeRes.value?.output ?? '';
+                              final output = controller.narrativeGenerationRes.value?.output ?? '';
                               // final output = controller.otput;
 
                               if (controller.isTableData(output)) {
@@ -1518,163 +1469,6 @@ class GenAIPVScreen extends StatelessWidget {
     );
   }
 
-  // Widget buildSafetyReportCards() {
-  //   return Obx(() {
-  //     final reports = controller.safetyReports;
-  //
-  //     if (reports.isEmpty) {
-  //       return const Center(child: Text("No reports found."));
-  //     }
-  //
-  //     return Container(
-  //       height: 220,
-  //       child: ListView.builder(
-  //         shrinkWrap: true,
-  //         itemCount: reports.length,
-  //         itemBuilder: (context, index) {
-  //           return _buildSafetyReportList(index); // each card
-  //         },
-  //       ),
-  //     );
-  //   });
-  // }
-
-  // Widget _buildSafetyReportList(int index) {
-  //   final item = controller.safetyReports[index]; // SqlDataItem
-  //
-  //   return Card(
-  //     color: appDashBoardCardColor,
-  //     margin: const EdgeInsets.symmetric(vertical: 6),
-  //     elevation: 2,
-  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12),side: BorderSide(color: appBackGroundColor)),
-  //     child: Padding(
-  //       padding: const EdgeInsets.all(12),
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           _reportRow("Safety Report ID", item.reportMeta["Safety Report ID"] ?? ''),
-  //           _reportRow("Initial Receipt Date", item.reportMeta["Initial Receipt Date"] ?? ''),
-  //           _reportRow("Awareness Date", item.reportMeta["Awareness Date"] ?? ''),
-  //           _reportRow("Study", item.reportMeta["Study"] ?? ''),
-  //           _reportRow("Primary Product", item.reportMeta["Primary Product"] ?? ''),
-  //           _reportRow("Primary Event", item.reportMeta["Primary Event"] ?? ''),
-  //           _reportRow("Occur Country", item.reportMeta["Occur Country"] ?? ''),
-  //           _reportRow("Seriousness", item.reportMeta["Seriousness"] ?? ''),
-  //           // _reportRow("Raw XML", item.xmlContent), // Optional
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-  // Widget _buildSafetyReportList(int index) {
-  //   final item = controller.safetyReports[index]; // SqlDataItem
-  //
-  //   return Card(
-  //     color: appDashBoardCardColor,
-  //     margin: const EdgeInsets.symmetric(vertical: 6),
-  //     elevation: 2,
-  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: appBackGroundColor)),
-  //     child: Padding(
-  //       padding: const EdgeInsets.all(12),
-  //       child: Row(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           Obx(() {
-  //             return Checkbox(
-  //               activeColor: appBackGroundColor,
-  //               value: controller.selectedReports.contains(item),
-  //               onChanged: (isSelected) {
-  //                 if (isSelected == true) {
-  //                 //   controller.selectedReports.add(item);
-  //                 //     final selectedReport = controller.selectedReports.firstWhere(
-  //                 //     (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
-  //                 //     orElse: () => item,
-  //                 //   );
-  //                 //   log("--------------${selectedReport.xmlContent}");
-  //                 //   if (isSelected == true) {
-  //                 //     controller.selectedReports.add(item);
-  //                 //     final selectedReport = controller.selectedReports.firstWhere(
-  //                 //           (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
-  //                 //       orElse: () => item,
-  //                 //     );
-  //                 //     log("--------------${selectedReport.xmlContent}");
-  //                 //     controller.selectedXmlContents.add(selectedReport); // Add the entire SqlDataItem to the list
-  //                 //   } else {
-  //                 //     controller.selectedReports.remove(item);
-  //                 //     controller.selectedXmlContents.remove(item); // Remove the entire SqlDataItem from the list
-  //                 //   }
-  //                 // } else {
-  //                 //   controller.selectedReports.remove(item);
-  //                 // }
-  //                   if (!controller.selectedReports.contains(item)) {
-  //                     controller.selectedReports.add(item);
-  //                     final selectedReport = controller.selectedReports.firstWhere(
-  //                       (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
-  //                       orElse: () => item,
-  //                     );
-  //                     log("--------------${selectedReport.xmlContent}");
-  //                     if (!controller.selectedXmlContents.contains(selectedReport)) {
-  //                       controller.selectedXmlContents.add(selectedReport); // Add the entire SqlDataItem to the list
-  //                     }
-  //                   }
-  //                 } else {
-  //                   controller.selectedReports.remove(item);
-  //                   controller.selectedXmlContents.removeWhere(
-  //                     (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
-  //                   );
-  //                 }
-  //               },
-  //             );
-  //           }),
-  //           Expanded(
-  //             child: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                   GestureDetector(
-  //                   onTap: () {
-  //                     // Find the report in safetyReports by Safety Report ID (show for all, not just selected)
-  //                     final report = controller.safetyReports.firstWhereOrNull(
-  //                     (report) => report.reportMeta["Safety Report ID"] == item.reportMeta["Safety Report ID"],
-  //                     );
-  //                     if (report != null) {
-  //                     showDialog(
-  //                       context: Get.context!,
-  //                       builder: (_) => AlertDialog(
-  //                       title: Text("XML Content for ID: ${item.reportMeta["Safety Report ID"]}"),
-  //                       content: SingleChildScrollView(
-  //                         child: Text(report.xmlContent ?? "No XML content found."),
-  //                       ),
-  //                       actions: [
-  //                         AppButton(
-  //                         onTap: () { Get.back(); },
-  //                         color: appBackGroundColor,
-  //                         child: Text("Close", style: boldTextStyle(color: appWhiteColor)),
-  //                         ),
-  //                       ],
-  //                       ),
-  //                     );
-  //                     } else {
-  //                     toast("No XML content found for this report.");
-  //                     }
-  //                   },
-  //                   child: _reportRow("Safety Report ID", item.reportMeta["Safety Report ID"] ?? ''),
-  //                   ),
-  //                 // _reportRow("Safety Report ID", item.reportMeta["Safety Report ID"] ?? ''),
-  //                 _reportRow("Initial Receipt Date", item.reportMeta["Initial Receipt Date"] ?? ''),
-  //                 _reportRow("Awareness Date", item.reportMeta["Awareness Date"] ?? ''),
-  //                 _reportRow("Study", item.reportMeta["Study"] ?? ''),
-  //                 _reportRow("Primary Product", item.reportMeta["Primary Product"] ?? ''),
-  //                 _reportRow("Primary Event", item.reportMeta["Primary Event"] ?? ''),
-  //                 _reportRow("Occur Country", item.reportMeta["Occur Country"] ?? ''),
-  //                 _reportRow("Seriousness", item.reportMeta["Seriousness"] ?? ''),
-  //               ],
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
   Widget buildSafetyReportCards() {
     return Obx(() {
       final reports = controller.safetyReports;
