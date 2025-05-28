@@ -10,6 +10,7 @@ import 'package:nb_utils/nb_utils.dart';
 import '../../../utils/shared_prefences.dart';
 import '../model/ai_translation_memory_model.dart';
 import '../model/staging_translation_memory.dart';
+import '../model/view_annotation.dart';
 
 enum SortColumn {
   language,
@@ -232,12 +233,59 @@ class TranslationMemoryController extends BaseController {
       final response = await TranslationMemoryServiceApis.saveAnnotation(request: request);
       editPendingAnnotation.value = response.success;
       fetchData();
+
     } catch (e) {
       print('Error fetching GenerateSQL: $e');
     } finally {
       isLoading.value = false;
     }
   }
+
+  // Future<void> getAnnotation(id) async {
+  //   if (isLoading.value) return;
+  //   setLoading(true);
+  //   try {
+  //     final result = await TranslationMemoryServiceApis.getAnnotation(id: id);
+  //
+  //   } catch (e) {
+  //     print('Error fetching Translation Memory list: $e');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
+   Future<void> getAnnotation(int id) async {
+    if (isLoading.value) return;
+
+    setLoading(true);
+    try {
+      final response = await TranslationMemoryServiceApis.getAnnotation(id: id);
+
+      // Check if response is a List and parse to ViewAnnotationRes
+      if (response is List) {
+        final List annotations = response as List;
+        final List<ViewAnnotationRes> parsedAnnotations = annotations
+            .where((item) => item is Map<String, dynamic>)
+            .map<ViewAnnotationRes>((item) => ViewAnnotationRes.fromJson(item as Map<String, dynamic>))
+            .toList();
+
+        // Show bottom sheet with the annotation data
+        Future.delayed(Duration.zero, () {
+          Get.bottomSheet(
+            ViewAnnotationPopup(annotations: parsedAnnotations),
+            isScrollControlled: true,
+          );
+        });
+      } else {
+        Get.snackbar('Error', 'Unexpected response format');
+      }
+    } catch (e) {
+      log('Error fetching annotation: $e');
+      Get.snackbar('Error', 'Failed to fetch annotation.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
 
 // Optional: Filtered list
   List<TranslationMemory> get filteredFiles {
@@ -303,3 +351,78 @@ class TranslationMemoryController extends BaseController {
     super.onClose();
   }
 }
+class ViewAnnotationPopup extends StatelessWidget {
+  final List<ViewAnnotationRes> annotations;
+
+  const ViewAnnotationPopup({super.key, required this.annotations});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.zero,
+      decoration: BoxDecoration(
+        color: appWhiteColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            color: appBackGroundColor,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                const Text(
+                  'Annotations',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: () => Get.back(),
+                  icon: const Icon(Icons.close, color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: annotations.map((annotation) {
+                  return Card(
+                    color: appDashBoardCardColor,
+                    margin: const EdgeInsets.symmetric(vertical: 6),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            annotation.comment,
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '- ${annotation.username} • ${annotation.createdAt}',
+                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+

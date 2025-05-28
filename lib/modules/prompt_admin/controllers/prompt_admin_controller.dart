@@ -80,9 +80,11 @@ class PromptAdminController extends BaseController {
 
   var selectedItems = <String>[].obs;
   final selectedFileNames = <String, String>{}.obs;
-
   RxList<File> imageFiles = <File>[].obs;
   RxList<String> fileNames = <String>[].obs;
+  final selectedTemplateFileNames = <String, String>{}.obs;
+  RxList<File> imageTempFiles = <File>[].obs;
+  RxList<String> fileTempNames = <String>[].obs;
 
   void addItem(String item) {
     if (!selectedItems.contains(item)) {
@@ -282,6 +284,30 @@ class PromptAdminController extends BaseController {
             imageFiles.add(imageSource);
             fileNames.add(fileName);
             selectedFileNames[item] = fileName;
+          },
+        ),
+        isScrollControlled: true,
+      );
+    }
+  }
+  void onSourceTempSelected(dynamic imageSource, String item) async {
+    if (imageSource is File) {
+      String fileName = imageSource.path.split('/').last;
+      bool isDuplicate = fileNames.contains(fileName);
+
+      if (isDuplicate) {
+        toast("File already added");
+        return;
+      }
+
+      Get.bottomSheet(
+        AppDialogueComponent(
+          titleText: "Do you want to upload this attachment?",
+          confirmText: "Upload",
+          onConfirm: () {
+            imageTempFiles.add(imageSource);
+            fileTempNames.add(fileName);
+            selectedTemplateFileNames[item] = fileName;
           },
         ),
         isScrollControlled: true,

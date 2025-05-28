@@ -672,17 +672,6 @@ class MetaPhraseScreen extends StatelessWidget {
                                                     ),
                                                   );
                                                 })
-
-
-
-
-
-
-
-
-
-
-
                                               ],
                                             ),
                                           ),

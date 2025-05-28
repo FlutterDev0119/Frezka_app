@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:open_file/open_file.dart';
 import '../../../utils/app_scaffold.dart';
+import '../../../utils/common/pdf_viewer.dart';
 import '../../../utils/component/app_widgets.dart';
 import '../../../utils/component/image_source_selection_component.dart';
 import '../controllers/reconAI_controller.dart';
@@ -12,6 +13,7 @@ import '../controllers/reconAI_controller.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:excel/excel.dart' as ex;
+import 'package:open_file/open_file.dart' as ofx;
 
 class ReconAIScreen extends StatelessWidget {
   final ReconAIController controller = Get.put(ReconAIController());
@@ -125,9 +127,55 @@ class ReconAIScreen extends StatelessWidget {
                                                       shape: RoundedRectangleBorder(
                                                         borderRadius: BorderRadius.circular(10), // Rounded corners
                                                       ),
-                                                      onSelected: (value) {
+                                                      onSelected: (value) async{
                                                         if (value == 'view') {
-                                                          toast('Viewing ${controller.fileNames[index]}');
+                                                            File file = controller.imageFiles[index];
+                                                            String filePath = file.path;
+                                                            String extension = filePath.split('.').last.toLowerCase();
+
+                                                            if (['txt', 'xml', 'csv'].contains(extension)) {
+                                                              String content = await file.readAsString();
+                                                              showDialog(
+                                                                context: context,
+                                                                builder: (_) => AlertDialog(
+                                                                  title: Text('$extension File'),
+                                                                  content: SingleChildScrollView(child: Text(content)),
+                                                                  actions: [
+                                                                    TextButton(onPressed: () => Navigator.pop(context), child: Text('Close')),
+                                                                  ],
+                                                                ),
+                                                              );
+                                                            } else if (extension == 'pdf') {
+                                                              Navigator.push(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                  builder: (_) => PDFViewerPage(filePath: filePath),
+                                                                ),
+                                                              );
+                                                              // } else if (['png', 'jpg'].contains(extension)) {
+                                                              //   showDialog(
+                                                              //   context: context,
+                                                              //   builder: (_) => AlertDialog(
+                                                              //     title: Text('Image Preview'),
+                                                              //     content: Image.file(file),
+                                                              //     actions: [
+                                                              //       AppButton(
+                                                              //         textStyle: TextStyle(color: appBackGroundColor),
+                                                              //         onTap: () => Get.back(),
+                                                              //         child: Text("Close"),
+                                                              //       ),
+                                                              //     ],
+                                                              //   ),
+                                                              //   );
+                                                            } else if (['docx', 'xlsx', 'xls'].contains(extension)) {
+                                                              final result = await ofx.OpenFile.open(filePath);
+
+                                                              if (result.type != ofx.ResultType.done) {
+                                                                toast("Can't open this file on your device.");
+                                                              }
+                                                            } else {
+                                                              toast("Unsupported file type.");
+                                                          }
                                                         } else if (value == 'remove') {
                                                           if (value == 'remove') {
                                                             final removedName = controller.fileNames[index];
@@ -318,10 +366,57 @@ class ReconAIScreen extends StatelessWidget {
                                                       shape: RoundedRectangleBorder(
                                                         borderRadius: BorderRadius.circular(10), // Rounded corners
                                                       ),
-                                                      onSelected: (value) {
-                                                        if (value == 'view') {
-                                                          toast('Viewing ${controller.targetFileNames[index]}');
-                                                        } else if (value == 'remove') {
+                                                      onSelected: (value) async{
+                                                          if (value == 'view') {
+                                                            File file = controller.imageFiles[index];
+                                                            String filePath = file.path;
+                                                            String extension = filePath.split('.').last.toLowerCase();
+
+                                                            if (['txt', 'xml', 'csv'].contains(extension)) {
+                                                              String content = await file.readAsString();
+                                                              showDialog(
+                                                                context: context,
+                                                                builder: (_) => AlertDialog(
+                                                                  title: Text('$extension File'),
+                                                                  content: SingleChildScrollView(child: Text(content)),
+                                                                  actions: [
+                                                                    TextButton(onPressed: () => Navigator.pop(context), child: Text('Close')),
+                                                                  ],
+                                                                ),
+                                                              );
+                                                            } else if (extension == 'pdf') {
+                                                              Navigator.push(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                  builder: (_) => PDFViewerPage(filePath: filePath),
+                                                                ),
+                                                              );
+                                                              // } else if (['png', 'jpg'].contains(extension)) {
+                                                              //   showDialog(
+                                                              //   context: context,
+                                                              //   builder: (_) => AlertDialog(
+                                                              //     title: Text('Image Preview'),
+                                                              //     content: Image.file(file),
+                                                              //     actions: [
+                                                              //       AppButton(
+                                                              //         textStyle: TextStyle(color: appBackGroundColor),
+                                                              //         onTap: () => Get.back(),
+                                                              //         child: Text("Close"),
+                                                              //       ),
+                                                              //     ],
+                                                              //   ),
+                                                              //   );
+                                                            } else if (['docx', 'xlsx', 'xls'].contains(extension)) {
+                                                              final result = await ofx.OpenFile.open(filePath);
+
+                                                              if (result.type != ofx.ResultType.done) {
+                                                                toast("Can't open this file on your device.");
+                                                              }
+                                                            } else {
+                                                              toast("Unsupported file type.");
+                                                            }
+                                                          }
+                                                         else if (value == 'remove') {
                                                           controller.targetFileNames.removeAt(index);
                                                           controller.targetImageFiles.removeAt(index);
                                                         }
@@ -484,10 +579,56 @@ class ReconAIScreen extends StatelessWidget {
                                                   shape: RoundedRectangleBorder(
                                                     borderRadius: BorderRadius.circular(10), // Rounded corners
                                                   ),
-                                                  onSelected: (value) {
+                                                  onSelected: (value) async{
                                                     if (value == 'view') {
-                                                      toast('Viewing ${controller.metaFileNames[index]}');
-                                                    } else if (value == 'remove') {
+                                                      File file = controller.imageFiles[index];
+                                                      String filePath = file.path;
+                                                      String extension = filePath.split('.').last.toLowerCase();
+
+                                                      if (['txt', 'xml', 'csv'].contains(extension)) {
+                                                        String content = await file.readAsString();
+                                                        showDialog(
+                                                          context: context,
+                                                          builder: (_) => AlertDialog(
+                                                            title: Text('$extension File'),
+                                                            content: SingleChildScrollView(child: Text(content)),
+                                                            actions: [
+                                                              TextButton(onPressed: () => Navigator.pop(context), child: Text('Close')),
+                                                            ],
+                                                          ),
+                                                        );
+                                                      } else if (extension == 'pdf') {
+                                                        Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (_) => PDFViewerPage(filePath: filePath),
+                                                          ),
+                                                        );
+                                                        // } else if (['png', 'jpg'].contains(extension)) {
+                                                        //   showDialog(
+                                                        //   context: context,
+                                                        //   builder: (_) => AlertDialog(
+                                                        //     title: Text('Image Preview'),
+                                                        //     content: Image.file(file),
+                                                        //     actions: [
+                                                        //       AppButton(
+                                                        //         textStyle: TextStyle(color: appBackGroundColor),
+                                                        //         onTap: () => Get.back(),
+                                                        //         child: Text("Close"),
+                                                        //       ),
+                                                        //     ],
+                                                        //   ),
+                                                        //   );
+                                                      } else if (['docx', 'xlsx', 'xls'].contains(extension)) {
+                                                        final result = await ofx.OpenFile.open(filePath);
+
+                                                        if (result.type != ofx.ResultType.done) {
+                                                          toast("Can't open this file on your device.");
+                                                        }
+                                                      } else {
+                                                        toast("Unsupported file type.");
+                                                      }
+                                                    }  else if (value == 'remove') {
                                                       controller.metaFileNames.removeAt(index);
                                                       controller.metaImageFiles.removeAt(index);
                                                     }

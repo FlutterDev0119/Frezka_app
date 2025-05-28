@@ -147,17 +147,21 @@ class GenAIPVScreen extends StatelessWidget {
                                                     builder: (_) => PDFViewerPage(filePath: filePath),
                                                   ),
                                                   );
-                                                } else if (['png', 'jpg'].contains(extension)) {
-                                                  showDialog(
-                                                  context: context,
-                                                  builder: (_) => AlertDialog(
-                                                    title: Text('Image Preview'),
-                                                    content: Image.file(file),
-                                                    actions: [
-                                                    TextButton(onPressed: () => Navigator.pop(context), child: Text('Close')),
-                                                    ],
-                                                  ),
-                                                  );
+                                                // } else if (['png', 'jpg'].contains(extension)) {
+                                                //   showDialog(
+                                                //   context: context,
+                                                //   builder: (_) => AlertDialog(
+                                                //     title: Text('Image Preview'),
+                                                //     content: Image.file(file),
+                                                //     actions: [
+                                                //       AppButton(
+                                                //         textStyle: TextStyle(color: appBackGroundColor),
+                                                //         onTap: () => Get.back(),
+                                                //         child: Text("Close"),
+                                                //       ),
+                                                //     ],
+                                                //   ),
+                                                //   );
                                                 } else if (['docx', 'xlsx', 'xls'].contains(extension)) {
                                                   final result = await ofx.OpenFile.open(filePath);
 
@@ -167,7 +171,9 @@ class GenAIPVScreen extends StatelessWidget {
                                               } else {
                                                 toast("Unsupported file type.");
                                               }
-                                              } else if (value == 'remove') {
+                                              }
+
+                                                else if (value == 'remove') {
                                               controller.fileNames.removeAt(index);
                                               controller.imageFiles.removeAt(index);
                                               }

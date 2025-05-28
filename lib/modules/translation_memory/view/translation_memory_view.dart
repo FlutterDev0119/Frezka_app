@@ -681,6 +681,7 @@ class TranslationMemoryScreen extends StatelessWidget {
                   // },
                   // );
                 } else if (value == 'view annotation') {
+                  controller.getAnnotation(item.id);
                 } else if (value == 'reject') {
                   controller.deleteStagingTranslationMemory(item.id).then(
                     (value) async {
@@ -791,7 +792,39 @@ class TranslationMemoryScreen extends StatelessWidget {
                 if (value == 'approve') {
                   showCredentialsAIDialog(context, controller, item.en, item.es);
                 } else if (value == 'annotation') {
-                  toast("approv");
+                  showDialog(
+                    context: Get.context!,
+                    builder: (_) => AlertDialog(
+                      title: Text("Add Your Annotation here"),
+                      content: TextField(
+                        // controller: ,
+                        decoration: InputDecoration(
+                          hintText: "Enter annotation...",
+                          border: OutlineInputBorder(),
+                        ),
+                        maxLines: 2,
+                      ),
+                      actions: [
+                        AppButton(
+                          textStyle: TextStyle(color: appBackGroundColor),
+                          onTap: () => Get.back(),
+                          child: Text("Close"),
+                        ),
+                        5.width,
+                        AppButton(
+                          color: appBackGroundColor,
+                          onTap: () {
+                            controller.saveAnnotation(item.id);
+                          },
+                          child: Text(
+                            "save",
+                            style: TextStyle(color: white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                  // toast("approv");
                   // controller.deleteTranslation(item.id).then(
                   //   (value) async {
                   //     await controller.fetchStagingTranslationMemoryList();
@@ -1197,7 +1230,7 @@ class TranslationMemoryScreen extends StatelessWidget {
                           errorMessage.value = "Please enter both email and password.";
                         } else {
                           errorMessage.value = null;
-                          controller.updateS(en: es, es: en).then(
+                          controller.updateStaging(en: es, es: en).then(
                             (value) async {
                               await controller.fetchData();
                             },

@@ -544,60 +544,58 @@ class PromptAdminScreen extends StatelessWidget {
                           child: content,
                         );
                       }),
-                      Obx(
-                        () {
-                          return Align(
-                            alignment: Alignment.bottomRight,
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                // controller.createNewPrompt();
-                                if (controller.currentIndex.value < 4) {
-                                  controller.currentIndex.value++;
-                                } else {
-                                  controller.currentIndex.value = 0;
-                                }
-                                if (controller.currentIndex.value == 4) {
-                                  //  String promptName = getStringAsync("promptName");
-                                  //  String Role = getStringAsync("Role");
-                                  //
-                                  //  List<String> Sources =  controller.selectedSources.toList();
-                                  //  String action =  controller.actionController.text;
-                                  // String group = getStringAsync("group");
-                                  // log("promptName---------------$promptName");
-                                  // log("Role---------------$Role");
-                                  // log("Sources---------------$Sources");
-                                  // log("action---------------$action");
-                                  // log("group---------------$group");
-                                  String promptName = getStringAsync("promptName").trim();
-                                  String role = getStringAsync("Role").trim();
-                                  List<String> sources = controller.selectedSources.toList();
-                                  String action = controller.actionController.text.trim();
-                                  String group = getStringAsync("group").trim();
+                      Obx(() {
+                        return Align(
+                          alignment: Alignment.bottomRight,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              // controller.createNewPrompt();
+                              if (controller.currentIndex.value < 4) {
+                                controller.currentIndex.value++;
+                              } else {
+                                controller.currentIndex.value = 0;
+                              }
+                              if (controller.currentIndex.value == 4) {
+                                //  String promptName = getStringAsync("promptName");
+                                //  String Role = getStringAsync("Role");
+                                //
+                                //  List<String> Sources =  controller.selectedSources.toList();
+                                //  String action =  controller.actionController.text;
+                                // String group = getStringAsync("group");
+                                // log("promptName---------------$promptName");
+                                // log("Role---------------$Role");
+                                // log("Sources---------------$Sources");
+                                // log("action---------------$action");
+                                // log("group---------------$group");
+                                String promptName = getStringAsync("promptName").trim();
+                                String role = getStringAsync("Role").trim();
+                                List<String> sources = controller.selectedSources.toList();
+                                String action = controller.actionController.text.trim();
+                                String group = getStringAsync("group").trim();
 
-                                  Map<String, dynamic> payload = {
-                                    "prompt_name": promptName.isNotEmpty ? promptName : "",
-                                    "role": {
-                                      "user_role": role.isNotEmpty ? role : "",
-                                    },
-                                    "group": group.isNotEmpty ? group : "",
-                                    "source": sources.isNotEmpty ? sources : [],
-                                    "metadata": {},
-                                    "task": action.isNotEmpty ? action : "",
-                                  };
+                                Map<String, dynamic> payload = {
+                                  "prompt_name": promptName.isNotEmpty ? promptName : "",
+                                  "role": {
+                                    "user_role": role.isNotEmpty ? role : "",
+                                  },
+                                  "group": group.isNotEmpty ? group : "",
+                                  "source": sources.isNotEmpty ? sources : [],
+                                  "metadata": {},
+                                  "task": action.isNotEmpty ? action : "",
+                                };
 
-                                  log("Payload: ${jsonEncode(payload)}");
-                                  await controller.createNewPrompt(payload);
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: appBackGroundColor,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              ),
-                              child: Text(  controller.currentIndex.value == 3 ? "Save" : "Next", style: TextStyle(color: appWhiteColor)),
+                                log("Payload: ${jsonEncode(payload)}");
+                                await controller.createNewPrompt(payload);
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: appBackGroundColor,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             ),
-                          );
-                        }
-                      ),
+                            child: Text(controller.currentIndex.value == 3 ? "Save" : "Next", style: TextStyle(color: appWhiteColor)),
+                          ),
+                        );
+                      }),
                     ],
                   ),
                 ),
@@ -648,6 +646,25 @@ class PromptAdminScreen extends StatelessWidget {
 
   Widget _buildOption(String label, IconData icon, int index) {
     return Obx(() {
+      // Determine if the option has a value
+      bool? hasValue = false;
+      if (index == 0) {
+        String role = getStringAsync("Role").trim();
+        hasValue = role.isNotEmpty && role != "Select a Role";
+      } else if (index == 1) {
+        List<String> sources = controller.selectedSources.toList();
+        hasValue = sources.isNotEmpty;
+      } else if (index == 2) {
+        String? metaCodeData = controller.selectedFileNames["Code list"];
+        log("metaCodeData--------------$metaCodeData");
+        String? metaTemplateData = controller.selectedTemplateFileNames["Template"];
+        hasValue = metaCodeData!.isNotEmpty || metaTemplateData!.isNotEmpty;
+        log("--------------hasValue----------$hasValue");
+      } else if (index == 3) {
+        String action = controller.actionController.text.trim();
+        hasValue = action.isNotEmpty;
+      }
+
       bool isSelected = controller.currentIndex.value == index;
       return GestureDetector(
         onTap: () => controller.currentIndex.value = index,
@@ -655,7 +672,7 @@ class PromptAdminScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           margin: const EdgeInsets.symmetric(horizontal: 4),
           decoration: BoxDecoration(
-            color: isSelected ? appBackGroundColor : appWhiteColor,
+            color: isSelected ? appBackGroundColor : (hasValue ? appGreenColor : appWhiteColor),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: appBackGroundColor, width: 1.5),
             boxShadow: const [
@@ -738,7 +755,7 @@ class PromptAdminScreen extends StatelessWidget {
                       value: controller.selectedRole.value,
                       onChanged: (String? newValue) async {
                         controller.selectedRole.value = newValue!;
-                        if(newValue !="Select a Role")controller.fetchRolePrompt(newValue);
+                        if (newValue != "Select a Role") controller.fetchRolePrompt(newValue);
                         await setValue("Role", newValue);
                       },
                       items: controller.roles.map((String role) {
@@ -919,21 +936,30 @@ class PromptAdminScreen extends StatelessWidget {
                             SizedBox(
                               width: item == "Other" ? 0 : 28,
                               height: 28,
-                              child: Obx(
-                                () {
-                                  final isLocked = controller.lockStates[item] ?? true;
-                                  return PopupMenuButton<String>(
-                                    padding: EdgeInsets.zero,
-                                    icon: item == "Other" ? SizedBox() : Icon(Icons.menu, size: 16, color: Colors.blue),
-                                    onSelected: (value) {
-                                      switch (value) {
-                                        case 'View':
+                              child: Obx(() {
+                                final isLocked = controller.lockStates[item] ?? true;
+                                return PopupMenuButton<String>(
+                                  padding: EdgeInsets.zero,
+                                  icon: item == "Other" ? SizedBox() : Icon(Icons.menu, size: 16, color: Colors.blue),
+                                  onSelected: (value) {
+                                    log("--------------------value----$value");
+                                    switch (value) {
+                                      case 'View':
+                                        if (controller.selectedItems.contains("Code list")) {
                                           showViewPopup(
                                             context,
                                             controller.selectedFileNames[item] ?? "No file chosen",
                                           );
-                                          break;
-                                        case 'Replace':
+                                        }
+                                        if (controller.selectedItems.contains("Template")) {
+                                          showViewPopup(
+                                            context,
+                                            controller.selectedFileNames[item] ?? "No file chosen",
+                                          );
+                                        }
+                                        break;
+                                      case 'Replace':
+                                        if (controller.selectedItems.contains("Code list")) {
                                           showReplacePopup(
                                             context,
                                             controller.selectedFileNames[item] ?? "No file chosen",
@@ -957,92 +983,128 @@ class PromptAdminScreen extends StatelessWidget {
                                               controller.removeItem(item);
                                             },
                                           );
-                                          break;
-                                        case 'Unlock':
-                                          controller.lockStates[item] = !(controller.lockStates[item] ?? true);
-                                          break;
-                                        case 'Remove':
-                                          controller.removeItem(item);
-                                          break;
-                                      }
-                                    },
-                                    // itemBuilder: (context) => [
-                                    //   PopupMenuItem(
-                                    //       value: 'View',enabled: !isLocked, child: Row(children: [Icon(Icons.visibility, size: 16), SizedBox(width: 6), Text("View")])),
-                                    //   PopupMenuDivider(),
-                                    //   PopupMenuItem(
-                                    //       value: 'Replace',enabled: !isLocked, child: Row(children: [Icon(Icons.edit, size: 16), SizedBox(width: 6), Text("Replace")])),
-                                    //   PopupMenuDivider(),
-                                    //   // PopupMenuItem(
-                                    //   //     value: 'Unlock', child: Row(children: [Icon(Icons.lock_open, size: 16), SizedBox(width: 6), Text("Unlock")])),
-                                    //   PopupMenuItem(
-                                    //       value: 'Unlock',
-                                    //       child: Row(
-                                    //         children: [
-                                    //           Icon(isLocked ? Icons.lock_open : Icons.lock, size: 16),
-                                    //           SizedBox(width: 6),
-                                    //           Text(isLocked ? "Unlock" : "Lock"),
-                                    //         ],
-                                    //       )),
-                                    //   PopupMenuDivider(),
-                                    //   PopupMenuItem(
-                                    //       value: 'Remove',enabled: !isLocked, child: Row(children: [Icon(Icons.close, size: 16), SizedBox(width: 6), Text("Remove")])),
-                                    // ],
-                                    itemBuilder: (context) => [
-                                      PopupMenuItem(
-                                        value: 'View',
-                                        enabled: !isLocked, // disable if locked
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.visibility, size: 16, color: isLocked ? Colors.grey : null),
-                                            SizedBox(width: 6),
-                                            Text("View", style: TextStyle(color: isLocked ? Colors.grey : null)),
-                                          ],
-                                        ),
-                                      ),
-                                      PopupMenuDivider(),
-                                      PopupMenuItem(
-                                        value: 'Replace',
-                                        enabled: !isLocked, // disable if locked
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.edit, size: 16, color: isLocked ? Colors.grey : null),
-                                            SizedBox(width: 6),
-                                            Text("Replace", style: TextStyle(color: isLocked ? Colors.grey : null)),
-                                          ],
-                                        ),
-                                      ),
-                                      PopupMenuDivider(),
-                                      PopupMenuItem(
-                                        value: 'Unlock',
-                                        child: Row(
-                                          children: [
-                                            Icon(isLocked ? Icons.lock_open : Icons.lock, size: 16),
-                                            SizedBox(width: 6),
-                                            Text(isLocked ? "Unlock" : "Lock"),
-                                          ],
-                                        ),
-                                      ),
-                                      PopupMenuDivider(),
-                                      PopupMenuItem(
-                                        value: 'Remove',
-                                        enabled: !isLocked, // disable if locked
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.close, size: 16, color: isLocked ? Colors.grey : null),
-                                            SizedBox(width: 6),
-                                            Text("Remove", style: TextStyle(color: isLocked ? Colors.grey : null)),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+                                        }
+                                        if (controller.selectedItems.contains("Template")) {
+                                          showReplacePopup(
+                                            context,
+                                            controller.selectedTemplateFileNames[item] ?? "No file chosen",
+                                            () async {
+                                              // First clear the old file
+                                              controller.selectedTemplateFileNames[item] = "";
 
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12), // adjust as needed
+                                              // Now immediately open the file picker to choose new file
+                                              final result = await Get.bottomSheet(
+                                                enableDrag: true,
+                                                isScrollControlled: true,
+                                                ImageSourceSelectionComponent(
+                                                  onSourceSelected: (imageSource) {
+                                                    hideKeyboard(context);
+                                                    controller.onSourceTempSelected(imageSource, item); // pass the item name
+                                                  },
+                                                ),
+                                              );
+                                            },
+                                            () {
+                                              controller.removeItem(item);
+                                            },
+                                          );
+                                        }
+                                        break;
+                                      case 'Unlock':
+                                        controller.lockStates[item] = !(controller.lockStates[item] ?? true);
+                                        break;
+                                      case 'Remove':
+                                        log("remove-----------------------$item");
+                                        log("remove-----------------------${controller.selectedItems}");
+                                        controller.removeItem(item);
+                                        if ("Code list" == item) {
+                                          toast("code ");
+                                          controller.selectedFileNames[item] = "";
+                                        }
+                                        if ("Template" == item) {
+                                          controller.selectedTemplateFileNames[item] = '';
+                                          toast("temp");
+                                        }
+
+                                        break;
+                                    }
+                                  },
+                                  // itemBuilder: (context) => [
+                                  //   PopupMenuItem(
+                                  //       value: 'View',enabled: !isLocked, child: Row(children: [Icon(Icons.visibility, size: 16), SizedBox(width: 6), Text("View")])),
+                                  //   PopupMenuDivider(),
+                                  //   PopupMenuItem(
+                                  //       value: 'Replace',enabled: !isLocked, child: Row(children: [Icon(Icons.edit, size: 16), SizedBox(width: 6), Text("Replace")])),
+                                  //   PopupMenuDivider(),
+                                  //   // PopupMenuItem(
+                                  //   //     value: 'Unlock', child: Row(children: [Icon(Icons.lock_open, size: 16), SizedBox(width: 6), Text("Unlock")])),
+                                  //   PopupMenuItem(
+                                  //       value: 'Unlock',
+                                  //       child: Row(
+                                  //         children: [
+                                  //           Icon(isLocked ? Icons.lock_open : Icons.lock, size: 16),
+                                  //           SizedBox(width: 6),
+                                  //           Text(isLocked ? "Unlock" : "Lock"),
+                                  //         ],
+                                  //       )),
+                                  //   PopupMenuDivider(),
+                                  //   PopupMenuItem(
+                                  //       value: 'Remove',enabled: !isLocked, child: Row(children: [Icon(Icons.close, size: 16), SizedBox(width: 6), Text("Remove")])),
+                                  // ],
+                                  itemBuilder: (context) => [
+                                    PopupMenuItem(
+                                      value: 'View',
+                                      enabled: !isLocked, // disable if locked
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.visibility, size: 16, color: isLocked ? Colors.grey : null),
+                                          SizedBox(width: 6),
+                                          Text("View", style: TextStyle(color: isLocked ? Colors.grey : null)),
+                                        ],
+                                      ),
                                     ),
-                                  );
-                                }
-                              ),
+                                    PopupMenuDivider(),
+                                    PopupMenuItem(
+                                      value: 'Replace',
+                                      enabled: !isLocked, // disable if locked
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.edit, size: 16, color: isLocked ? Colors.grey : null),
+                                          SizedBox(width: 6),
+                                          Text("Replace", style: TextStyle(color: isLocked ? Colors.grey : null)),
+                                        ],
+                                      ),
+                                    ),
+                                    PopupMenuDivider(),
+                                    PopupMenuItem(
+                                      value: 'Unlock',
+                                      child: Row(
+                                        children: [
+                                          Icon(isLocked ? Icons.lock_open : Icons.lock, size: 16),
+                                          SizedBox(width: 6),
+                                          Text(isLocked ? "Unlock" : "Lock"),
+                                        ],
+                                      ),
+                                    ),
+                                    PopupMenuDivider(),
+                                    PopupMenuItem(
+                                      value: 'Remove',
+                                      enabled: !isLocked, // disable if locked
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.close, size: 16, color: isLocked ? Colors.grey : null),
+                                          SizedBox(width: 6),
+                                          Text("Remove", style: TextStyle(color: isLocked ? Colors.grey : null)),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12), // adjust as needed
+                                  ),
+                                );
+                              }),
                             ),
                           ],
                         ),
@@ -1150,7 +1212,16 @@ class PromptAdminScreen extends StatelessWidget {
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                        // Handle file pick for Template
+                        Get.bottomSheet(
+                          enableDrag: true,
+                          isScrollControlled: true,
+                          ImageSourceSelectionComponent(
+                            onSourceSelected: (imageSource) {
+                              hideKeyboard(context);
+                              controller.onSourceTempSelected(imageSource, "Template");
+                            },
+                          ),
+                        );
                       },
                       child: Text('Choose File'),
                       style: ElevatedButton.styleFrom(
@@ -1158,7 +1229,20 @@ class PromptAdminScreen extends StatelessWidget {
                       ),
                     ),
                     SizedBox(width: 10),
-                    Text("No file chosen"),
+                    Obx(() {
+                      final fileName = controller.selectedTemplateFileNames["Template"];
+                      return Expanded(
+                        // or use Flexible
+                        child: Marquee(
+                          child: Text(
+                            (fileName?.isEmpty ?? true) ? "No file chosen" : fileName!,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            softWrap: false,
+                          ),
+                        ),
+                      );
+                    })
                   ],
                 ),
                 SizedBox(height: 20),
@@ -1225,8 +1309,7 @@ class PromptAdminScreen extends StatelessWidget {
     return Column(
       children: [
         SizedBox(height: 20),
-        Center(child: Text("Verify", style: TextStyle(fontSize: 20,color: appWhiteColor))),
-
+        Center(child: Text("Verify", style: TextStyle(fontSize: 20, color: appWhiteColor))),
 
         // ElevatedButton(
         //   onPressed: () => controller.verifyText.value = "Verified",

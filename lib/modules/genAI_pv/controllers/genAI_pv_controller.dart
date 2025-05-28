@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:apps/utils/library.dart';
+import 'package:excel/excel.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -142,7 +143,62 @@ isNarrativeGeneration.value = false;
       isLoading.value = false;
     }
   }
-
+  // Future<String> decodeExcel(File file) async {
+  //   var bytes = file.readAsBytesSync();
+  //   var excel = Excel.decodeBytes(bytes);
+  //   StringBuffer buffer = StringBuffer();
+  //
+  //   for (var table in excel.tables.keys) {
+  //     var rows = excel.tables[table]!.rows;
+  //     for (var row in rows) {
+  //       buffer.writeln(row.map((cell) => cell?.value.toString() ?? '').join(','));
+  //     }
+  //     break;
+  //   }
+  //
+  //   return buffer.toString();
+  // }
+  // void onSourceSelected(File file) async {
+  //   final fileName = file.path.split('/').last;
+  //   final ext = fileName.split('.').last.toLowerCase();
+  //
+  //   String? content;
+  //
+  //   try {
+  //     if (['txt', 'csv', 'json'].contains(ext)) {
+  //       content = await file.readAsString();
+  //     } else if (['xlsx', 'xls'].contains(ext)) {
+  //       content = await decodeExcel(file);
+  //     } else {
+  //       toast('Unsupported file format: .$ext');
+  //       return;
+  //     }
+  //   } catch (e) {
+  //     toast('Error decoding file: $e');
+  //     return;
+  //   }
+  //
+  //   if (fileNames.contains(fileName)) {
+  //     toast("File '$fileName' already selected.");
+  //     return;
+  //   }
+  //
+  //   final confirmed = await Get.bottomSheet<bool>(
+  //     AppDialogueComponent(
+  //       titleText: "Do you want to upload this attachment?",
+  //       confirmText: "Upload",
+  //       onConfirm: () {},
+  //     ),
+  //     isScrollControlled: true,
+  //   );
+  //   print("content-------------------$content");
+  //   if (confirmed == true) {
+  //     fileNames.clear();
+  //     imageFiles.clear();
+  //     imageFiles.add(file);
+  //     fileNames.add(fileName);
+  //   }
+  // }
   void onSourceSelected(dynamic imageSource) async {
     if (imageSource is File) {
       String fileName = imageSource.path.split('/').last;
