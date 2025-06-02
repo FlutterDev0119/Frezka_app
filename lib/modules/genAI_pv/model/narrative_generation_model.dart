@@ -9,8 +9,8 @@ class NarrativeGenerationRes {
 
   factory NarrativeGenerationRes.fromJson(Map<String, dynamic> json) {
     return NarrativeGenerationRes(
-      output: json['output'] as String,
-      prompt: json['prompt'] as String,
+      output: json['output']?.toString() ?? '',
+      prompt: json['prompt']?.toString() ?? '',
     );
   }
 

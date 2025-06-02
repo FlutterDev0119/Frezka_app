@@ -286,7 +286,7 @@ class TranslationMemoryServiceApis {
   static Future<Map<String, dynamic>> updateTranslationMemory({required int id, required String en, required String es}) async {
     final response = await buildHttpResponse(
       endPoint: '${APIEndPoints.translationMemory}/$id',
-      method: MethodType.post,
+      method: MethodType.put,
       request: {'en': en, 'es': es},
     );
 
@@ -346,13 +346,18 @@ class TranslationMemoryServiceApis {
     return SaveAnnotationRes.fromJson(response);
   }
 
-  static Future<ViewAnnotationRes> getAnnotation({required int id}) async {
+  static Future<List<ViewAnnotationRes>> getAnnotation({required int id}) async {
     final response = await buildHttpResponse(
       endPoint: '${APIEndPoints.getAnnotation}?translation_edits_id=$id',
       method: MethodType.get,
     );
-    return ViewAnnotationRes.fromJson(response);
+
+    // Parse list of maps into list of ViewAnnotationRes
+    return (response as List)
+        .map((item) => ViewAnnotationRes.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
+
 //---------------------------------------------------------------------------------------------------------------
   static Future<List<TranslationReport>> fetchMetaPhraseListById(String id) async {
     try {
@@ -514,12 +519,27 @@ class GenAIPVServiceApis {
     return AdditionalNarrativeRes.fromJson(response);
   }
   /// Narrative Generation
-  static Future<NarrativeGenerationRes> fetchNarrativeGeneration({required Map request}) async {
+  // static Future<NarrativeGenerationRes> fetchNarrativeGeneration({required Map request}) async {
+  //   final response = await buildHttpResponse(
+  //     endPoint: APIEndPoints.fetchNarrativeGeneration,
+  //     request: request,
+  //     method: MethodType.post,
+  //   );
+  //   return NarrativeGenerationRes.fromJson(response);
+  // }
+  static Future<NarrativeGenerationRes> fetchNarrativeGeneration({
+    required Map request,
+  }) async {
     final response = await buildHttpResponse(
       endPoint: APIEndPoints.fetchNarrativeGeneration,
       request: request,
       method: MethodType.post,
     );
+
+    if (response.containsKey('error')) {
+      throw Exception(response['error']);
+    }
+
     return NarrativeGenerationRes.fromJson(response);
   }
 }
@@ -565,13 +585,13 @@ class ClinicalPromptServiceApis {
   }
 
   /// Execute Prompt
-  static Future<ExecutePromptRes> executePrompt({required Map request}) async {
+  static Future<AdditionalNarrativeRes> executePrompt({required Map request}) async {
     final response = await buildHttpResponse(
       endPoint: APIEndPoints.executePrompt,
       request: request,
       method: MethodType.post,
     );
-    return ExecutePromptRes.fromJson(response);
+    return AdditionalNarrativeRes.fromJson(response);
   }
 }
 

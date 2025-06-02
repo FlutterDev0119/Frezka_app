@@ -50,7 +50,8 @@ class TranslationMemoryController extends BaseController {
   var selectedAISearchField = ''.obs;
 
   TextEditingController searchAIController = TextEditingController();
-
+  TextEditingController aiCommentController = TextEditingController();
+  TextEditingController stagingCommentController = TextEditingController();
   var selectedOption = 'Pending Approval'.obs;
 
   final options = ['Pending Approval', 'AI Suggestions'];
@@ -134,6 +135,7 @@ class TranslationMemoryController extends BaseController {
   /// Staging (Pending)
   //========================================================================================
   Future<void> fetchData() async {
+    log("==================call----------------------------------------");
     if (isLoading.value) return;
     setLoading(true);
     try {
@@ -173,8 +175,9 @@ class TranslationMemoryController extends BaseController {
 
       if (response['success'] != null) {
         toast(response['success'].toString());
+        await fetchData();
       }
-      await fetchData();
+
       Get.back();
     } catch (e) {
       Get.snackbar('Error', 'Failed to update translation');
@@ -192,9 +195,14 @@ class TranslationMemoryController extends BaseController {
       // Check for success response
       if (response['success'] != null) {
         toast(response['success'].toString());
+        final result = await TranslationMemoryServiceApis.fetchTranslationMemoryList();
+        allFiles.clear();
+        allFiles.assignAll(result);
+        log("----------------------all----------------------------------");
+        log(allFiles);
       }
 
-      await fetchData();
+
     } catch (e) {
       toast(e.toString());
     } finally {
@@ -219,13 +227,13 @@ class TranslationMemoryController extends BaseController {
   //     setLoading(false); // Stop the loading indicator
   //   }
   // }
-  Future<void> saveAnnotation(id) async {
+  Future<void> saveAnnotation(comment,Id) async {
     try {
       isLoading.value = true;
 
       final request = {
-        "comment":"test",
-        "translation_edits_id":id,
+        "comment":comment,
+        "translation_edits_id":Id,
         "user_id":id,
         "username":Fullname,
       };
@@ -253,38 +261,33 @@ class TranslationMemoryController extends BaseController {
   //     setLoading(false);
   //   }
   // }
-   Future<void> getAnnotation(int id) async {
+  Future<void> getAnnotation(int id) async {
     if (isLoading.value) return;
 
     setLoading(true);
     try {
       final response = await TranslationMemoryServiceApis.getAnnotation(id: id);
 
-      // Check if response is a List and parse to ViewAnnotationRes
-      if (response is List) {
-        final List annotations = response as List;
-        final List<ViewAnnotationRes> parsedAnnotations = annotations
-            .where((item) => item is Map<String, dynamic>)
-            .map<ViewAnnotationRes>((item) => ViewAnnotationRes.fromJson(item as Map<String, dynamic>))
-            .toList();
+      // Optional: Log or format for debugging
+      log("Annotations: ${response.map((e) => e.toJson()).toList()}");
 
-        // Show bottom sheet with the annotation data
-        Future.delayed(Duration.zero, () {
-          Get.bottomSheet(
-            ViewAnnotationPopup(annotations: parsedAnnotations),
-            isScrollControlled: true,
-          );
-        });
-      } else {
-        Get.snackbar('Error', 'Unexpected response format');
-      }
-    } catch (e) {
-      log('Error fetching annotation: $e');
+      Future.delayed(Duration.zero, () {
+        Get.bottomSheet(
+          ViewAnnotationPopup(annotations: response), // ✅ Pass the list directly
+          isScrollControlled: true,
+        );
+      });
+    } catch (e, st) {
+      log('Error: $e\n$st');
       Get.snackbar('Error', 'Failed to fetch annotation.');
     } finally {
       setLoading(false);
     }
   }
+
+
+
+
 
 
 // Optional: Filtered list
@@ -402,14 +405,32 @@ class ViewAnnotationPopup extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            annotation.comment,
-                            style: const TextStyle(fontSize: 16),
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: annotation.username,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                    color: Colors.black, // or any color you prefer
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: '  ${annotation.createdAt}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            '- ${annotation.username} • ${annotation.createdAt}',
-                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                            annotation.comment,
+                            style: const TextStyle(fontSize: 16),
                           ),
                         ],
                       ),

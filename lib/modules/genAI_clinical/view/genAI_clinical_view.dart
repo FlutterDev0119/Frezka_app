@@ -976,13 +976,20 @@ class GenAIClinicalScreen extends StatelessWidget {
                                   log(controller.dataLakeInput.value);
                                   log(controller.selectedTags);
                                   log(controller.personalizeController.text);
-
+                                  final res = controller.fetchClinicalData.value;
+                                  final prettyJson = const JsonEncoder.withIndent('  ').convert(
+                                    res?.data.map((e) => e.toJson()).toList(),
+                                  );
                                   controller
-                                      .additionalNarrative(
-                                      query: controller.dataLakeInput.value.toString(),
-                                      SafetyReport: "",
-                                      checkbox: controller.selectedTags.toList(),
-                                      narrative: "")
+                                      .executePrompt(
+                                    studies: prettyJson.toList(),
+                                    checkbox: controller.selectedTags.toList(),
+                                  )
+                                      // .additionalNarrative(
+                                      // query: controller.dataLakeInput.value.toString(),
+                                      // SafetyReport: "",
+                                      // checkbox: controller.selectedTags.toList(),
+                                      // narrative: "")
                                       .then(
                                         (value) {
                                       controller.isAdditionalNarrative(true);
@@ -1590,22 +1597,107 @@ class GenAIClinicalScreen extends StatelessWidget {
                             ),
                           ),
                           10.height,
-                          Obx(() => controller.isExpanded.value
-                              ? SingleChildScrollView(
-                            scrollDirection: Axis.vertical,
-                            child: Text(
-                              controller.additionalNarrativeRes.value?.output ?? '',
-                              style: TextStyle(fontSize: 16),
-                            ).expand(),
-                          )
-                              : SingleChildScrollView(
-                              scrollDirection: Axis.vertical,
-                              child: Text(
-                            controller.additionalNarrativeRes.value?.output ?? '',
-                            style: TextStyle(fontSize: 16),
-                            // maxLines: 5,
-                            // overflow: TextOverflow.ellipsis,
-                          )),)
+                          Obx(() {
+                          // => controller.isExpanded.value
+                          //     ?
+                          // SingleChildScrollView(
+                          //   scrollDirection: Axis.vertical,
+                          //   child: Text(
+                          //     controller.additionalNarrativeRes.value?.output ?? '',
+                          //     style: TextStyle(fontSize: 16),
+                          //   ).expand(),
+                          // )
+                              final output = controller.additionalNarrativeRes.value?.output ?? '';
+
+                              if (controller.isTableData(output)) {
+                      // Parse markdown table
+                      final lines = output.trim().split('\n');
+                  final rows = <List<String>>[];
+
+                  for (var line in lines) {
+                    final trimmed = line.trim();
+                    if (trimmed.startsWith('|') && !RegExp(r'^\|[\s\-|:]+\|$').hasMatch(trimmed)) {
+                      final cells = trimmed
+                          .split('|')
+                          .map((e) => e.trim())
+                          .where((e) => e.isNotEmpty)
+                          .toList();
+                      rows.add(cells);
+                    }
+                  }
+
+                  if (rows.isEmpty) {
+                    return Text(output, style: TextStyle(fontSize: 16));
+                  }
+
+                  final maxCols = rows.map((r) => r.length).fold<int>(0, (a, b) => a > b ? a : b);
+
+                  final horizontalController = ScrollController();
+                  final verticalController = ScrollController();
+
+                  return Scrollbar(
+                    controller: horizontalController,
+                    thumbVisibility: true,
+                    interactive: true,
+                    child: SingleChildScrollView(
+                      controller: horizontalController,
+                      scrollDirection: Axis.horizontal,
+                      child: Scrollbar(
+                        controller: verticalController,
+                        thumbVisibility: true,
+                        interactive: true,
+                        child: SingleChildScrollView(
+                          controller: verticalController,
+                          scrollDirection: Axis.vertical,
+                          child: Table(
+                            border: TableBorder.all(),
+                            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                            columnWidths: {
+                              for (int i = 0; i < maxCols; i++) i: IntrinsicColumnWidth(),
+                            },
+                            children: rows.map((row) {
+                              final padded = List<String>.from(row);
+                              while (padded.length < maxCols) {
+                                padded.add('');
+                              }
+                              return TableRow(
+                                children: padded.map((cell) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(cell, style: TextStyle(fontSize: 16)),
+                                  );
+                                }).toList(),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                    } else {
+                      final verticalController = ScrollController();
+                      return Scrollbar(
+                      controller: verticalController,
+                      thumbVisibility: true,
+                      interactive: true,
+                      child: SingleChildScrollView(
+                      controller: verticalController,
+                      scrollDirection: Axis.vertical,
+                      child: Text(output, style: TextStyle(fontSize: 16)),
+                      ),
+                      );
+                      }
+                    })
+                    //           : SingleChildScrollView(
+                    //           scrollDirection: Axis.vertical,
+                    //           child: Text(
+                    //         controller.additionalNarrativeRes.value?.output ?? '',
+                    //         style: TextStyle(fontSize: 16),
+                    //         // maxLines: 5,
+                    //         // overflow: TextOverflow.ellipsis,
+                    //       )
+                    // ),
+                  // )
                         ],
                       ),
                     ),

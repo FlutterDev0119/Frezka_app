@@ -336,12 +336,12 @@ isNarrativeGeneration.value = false;
       isLoading.value = false;
     }
   }
-
-  Future<void> narrativeGeneration(
-      {required String query,
-      required List<String> safetyReport,
-      required String prompt,
-      required List<String> checkbox,}) async {
+  Future<void> narrativeGeneration({
+    required String query,
+    required List<String> safetyReport,
+    required String prompt,
+    required List<String> checkbox,
+  }) async {
     try {
       isLoading.value = true;
 
@@ -349,26 +349,63 @@ isNarrativeGeneration.value = false;
         "query": query,
         "SafetyReport": safetyReport,
         "checkbox": checkbox,
-        "prompt": "",
+        "prompt": prompt,
         "userId": id,
         "user_name": Fullname,
       };
-      log(request);
-      void logLongString(String message, {int chunkSize = 800}) {
-        final pattern = RegExp('.{1,$chunkSize}'); // chunk size
-        pattern.allMatches(message).forEach((match) => log(match.group(0)!));
-      }
 
       log('--------------narrativeGeneration------------------------');
-      logLongString(request.toString());
+      _logLongString(request.toString());
+
       final response = await GenAIPVServiceApis.fetchNarrativeGeneration(request: request);
       narrativeGenerationRes.value = response;
-    } catch (e) {
-      log('Error fetching Narrative Generation: $e');
+    } catch (e, stackTrace) {
+      log('❌ Error fetching Narrative Generation: $e');
+      log('📍 StackTrace: $stackTrace');
     } finally {
       isLoading.value = false;
     }
   }
+
+  void _logLongString(String message, {int chunkSize = 800}) {
+    final pattern = RegExp('.{1,$chunkSize}');
+    for (final match in pattern.allMatches(message)) {
+      log(match.group(0)!);
+    }
+  }
+
+  // Future<void> narrativeGeneration(
+  //     {required String query,
+  //     required List<String> safetyReport,
+  //     required String prompt,
+  //     required List<String> checkbox,}) async {
+  //   try {
+  //     isLoading.value = true;
+  //
+  //     final request = {
+  //       "query": query,
+  //       "SafetyReport": safetyReport,
+  //       "checkbox": checkbox,
+  //       "prompt": "",
+  //       "userId": id,
+  //       "user_name": Fullname,
+  //     };
+  //     log(request);
+  //     void logLongString(String message, {int chunkSize = 800}) {
+  //       final pattern = RegExp('.{1,$chunkSize}'); // chunk size
+  //       pattern.allMatches(message).forEach((match) => log(match.group(0)!));
+  //     }
+  //
+  //     log('--------------narrativeGeneration------------------------');
+  //     logLongString(request.toString());
+  //     final response = await GenAIPVServiceApis.fetchNarrativeGeneration(request: request);
+  //     narrativeGenerationRes.value = response;
+  //   } catch (e) {
+  //     log('Error fetching Narrative Generation: $e');
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
 
   // Future<void> getDocsLanguage({required String language}) async {
   //   try {

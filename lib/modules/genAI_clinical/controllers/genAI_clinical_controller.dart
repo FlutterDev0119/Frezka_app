@@ -33,7 +33,7 @@ class GenAIClinicalController extends GetxController {
   final RxString selectedParentTag = ''.obs;
   var additionalNarrativeRes = Rxn<AdditionalNarrativeRes>();
   var fetchClinicalData = Rxn<FetchClinicalDataRes>();
-  var executePromptRes = Rxn<ExecutePromptRes>();
+  var executePromptRes = Rxn<AdditionalNarrativeRes>();
   var generateSQLQuery = ''.obs;
   final RxString sqlQuery = ''.obs;
   var errorMessage = ''.obs;
@@ -182,7 +182,8 @@ class GenAIClinicalController extends GetxController {
       };
 
       final response = await ClinicalPromptServiceApis.executePrompt(request: request);
-      executePromptRes.value = response;
+      // executePromptRes.value = response;
+      additionalNarrativeRes.value = response;
     } catch (e) {
       print('Error fetching Additional Narrative: $e');
     } finally {
@@ -298,5 +299,11 @@ class GenAIClinicalController extends GetxController {
 
     filteredClassificationMap.assignAll(newFiltered);
   }
+
+  bool isTableData(String output) {
+    // Basic check for markdown-style table
+    return output.contains('|') && output.contains('\n');
+  }
+
 }
 
