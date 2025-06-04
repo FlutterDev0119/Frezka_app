@@ -116,11 +116,12 @@ class ReconAIScreen extends StatelessWidget {
                                                   children: [
                                                     Padding(
                                                       padding: EdgeInsets.only(left: 8),
-                                                      child: Text(
-                                                        fileName,
-                                                        overflow: TextOverflow.ellipsis,
+                                                      child:Text(
+                                                        fileName.length > 10 ? '${fileName.substring(0, 10)}...' : fileName,
+                                                        overflow: TextOverflow.ellipsis, // optional now
                                                         style: TextStyle(color: Colors.black),
-                                                      ),
+                                                      )
+
                                                     ),
                                                     PopupMenuButton<String>(
                                                       padding: EdgeInsets.zero,
@@ -356,10 +357,11 @@ class ReconAIScreen extends StatelessWidget {
                                                     Padding(
                                                       padding: EdgeInsets.only(left: 8),
                                                       child: Text(
-                                                        fileName,
-                                                        overflow: TextOverflow.ellipsis,
+                                                        fileName.length > 10 ? '${fileName.substring(0, 10)}...' : fileName,
+                                                        overflow: TextOverflow.ellipsis, // optional now
                                                         style: TextStyle(color: Colors.black),
-                                                      ),
+                                                      )
+
                                                     ),
                                                     PopupMenuButton<String>(
                                                       padding: EdgeInsets.zero,
@@ -569,10 +571,11 @@ class ReconAIScreen extends StatelessWidget {
                                                 Padding(
                                                   padding: EdgeInsets.only(left: 8),
                                                   child: Text(
-                                                    fileName,
-                                                    overflow: TextOverflow.ellipsis,
+                                                    fileName.length > 10 ? '${fileName.substring(0, 10)}...' : fileName,
+                                                    overflow: TextOverflow.ellipsis, // optional now
                                                     style: TextStyle(color: Colors.black),
-                                                  ),
+                                                  )
+
                                                 ),
                                                 PopupMenuButton<String>(
                                                   padding: EdgeInsets.zero,

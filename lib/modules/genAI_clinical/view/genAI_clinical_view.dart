@@ -459,6 +459,9 @@ class GenAIClinicalScreen extends StatelessWidget {
                           }).toList(),
                           onChanged: (newValue) {
                             controller.genAIDropdownValue.value = newValue!;
+                            if(newValue == "Upload File"){
+                              controller.fileCopyTap(false);
+                            };
                           },
                         )),
                   ),
@@ -795,14 +798,14 @@ class GenAIClinicalScreen extends StatelessWidget {
 
         /// Show data of FetchClinicalDataRes with image and scrollable in both axes
         Obx(() {
-          if (controller.fileCopyTap == true) {
+          if (controller.fileCopyTap == true ) {
             final res = controller.fetchClinicalData.value;
-            if (res == null || res.data.isEmpty) {
+            if (res == null || res.studies.isEmpty) {
               return SizedBox.shrink();
             }
             // Show the full JSON response in a scrollable box
             final prettyJson = const JsonEncoder.withIndent('  ').convert(
-              res.data.map((e) => e.toJson()).toList(),
+              res.studies.map((e) => e.toJson()).toList(),
             );
             return Container(
               width: double.infinity,
@@ -978,7 +981,7 @@ class GenAIClinicalScreen extends StatelessWidget {
                                   log(controller.personalizeController.text);
                                   final res = controller.fetchClinicalData.value;
                                   final prettyJson = const JsonEncoder.withIndent('  ').convert(
-                                    res?.data.map((e) => e.toJson()).toList(),
+                                    res?.studies.map((e) => e.toJson()).toList(),
                                   );
                                   controller
                                       .executePrompt(
@@ -1261,14 +1264,19 @@ class GenAIClinicalScreen extends StatelessWidget {
                                 log(controller.dataLakeInput.value);
                                 log(controller.selectedTags);
                                 log(controller.personalizeController.text);
+                                final res = controller.fetchClinicalData.value;
+                                final prettyJson = const JsonEncoder.withIndent('  ').convert(
+                                  res?.studies.map((e) => e.toJson()).toList(),
+                                );
                                 // if (controller.dataLakeInput.value.isEmpty) {
                                 //   toast("Please Include your query.");
                                 //   return;
                                 // } else {
+
                                   controller
                                       .additionalNarrative(
                                           query: controller.dataLakeInput.value.toString(),
-                                          SafetyReport: "",
+                                          SafetyReport: prettyJson.toList(),
                                           checkbox: controller.selectedTags.toList(),
                                           narrative: "")
                                       .then(
@@ -1432,20 +1440,159 @@ class GenAIClinicalScreen extends StatelessWidget {
                                 ),
 
                                 // Show prompt
+                                // IconButton(
+                                //   icon: const Icon(Icons.visibility),
+                                //   tooltip: 'Show prompt',
+                                //   onPressed: () {
+                                //     final prompt = controller.personalizeController.text;
+                                //     showDialog(
+                                //       context: Get.context!,
+                                //       builder: (_) => AlertDialog(
+                                //         title: Text('Prompt'),
+                                //         content: Text(prompt.isNotEmpty ? prompt : 'No prompt available.'),
+                                //         actions: [
+                                //           AppButton(
+                                //             onTap: () => Get.back(),
+                                //             child: Text('Close',style:TextStyle(color: appWhiteColor),),
+                                //             color: appBackGroundColor,
+                                //           ),
+                                //         ],
+                                //       ),
+                                //     );
+                                //   },
+                                //   padding: EdgeInsets.zero,
+                                //   constraints: const BoxConstraints(),
+                                // ),
                                 IconButton(
                                   icon: const Icon(Icons.visibility),
                                   tooltip: 'Show prompt',
                                   onPressed: () {
-                                    final prompt = controller.personalizeController.text;
+                                    final executeText = controller.additionalNarrativeRes.value?.output ?? '';
+                                    final output = controller.executePromptRes.value?.output ?? '';
+
+                                    Widget buildContent(String data) {
+                                      if (controller.isTableData(data)) {
+                                        final lines = data.trim().split('\n');
+                                        final rows = <List<String>>[];
+
+                                        for (var line in lines) {
+                                          final trimmed = line.trim();
+                                          if (trimmed.startsWith('|') &&
+                                              !RegExp(r'^\|[\s\-|:]+\|$').hasMatch(trimmed)) {
+                                            final cells = trimmed
+                                                .split('|')
+                                                .map((e) => e.trim())
+                                                .where((e) => e.isNotEmpty)
+                                                .toList();
+                                            rows.add(cells);
+                                          }
+                                        }
+
+                                        if (rows.isEmpty) {
+                                          return Text(data, style: const TextStyle(fontSize: 14));
+                                        }
+
+                                        final maxCols = rows.map((r) => r.length).fold<int>(0, (a, b) => a > b ? a : b);
+
+                                        return SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          child: Table(
+                                            border: TableBorder.all(),
+                                            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                                            columnWidths: {
+                                              for (int i = 0; i < maxCols; i++) i: IntrinsicColumnWidth(),
+                                            },
+                                            children: rows.map((row) {
+                                              final padded = List<String>.from(row);
+                                              while (padded.length < maxCols) padded.add('');
+                                              return TableRow(
+                                                children: padded.map((cell) {
+                                                  return Padding(
+                                                    padding: const EdgeInsets.all(8.0),
+                                                    child: Text(cell, style: const TextStyle(fontSize: 14)),
+                                                  );
+                                                }).toList(),
+                                              );
+                                            }).toList(),
+                                          ),
+                                        );
+                                      } else {
+                                        // Handle text with ### headers and **bold** formatting
+                                        final lines = data.split('\n');
+
+                                        return Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: lines.map((line) {
+                                            if (line.trim().startsWith('###')) {
+                                              final headerText = line.replaceFirst('###', '').trim();
+                                              return Padding(
+                                                padding: const EdgeInsets.only(bottom: 8.0, top: 12.0),
+                                                child: Text(
+                                                  headerText,
+                                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                                ),
+                                              );
+                                            } else {
+                                              final spans = <TextSpan>[];
+                                              final regex = RegExp(r'\*\*(.*?)\*\*');
+                                              var currentIndex = 0;
+
+                                              for (final match in regex.allMatches(line)) {
+                                                if (match.start > currentIndex) {
+                                                  spans.add(TextSpan(text: line.substring(currentIndex, match.start)));
+                                                }
+                                                spans.add(TextSpan(
+                                                  text: match.group(1),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                                ));
+                                                currentIndex = match.end;
+                                              }
+
+                                              if (currentIndex < line.length) {
+                                                spans.add(TextSpan(text: line.substring(currentIndex)));
+                                              }
+
+                                              return Padding(
+                                                padding: const EdgeInsets.only(bottom: 4.0),
+                                                child: RichText(
+                                                  text: TextSpan(
+                                                    children: spans,
+                                                    style: const TextStyle(fontSize: 14, color: Colors.black),
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          }).toList(),
+                                        );
+                                      }
+                                    }
+
                                     showDialog(
                                       context: Get.context!,
                                       builder: (_) => AlertDialog(
-                                        title: Text('Prompt'),
-                                        content: Text(prompt.isNotEmpty ? prompt : 'No prompt available.'),
+                                        title: const Text('Prompt'),
+                                        content: SingleChildScrollView(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              if (output.isNotEmpty) ...[
+                                                const SizedBox(height: 8),
+                                                buildContent(output),
+                                                const SizedBox(height: 20),
+                                              ],
+                                              if (executeText.isNotEmpty) ...[
+                                                const SizedBox(height: 8),
+                                                buildContent(executeText),
+                                              ],
+                                              if (output.isEmpty && executeText.isEmpty)
+                                                const Text('No response available.'),
+                                            ],
+                                          ),
+                                        ),
                                         actions: [
                                           AppButton(
                                             onTap: () => Get.back(),
-                                            child: Text('Close',style:TextStyle(color: appWhiteColor),),
+                                            child: Text('Close', style: TextStyle(color: appWhiteColor)),
                                             color: appBackGroundColor,
                                           ),
                                         ],
@@ -1455,6 +1602,8 @@ class GenAIClinicalScreen extends StatelessWidget {
                                   padding: EdgeInsets.zero,
                                   constraints: const BoxConstraints(),
                                 ),
+
+
 
                                 // Download as .txt
                                 IconButton(
@@ -1543,11 +1692,173 @@ class GenAIClinicalScreen extends StatelessWidget {
                                 // ),
 
                                 // Show response in full screen dialog
+                                // IconButton(
+                                //   icon: const Icon(Icons.fullscreen),
+                                //   tooltip: 'Show response fullscreen',
+                                //   onPressed: () {
+                                //     final text = controller.additionalNarrativeRes.value?.output ?? '';
+                                //     final exucuteText = controller.executePromptRes.value?.output ?? '';
+                                //     showDialog(
+                                //       context: Get.context!,
+                                //       barrierDismissible: true,
+                                //       builder: (context) {
+                                //         return Dialog(
+                                //           insetPadding: EdgeInsets.zero,
+                                //           backgroundColor: Colors.transparent,
+                                //           child: Container(
+                                //             width: double.infinity,
+                                //             height: double.infinity,
+                                //             color: Colors.white,
+                                //             child: Column(
+                                //               children: [
+                                //                 AppBar(
+                                //                   backgroundColor: appBackGroundColor,
+                                //                   automaticallyImplyLeading: false,
+                                //                   title: const Text('AI Powered Response', style: TextStyle(color: Colors.white)),
+                                //                   actions: [
+                                //                     IconButton(
+                                //                       icon: const Icon(Icons.close, color: Colors.white),
+                                //                       onPressed: () => Navigator.of(context).pop(),
+                                //                     ),
+                                //                   ],
+                                //                 ),
+                                //                 Expanded(
+                                //                   child: Padding(
+                                //                     padding: const EdgeInsets.all(16.0),
+                                //                     child: SingleChildScrollView(
+                                //                       child:
+                                //                       Column(
+                                //                         children: [
+                                //                           Text(
+                                //                             text,
+                                //                             style: const TextStyle(fontSize: 16),
+                                //                           ),
+                                //                           20.height,
+                                //                           Text(
+                                //                             exucuteText.toString(),
+                                //                             style: const TextStyle(fontSize: 16),
+                                //                           ),
+                                //                         ],
+                                //                       ),
+                                //                     ),
+                                //                   ),
+                                //                 ),
+                                //               ],
+                                //             ),
+                                //           ),
+                                //         );
+                                //       },
+                                //     );
+                                //   },
+                                //   padding: EdgeInsets.zero,
+                                //   constraints: const BoxConstraints(),
+                                // ),
                                 IconButton(
                                   icon: const Icon(Icons.fullscreen),
                                   tooltip: 'Show response fullscreen',
                                   onPressed: () {
-                                    final text = controller.additionalNarrativeRes.value?.output ?? '';
+                                    final exucuteText = controller.additionalNarrativeRes.value?.output ?? '';
+                                    final text = controller.executePromptRes.value?.output ?? '';
+
+                                    Widget renderContent(String data) {
+                                      if (controller.isTableData(data)) {
+                                        final lines = data.trim().split('\n');
+                                        final rows = <List<String>>[];
+
+                                        for (var line in lines) {
+                                          final trimmed = line.trim();
+                                          if (trimmed.startsWith('|') &&
+                                              !RegExp(r'^\|[\s\-|:]+\|$').hasMatch(trimmed)) {
+                                            final cells = trimmed
+                                                .split('|')
+                                                .map((e) => e.trim())
+                                                .where((e) => e.isNotEmpty)
+                                                .toList();
+                                            rows.add(cells);
+                                          }
+                                        }
+
+                                        if (rows.isEmpty) {
+                                          return Text(data, style: const TextStyle(fontSize: 16));
+                                        }
+
+                                        final maxCols = rows.map((r) => r.length).fold<int>(0, (a, b) => a > b ? a : b);
+
+                                        return SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          child: Table(
+                                            border: TableBorder.all(),
+                                            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                                            columnWidths: {
+                                              for (int i = 0; i < maxCols; i++) i: IntrinsicColumnWidth(),
+                                            },
+                                            children: rows.map((row) {
+                                              final padded = List<String>.from(row);
+                                              while (padded.length < maxCols) {
+                                                padded.add('');
+                                              }
+                                              return TableRow(
+                                                children: padded.map((cell) {
+                                                  return Padding(
+                                                    padding: const EdgeInsets.all(8.0),
+                                                    child: Text(cell, style: const TextStyle(fontSize: 16)),
+                                                  );
+                                                }).toList(),
+                                              );
+                                            }).toList(),
+                                          ),
+                                        );
+                                      } else {
+                                        // Markdown-like header and bold formatting
+                                        final lines = data.split('\n');
+
+                                        return Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: lines.map((line) {
+                                            if (line.trim().startsWith('###')) {
+                                              final headerText = line.replaceFirst('###', '').trim();
+                                              return Padding(
+                                                padding: const EdgeInsets.only(bottom: 8.0, top: 12.0),
+                                                child: Text(
+                                                  headerText,
+                                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                                ),
+                                              );
+                                            } else {
+                                              final spans = <TextSpan>[];
+                                              final regex = RegExp(r'\*\*(.*?)\*\*');
+                                              var currentIndex = 0;
+
+                                              for (final match in regex.allMatches(line)) {
+                                                if (match.start > currentIndex) {
+                                                  spans.add(TextSpan(text: line.substring(currentIndex, match.start)));
+                                                }
+                                                spans.add(TextSpan(
+                                                  text: match.group(1),
+                                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                                ));
+                                                currentIndex = match.end;
+                                              }
+
+                                              if (currentIndex < line.length) {
+                                                spans.add(TextSpan(text: line.substring(currentIndex)));
+                                              }
+
+                                              return Padding(
+                                                padding: const EdgeInsets.only(bottom: 4.0),
+                                                child: RichText(
+                                                  text: TextSpan(
+                                                    children: spans,
+                                                    style: const TextStyle(fontSize: 16, color: Colors.black),
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          }).toList(),
+                                        );
+                                      }
+                                    }
+
                                     showDialog(
                                       context: Get.context!,
                                       barrierDismissible: true,
@@ -1564,7 +1875,8 @@ class GenAIClinicalScreen extends StatelessWidget {
                                                 AppBar(
                                                   backgroundColor: appBackGroundColor,
                                                   automaticallyImplyLeading: false,
-                                                  title: const Text('AI Powered Response', style: TextStyle(color: Colors.white)),
+                                                  title: const Text('AI Powered Response',
+                                                      style: TextStyle(color: Colors.white)),
                                                   actions: [
                                                     IconButton(
                                                       icon: const Icon(Icons.close, color: Colors.white),
@@ -1576,9 +1888,25 @@ class GenAIClinicalScreen extends StatelessWidget {
                                                   child: Padding(
                                                     padding: const EdgeInsets.all(16.0),
                                                     child: SingleChildScrollView(
-                                                      child: Text(
-                                                        text,
-                                                        style: const TextStyle(fontSize: 16),
+                                                      child: Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          if (text.isNotEmpty) ...[
+                                                            const Text('Additional Narrative',
+                                                                style: TextStyle(
+                                                                    fontWeight: FontWeight.bold, fontSize: 18)),
+                                                            const SizedBox(height: 8),
+                                                            renderContent(text),
+                                                            const SizedBox(height: 24),
+                                                          ],
+                                                          if (exucuteText.isNotEmpty) ...[
+                                                            const Text('Prompt Result',
+                                                                style: TextStyle(
+                                                                    fontWeight: FontWeight.bold, fontSize: 18)),
+                                                            const SizedBox(height: 8),
+                                                            renderContent(exucuteText),
+                                                          ]
+                                                        ],
                                                       ),
                                                     ),
                                                   ),
@@ -1592,112 +1920,249 @@ class GenAIClinicalScreen extends StatelessWidget {
                                   },
                                   padding: EdgeInsets.zero,
                                   constraints: const BoxConstraints(),
-                                ),
+                                )
+
+
                               ],
                             ),
                           ),
                           10.height,
+
                           Obx(() {
-                          // => controller.isExpanded.value
-                          //     ?
-                          // SingleChildScrollView(
-                          //   scrollDirection: Axis.vertical,
-                          //   child: Text(
-                          //     controller.additionalNarrativeRes.value?.output ?? '',
-                          //     style: TextStyle(fontSize: 16),
-                          //   ).expand(),
-                          // )
-                              final output = controller.additionalNarrativeRes.value?.output ?? '';
+                            final executeText = controller.additionalNarrativeRes.value?.output ?? '';
+                            final output = controller.executePromptRes.value?.output ?? '';
 
-                              if (controller.isTableData(output)) {
-                      // Parse markdown table
-                      final lines = output.trim().split('\n');
-                  final rows = <List<String>>[];
+                            Widget renderContent(String text) {
+                              if (controller.isTableData(text)) {
+                                final lines = text.trim().split('\n');
+                                final rows = <List<String>>[];
 
-                  for (var line in lines) {
-                    final trimmed = line.trim();
-                    if (trimmed.startsWith('|') && !RegExp(r'^\|[\s\-|:]+\|$').hasMatch(trimmed)) {
-                      final cells = trimmed
-                          .split('|')
-                          .map((e) => e.trim())
-                          .where((e) => e.isNotEmpty)
-                          .toList();
-                      rows.add(cells);
-                    }
-                  }
+                                for (var line in lines) {
+                                  final trimmed = line.trim();
+                                  if (trimmed.startsWith('|') &&
+                                      !RegExp(r'^\|[\s\-|:]+\|$').hasMatch(trimmed)) {
+                                    final cells = trimmed
+                                        .split('|')
+                                        .map((e) => e.trim())
+                                        .where((e) => e.isNotEmpty)
+                                        .toList();
+                                    rows.add(cells);
+                                  }
+                                }
 
-                  if (rows.isEmpty) {
-                    return Text(output, style: TextStyle(fontSize: 16));
-                  }
-
-                  final maxCols = rows.map((r) => r.length).fold<int>(0, (a, b) => a > b ? a : b);
-
-                  final horizontalController = ScrollController();
-                  final verticalController = ScrollController();
-
-                  return Scrollbar(
-                    controller: horizontalController,
-                    thumbVisibility: true,
-                    interactive: true,
-                    child: SingleChildScrollView(
-                      controller: horizontalController,
-                      scrollDirection: Axis.horizontal,
-                      child: Scrollbar(
-                        controller: verticalController,
-                        thumbVisibility: true,
-                        interactive: true,
-                        child: SingleChildScrollView(
-                          controller: verticalController,
-                          scrollDirection: Axis.vertical,
-                          child: Table(
-                            border: TableBorder.all(),
-                            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                            columnWidths: {
-                              for (int i = 0; i < maxCols; i++) i: IntrinsicColumnWidth(),
-                            },
-                            children: rows.map((row) {
-                              final padded = List<String>.from(row);
-                              while (padded.length < maxCols) {
-                                padded.add('');
-                              }
-                              return TableRow(
-                                children: padded.map((cell) {
+                                if (rows.isEmpty) {
                                   return Padding(
                                     padding: const EdgeInsets.all(8.0),
-                                    child: Text(cell, style: TextStyle(fontSize: 16)),
+                                    child: Text(text, style: TextStyle(fontSize: 16)),
                                   );
-                                }).toList(),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                    } else {
-                      final verticalController = ScrollController();
-                      return Scrollbar(
-                      controller: verticalController,
-                      thumbVisibility: true,
-                      interactive: true,
-                      child: SingleChildScrollView(
-                      controller: verticalController,
-                      scrollDirection: Axis.vertical,
-                      child: Text(output, style: TextStyle(fontSize: 16)),
-                      ),
-                      );
-                      }
-                    })
-                    //           : SingleChildScrollView(
-                    //           scrollDirection: Axis.vertical,
-                    //           child: Text(
-                    //         controller.additionalNarrativeRes.value?.output ?? '',
-                    //         style: TextStyle(fontSize: 16),
-                    //         // maxLines: 5,
-                    //         // overflow: TextOverflow.ellipsis,
-                    //       )
-                    // ),
-                  // )
+                                }
+
+                                final maxCols =
+                                rows.map((r) => r.length).fold<int>(0, (a, b) => a > b ? a : b);
+
+                                return Scrollbar(
+                                  thumbVisibility: true,
+                                  interactive: true,
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Scrollbar(
+                                      thumbVisibility: true,
+                                      interactive: true,
+                                      child: SingleChildScrollView(
+                                        scrollDirection: Axis.vertical,
+                                        child: Table(
+                                          border: TableBorder.all(),
+                                          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                                          columnWidths: {
+                                            for (int i = 0; i < maxCols; i++) i: IntrinsicColumnWidth(),
+                                          },
+                                          children: rows.map((row) {
+                                            final padded = List<String>.from(row);
+                                            while (padded.length < maxCols) {
+                                              padded.add('');
+                                            }
+                                            return TableRow(
+                                              children: padded.map((cell) {
+                                                return Padding(
+                                                  padding: const EdgeInsets.all(8.0),
+                                                  child: Text(cell, style: TextStyle(fontSize: 16)),
+                                                );
+                                              }).toList(),
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                final lines = text.split('\n');
+
+                                return Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: lines.map((line) {
+                                      if (line.trim().startsWith('###')) {
+                                        final headerText = line.replaceFirst('###', '').trim();
+                                        return Padding(
+                                          padding: const EdgeInsets.only(bottom: 8.0, top: 12.0),
+                                          child: Text(
+                                            headerText,
+                                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                          ),
+                                        );
+                                      } else {
+                                        final spans = <TextSpan>[];
+                                        final regex = RegExp(r'\*\*(.*?)\*\*');
+                                        var currentIndex = 0;
+
+                                        for (final match in regex.allMatches(line)) {
+                                          if (match.start > currentIndex) {
+                                            spans.add(TextSpan(text: line.substring(currentIndex, match.start)));
+                                          }
+                                          spans.add(TextSpan(
+                                            text: match.group(1),
+                                            style: TextStyle(fontWeight: FontWeight.bold),
+                                          ));
+                                          currentIndex = match.end;
+                                        }
+
+                                        if (currentIndex < line.length) {
+                                          spans.add(TextSpan(text: line.substring(currentIndex)));
+                                        }
+
+                                        return RichText(
+                                          text: TextSpan(
+                                            children: spans,
+                                            style: TextStyle(fontSize: 16, color: Colors.black),
+                                          ),
+                                        );
+                                      }
+                                    }).toList(),
+                                  ),
+                                );
+                              }
+                            }
+
+                            final verticalController = ScrollController();
+
+                            return Scrollbar(
+                              controller: verticalController,
+                              thumbVisibility: true,
+                              interactive: true,
+                              child: SingleChildScrollView(
+                                controller: verticalController,
+                                scrollDirection: Axis.vertical,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (output.isNotEmpty) renderContent(output),
+                                    const SizedBox(height: 20),
+                                    if (executeText.isNotEmpty) renderContent(executeText),
+                                  ],
+                                ),
+                              ),
+                            );
+                          })
+
+                          //         Obx(() {
+                  //           final  exucuteText= controller.additionalNarrativeRes.value?.output ?? '';
+                  //           final output = controller.executePromptRes.value?.output ?? '';
+                  //
+                  //           Widget renderContent(String text) {
+                  //             if (controller.isTableData(text)) {
+                  //               final lines = text.trim().split('\n');
+                  //               final rows = <List<String>>[];
+                  //
+                  //               for (var line in lines) {
+                  //                 final trimmed = line.trim();
+                  //                 if (trimmed.startsWith('|') &&
+                  //                     !RegExp(r'^\|[\s\-|:]+\|$').hasMatch(trimmed)) {
+                  //                   final cells = trimmed
+                  //                       .split('|')
+                  //                       .map((e) => e.trim())
+                  //                       .where((e) => e.isNotEmpty)
+                  //                       .toList();
+                  //                   rows.add(cells);
+                  //                 }
+                  //               }
+                  //
+                  //               if (rows.isEmpty) {
+                  //                 return Padding(
+                  //                   padding: const EdgeInsets.all(8.0),
+                  //                   child: Text(text, style: TextStyle(fontSize: 16)),
+                  //                 );
+                  //               }
+                  //
+                  //               final maxCols =
+                  //               rows.map((r) => r.length).fold<int>(0, (a, b) => a > b ? a : b);
+                  //
+                  //               return Scrollbar(
+                  //                 thumbVisibility: true,
+                  //                 interactive: true,
+                  //                 child: SingleChildScrollView(
+                  //                   scrollDirection: Axis.horizontal,
+                  //                   child: Scrollbar(
+                  //                     thumbVisibility: true,
+                  //                     interactive: true,
+                  //                     child: SingleChildScrollView(
+                  //                       scrollDirection: Axis.vertical,
+                  //                       child: Table(
+                  //                         border: TableBorder.all(),
+                  //                         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                  //                         columnWidths: {
+                  //                           for (int i = 0; i < maxCols; i++) i: IntrinsicColumnWidth(),
+                  //                         },
+                  //                         children: rows.map((row) {
+                  //                           final padded = List<String>.from(row);
+                  //                           while (padded.length < maxCols) {
+                  //                             padded.add('');
+                  //                           }
+                  //                           return TableRow(
+                  //                             children: padded.map((cell) {
+                  //                               return Padding(
+                  //                                 padding: const EdgeInsets.all(8.0),
+                  //                                 child: Text(cell, style: TextStyle(fontSize: 16)),
+                  //                               );
+                  //                             }).toList(),
+                  //                           );
+                  //                         }).toList(),
+                  //                       ),
+                  //                     ),
+                  //                   ),
+                  //                 ),
+                  //               );
+                  //             } else {
+                  //               return Padding(
+                  //                 padding: const EdgeInsets.all(12.0),
+                  //                 child: Text(text, style: TextStyle(fontSize: 16)),
+                  //               );
+                  //             }
+                  //           }
+                  //
+                  //           final verticalController = ScrollController();
+                  //
+                  //           return Scrollbar(
+                  //             controller: verticalController,
+                  //             thumbVisibility: true,
+                  //             interactive: true,
+                  //             child: SingleChildScrollView(
+                  //               controller: verticalController,
+                  //               scrollDirection: Axis.vertical,
+                  //               child: Column(
+                  //                 crossAxisAlignment: CrossAxisAlignment.start,
+                  //                 children: [
+                  //                   if (output.isNotEmpty) renderContent(output),
+                  //                   const SizedBox(height: 20),
+                  //                   if (exucuteText.isNotEmpty) renderContent(exucuteText),
+                  //                 ],
+                  //               ),
+                  //             ),
+                  //           );
+                  //         })
+
+
                         ],
                       ),
                     ),

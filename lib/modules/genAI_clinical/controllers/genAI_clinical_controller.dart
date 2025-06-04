@@ -33,7 +33,7 @@ class GenAIClinicalController extends GetxController {
   final RxString selectedParentTag = ''.obs;
   var additionalNarrativeRes = Rxn<AdditionalNarrativeRes>();
   var fetchClinicalData = Rxn<FetchClinicalDataRes>();
-  var executePromptRes = Rxn<AdditionalNarrativeRes>();
+  var executePromptRes = Rxn<ExecutePromptRes>();
   var generateSQLQuery = ''.obs;
   final RxString sqlQuery = ''.obs;
   var errorMessage = ''.obs;
@@ -142,13 +142,13 @@ class GenAIClinicalController extends GetxController {
   }
 
 
-  Future<void> additionalNarrative({required String query, required String SafetyReport, required List<String> checkbox, required String narrative}) async {
+  Future<void> additionalNarrative({required String query, required List<String> SafetyReport, required List<String> checkbox, required String narrative}) async {
     try {
       isLoading.value = true;
 
       final request = {
         "query": query,
-        "SafetyReport": [],
+        "SafetyReport": SafetyReport,
         "checkbox": checkbox,
         "narrative": '',
       };
@@ -182,8 +182,7 @@ class GenAIClinicalController extends GetxController {
       };
 
       final response = await ClinicalPromptServiceApis.executePrompt(request: request);
-      // executePromptRes.value = response;
-      additionalNarrativeRes.value = response;
+      executePromptRes.value = response;
     } catch (e) {
       print('Error fetching Additional Narrative: $e');
     } finally {

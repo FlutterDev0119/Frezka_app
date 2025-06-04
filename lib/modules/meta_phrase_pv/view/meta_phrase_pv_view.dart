@@ -223,6 +223,8 @@ class MetaPhraseScreen extends StatelessWidget {
                controller.filteredReturnReasons.assignAll(controller.returnReson);
                controller.isEditing.value = false;
                controller.isShowDowanlaodButton.value = false;
+               controller.selectedMode.value = 'Review';
+               controller.selected.value = 'Review';
               },
               child: Align(
                 alignment: Alignment.centerRight,
@@ -272,7 +274,7 @@ class MetaPhraseScreen extends StatelessWidget {
                             child: Container(
                               child: Card(
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                color: getColor(label),
+                                color: (controller.isShowDowanlaodButton.value == true || controller.selected.value == "Certify") ? appGreenColor : getColor(label),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                                   child: Column(
@@ -1043,6 +1045,11 @@ class MetaPhraseScreen extends StatelessWidget {
                                                   items: isCertify
                                                       ? certifyOptions.map((option) {
                                                         log("option----------$option");
+                                                        controller.isHideReturnCard.value = false;
+                                                        controller.selectedReturnReason.value ='';
+                                                        controller.returnTextController.text ="";
+                                                        controller.selectedReason.value ='';
+                                                        controller.rejectTextController.text ="";
                                                           return PopupMenuItem<String>(
                                                             value: option,
                                                             child: InkWell(
@@ -1267,7 +1274,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                     //   }).toList(),
                                     // ),
                                   ),
-                                if (controller.isReturnSelected.value)
+                                if (controller.isReturnSelected.value && controller.isHideReturnCard.value !=true)
                                   Obx(() {
                                     if (controller.isReturnSelected.value) {
                                       return Container(
@@ -1295,6 +1302,8 @@ class MetaPhraseScreen extends StatelessWidget {
                                                 border: OutlineInputBorder(),
                                               ),
                                               items: controller.filteredReturnReasons.map((reason) {
+                                                log("reason: $reason");
+                                                log("reason: ${controller.selectedReturnReason.value}");
                                                 return DropdownMenuItem<String>(
                                                   value: reason,
                                                   child: Marquee(child: Text(reason)),
@@ -1316,7 +1325,8 @@ class MetaPhraseScreen extends StatelessWidget {
                                             ElevatedButton(
                                               onPressed: () {
                                                 // Handle submit action
-                                                print('Submitted: ${controller.rejectTextController.text}');
+                                                print('Submitted:--- ${controller.returnTextController.text}');
+                                                controller.putJustification();
                                               },
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: appBackGroundColor,
@@ -1384,7 +1394,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                           ElevatedButton(
                                             onPressed: () {
                                               // Handle submit action
-                                              print('Submitted: ${controller.rejectTextController.text}');
+                                              print('Submitted: ++++ ${controller.rejectTextController.text}');
                                             },
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: appBackGroundColor,
@@ -1821,6 +1831,7 @@ void showCredentialsDialog(BuildContext context, controller) {
 Future<void> generateAndDownloadCertificate(String firstName, String email, String fileName) async {
   final pdf = pw.Document();
 
+  // Build PDF content
   pdf.addPage(
     pw.Page(
       build: (context) {
@@ -1842,8 +1853,8 @@ Future<void> generateAndDownloadCertificate(String firstName, String email, Stri
               pw.SizedBox(height: 20),
               pw.Text(
                 'I, $firstName, certify that I am competent to translate between English and Japanese (ja). '
-                'I further certify that I translated the document titled "$fileName", and the translation is true '
-                'and accurate to the best of my abilities.',
+                    'I further certify that I translated the document titled "$fileName", and the translation is true '
+                    'and accurate to the best of my abilities.',
                 style: pw.TextStyle(fontSize: 14),
               ),
               pw.SizedBox(height: 20),
@@ -1867,15 +1878,15 @@ Future<void> generateAndDownloadCertificate(String firstName, String email, Stri
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.end,
                     children: [
-                      pw.Text(firstName.toString()),
+                      pw.Text(firstName),
                       pw.SizedBox(height: 8),
-                      pw.Text(email.toString()),
+                      pw.Text(email),
                       pw.SizedBox(height: 8),
                       pw.Text('123456789'),
                       pw.SizedBox(height: 8),
                       pw.Text('India'),
                     ],
-                  )
+                  ),
                 ],
               ),
             ],
@@ -1885,19 +1896,40 @@ Future<void> generateAndDownloadCertificate(String firstName, String email, Stri
     ),
   );
 
-  // Permissions (Only needed for Android)
-  if (Platform.isAndroid) {
-    final status = await Permission.storage.request();
-    if (!status.isGranted) {
-      print('Storage permission denied');
-      return;
+  try {
+    Directory? outputDir;
+
+    // Android: Ask storage permission and use Downloads folder
+    if (Platform.isAndroid) {
+      var status = await Permission.manageExternalStorage.status;
+      if (!status.isGranted) {
+        status = await Permission.manageExternalStorage.request();
+        if (!status.isGranted) {
+          print('Storage permission denied');
+          await openAppSettings(); // Optional: prompt user to manually grant
+          return;
+        }
+      }
+
+      // Get downloads folder manually (public directory)
+      outputDir = Directory('/storage/emulated/0/Download');
+      if (!await outputDir.exists()) {
+        print("Downloads folder not found");
+        return;
+      }
+    } else {
+      outputDir = await getApplicationDocumentsDirectory();
     }
+
+    // Save file
+    final filePath = "${outputDir.path}/certificate_${DateTime.now().millisecondsSinceEpoch}.pdf";
+    final file = File(filePath);
+    await file.writeAsBytes(await pdf.save());
+
+    // Open file
+    final result = await OpenFile.open(filePath);
+    print('File opened: ${result.message}');
+  } catch (e) {
+    print('Error generating certificate: $e');
   }
-
-  final outputDir = await getApplicationDocumentsDirectory();
-  final filePath = "${outputDir.path}/certificate.pdf";
-  final file = File(filePath);
-  await file.writeAsBytes(await pdf.save());
-
-  OpenFile.open(filePath); // Optional: open after save
 }

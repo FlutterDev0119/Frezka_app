@@ -17,6 +17,7 @@ import '../modules/governAI/model/count_traces_model.dart';
 import '../modules/governAI/model/fetch_traces_model.dart';
 import '../modules/login/model/google_social_login_model.dart';
 import '../modules/meta_phrase_pv/model/open_worklist_model.dart';
+import '../modules/meta_phrase_pv/model/put_justification_data_res.dart';
 import '../modules/meta_phrase_pv/model/reverse_translate_model.dart';
 import '../modules/meta_phrase_pv/model/transalted_model.dart';
 import '../modules/prompt_admin/model/inherit_fetch_doc_model.dart';
@@ -224,6 +225,15 @@ class MetaPhrasePVServiceApis {
       method: MethodType.post,
     );
     return ReverseTranslateResponse.fromJson(response);
+  }
+
+  static Future<SaveJustificationRes> putJustificationData({required Map request}) async {
+    final response = await buildHttpResponse(
+      endPoint: APIEndPoints.putJustification,
+      request: request,
+      method: MethodType.post,
+    );
+    return SaveJustificationRes.fromJson(response);
   }
 }
 
@@ -435,10 +445,10 @@ class GovernAIServiceApis {
   //     throw Exception('Error fetching TracesList:----------- $e');
   //   }
   // }
-  static Future<List<TraceData>> fetchTracesList(String key, String date) async {
+  static Future<List<TraceData>> fetchTracesList(String key, String date,int page) async {
     try {
       final response = await buildHttpResponse(
-        endPoint: "${APIEndPoints.fetchTrace}?key=$key&date=$date&page=1",
+        endPoint: "${APIEndPoints.fetchTrace}?key=$key&date=$date&page=$page",
         method: MethodType.get,
       );
 
@@ -530,18 +540,47 @@ class GenAIPVServiceApis {
   static Future<NarrativeGenerationRes> fetchNarrativeGeneration({
     required Map request,
   }) async {
-    final response = await buildHttpResponse(
-      endPoint: APIEndPoints.fetchNarrativeGeneration,
-      request: request,
-      method: MethodType.post,
-    );
+    try {
+      final response = await buildHttpResponse(
+        endPoint: APIEndPoints.fetchNarrativeGeneration,
+        request: request,
+        method: MethodType.post,
+      );
 
-    if (response.containsKey('error')) {
-      throw Exception(response['error']);
+      // Check type safety
+      if (response is! Map<String, dynamic>) {
+        log("⚠️ Unexpected response type: ${response.runtimeType}");
+        throw Exception("Unexpected response format from server.");
+      }
+
+      // Handle server error
+      if (response['error'] != null) {
+        throw Exception(response['error']);
+      }
+
+      return NarrativeGenerationRes.fromJson(response);
+    } catch (e) {
+      log('❌ Narrative Generation error: $e');
+      rethrow;
     }
-
-    return NarrativeGenerationRes.fromJson(response);
   }
+
+  // static Future<NarrativeGenerationRes> fetchNarrativeGeneration({
+  //   required Map request,
+  // }) async {
+  //   final response = await buildHttpResponse(
+  //     endPoint: APIEndPoints.fetchNarrativeGeneration,
+  //     request: request,
+  //     method: MethodType.post,
+  //   );
+  //
+  //   if (response is Map<String, dynamic> && response['error'] != null) {
+  //     throw Exception(response['error']);
+  //   }
+  //
+  //
+  //   return NarrativeGenerationRes.fromJson(response);
+  // }
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -585,13 +624,13 @@ class ClinicalPromptServiceApis {
   }
 
   /// Execute Prompt
-  static Future<AdditionalNarrativeRes> executePrompt({required Map request}) async {
+  static Future<ExecutePromptRes> executePrompt({required Map request}) async {
     final response = await buildHttpResponse(
       endPoint: APIEndPoints.executePrompt,
       request: request,
       method: MethodType.post,
     );
-    return AdditionalNarrativeRes.fromJson(response);
+    return ExecutePromptRes.fromJson(response);
   }
 }
 

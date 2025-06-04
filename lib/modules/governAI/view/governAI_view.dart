@@ -146,7 +146,11 @@ class _GovernAIScreenState extends State<GovernAIScreen> {
                               final tappedDate = data[groupIndex].date;
                               log('Tapped on: Category=$tappedCategory, Value=$tappedValue, Date=$tappedDate');
                               print(true); // 👈 This prints true on tap
-                              controller.fetchTraces(tappedCategory, tappedDate);
+                              controller.lastTappedCategory.value = tappedCategory;
+                              controller.lastTappedDate.value = tappedDate;
+                              controller.fetchTraces(tappedCategory, tappedDate, 1);
+
+                              // controller.fetchTraces(tappedCategory, tappedDate);
                             }
                           },
                         ),
@@ -198,6 +202,31 @@ class _GovernAIScreenState extends State<GovernAIScreen> {
                 ),
                 Obx(() => controller.filteredFiles.isNotEmpty ? _buildHeaderRow(context) : SizedBox()),
                 Obx(() => controller.filteredFiles.isNotEmpty ? SizedBox(height: 300, child: _buildFileList()) : SizedBox()),
+            Obx(() {
+              if (controller.filteredFiles.isNotEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: ElevatedButton(
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : () {
+                      controller.fetchTraces(
+                        controller.lastTappedCategory.value,
+                        controller.lastTappedDate.value,
+                        controller.currentPage.value + 1,
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: appBackGroundColor,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: Text( "Next 100 Entries", style: TextStyle(color: appWhiteColor)),
+                  ),
+                );
+              } else {
+                return const SizedBox();
+              }
+            })
               ],
             ),
           );
@@ -275,6 +304,7 @@ class _GovernAIScreenState extends State<GovernAIScreen> {
 
   Widget _buildFileList() {
     log("-----------------------${controller.filteredFiles.length}");
+    log("-----------------------${controller.allFiles.length}");
     return ListView.builder(
       itemCount: controller.filteredFiles.length,
       itemBuilder: (_, index) {

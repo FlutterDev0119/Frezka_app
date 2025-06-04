@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:apps/utils/common/base_controller.dart';
@@ -7,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
 import '../../../utils/common/common_base.dart';
 import '../../../utils/component/app_dialogue_component.dart';
+import '../../../utils/shared_prefences.dart';
 import '../model/open_worklist_model.dart';
 import '../model/transalted_model.dart';
 
@@ -79,7 +81,10 @@ class MetaPhraseController extends BaseController {
   final TextEditingController rejectTextController = TextEditingController();
   final TextEditingController returnTextController = TextEditingController();
   RxBool isReturnSelected = false.obs;
+  RxBool isHideReturnCard = false.obs;
   RxString changedData = ''.obs;
+  String Fullname = '';
+  String id = '';
 
   @override
   void onInit() {
@@ -92,6 +97,15 @@ class MetaPhraseController extends BaseController {
     filteredReturnReasons.assignAll(returnReson);
     isEditing.value = false;
     isShowDowanlaodButton.value = false;
+    String? userJson = getStringAsync(AppSharedPreferenceKeys.userModel);
+
+    if (userJson.isNotEmpty) {
+      var userMap = jsonDecode(userJson);
+      var userModel = UserModel.fromJson(userMap); // Replace with your actual model
+      Fullname = "${userModel.firstName} ${userModel.lastName}";
+      id = userModel.id.toString();
+    }
+    isHideReturnCard.value = false;
   }
 
   void onSearchTextChanged(String text) {
@@ -111,6 +125,7 @@ class MetaPhraseController extends BaseController {
       textSearchController.text = value;
     }
   }
+
   void onReturnReasonSelected(String? value) {
     if (value != null) {
       selectedReturnReason.value = value;
@@ -197,6 +212,32 @@ class MetaPhraseController extends BaseController {
     } catch (e) {
       print('Reverse translation error: $e');
       reverseTranslatedText.value = 'Error occurred during reverse translation.';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// Put Justification
+  Future<void> putJustification() async {
+    String setId = getStringAsync("setid");
+    try {
+      isLoading.value = true;
+      final response = await MetaPhrasePVServiceApis.putJustificationData(request: {
+        "file_id": setId,
+        "dropdown": selectedReturnReason.value.validate(),
+        "textbox": returnTextController.text.validate(),
+        "user_name": Fullname,
+        "userId": id
+      });
+      log(response);
+      if (response.message.isNotEmpty) {
+        toast(response.message);
+        isHideReturnCard.value = true;
+        // selectedMode.value = 'Edit';
+        // selected.value = 'Edit';
+      }
+    } catch (e) {
+      print('put Justification Data error: $e');
     } finally {
       isLoading.value = false;
     }

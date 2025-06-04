@@ -25,6 +25,7 @@ class APIEndPoints {
   ///Meta Phrase Pv
   static const String openWorklist = 'open_worklist';
   static const String reverseTranslate = 'reverse_translate';
+  static const String putJustification = 'put_justification';
 
   ///GovernAI
   static const String countTraces = 'count_traces';

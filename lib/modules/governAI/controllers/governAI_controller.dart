@@ -24,6 +24,10 @@ class GovernAIController extends GetxController {
 
   final executionTime = ''.obs;
 
+  RxInt currentPage = 1.obs;
+  RxInt totalItems = 0.obs;
+  RxString lastTappedCategory = ''.obs;
+  RxString lastTappedDate = ''.obs;
   @override
   void onInit() {
     super.onInit();
@@ -62,14 +66,35 @@ class GovernAIController extends GetxController {
   //     isLoading(false);
   //   }
   // }
-  Future<void> fetchTraces(String tappedCategory, String tappedDate) async {
+  // Future<void> fetchTraces(String tappedCategory, String tappedDate) async {
+  //   try {
+  //     isLoading(true);
+  //     final result = await GovernAIServiceApis.fetchTracesList(tappedCategory, tappedDate);
+  //
+  //     allFiles.assignAll(result);
+  //     filteredFiles.assignAll(result);
+  //     traceList.assignAll(result);
+  //   } catch (e) {
+  //     print('Error fetching traces: $e');
+  //   } finally {
+  //     isLoading(false);
+  //   }
+  // }
+  Future<void> fetchTraces(String tappedCategory, String tappedDate, int page) async {
     try {
       isLoading(true);
-      final result = await GovernAIServiceApis.fetchTracesList(tappedCategory, tappedDate);
+      final result = await GovernAIServiceApis.fetchTracesList(tappedCategory, tappedDate, page);
+      // allFiles.clear();
+      if (page == 1) {
+        allFiles.assignAll(result.toSet().toList());
+      } else {
+        allFiles.addAll(result);
+        allFiles.assignAll(allFiles.toSet().toList());
+      }
+      filteredFiles.assignAll(allFiles);
+      traceList.assignAll(allFiles);
+      currentPage.value = page;
 
-      allFiles.assignAll(result);
-      filteredFiles.assignAll(result);
-      traceList.assignAll(result);
     } catch (e) {
       print('Error fetching traces: $e');
     } finally {

@@ -557,17 +557,7 @@ class PromptAdminScreen extends StatelessWidget {
                                   controller.currentIndex.value = 0;
                                 }
                                 if (controller.currentIndex.value == 4) {
-                                  //  String promptName = getStringAsync("promptName");
-                                  //  String Role = getStringAsync("Role");
-                                  //
-                                  //  List<String> Sources =  controller.selectedSources.toList();
-                                  //  String action =  controller.actionController.text;
-                                  // String group = getStringAsync("group");
-                                  // log("promptName---------------$promptName");
-                                  // log("Role---------------$Role");
-                                  // log("Sources---------------$Sources");
-                                  // log("action---------------$action");
-                                  // log("group---------------$group");
+
                                   String promptName = getStringAsync("promptName").trim();
                                   String role = getStringAsync("Role").trim();
                                   List<String> sources = controller.selectedSources.toList();
@@ -593,7 +583,12 @@ class PromptAdminScreen extends StatelessWidget {
                                 backgroundColor: appBackGroundColor,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                               ),
-                              child: Text(  controller.currentIndex.value == 3 ? "Save" : "Next", style: TextStyle(color: appWhiteColor)),
+                              child: Text( controller.currentIndex.value == 3
+                                  ? "Save"
+                                  : controller.currentIndex.value == 4
+                                  ? "Finalized"
+                                  : "Next",
+                                  style: TextStyle(color: appWhiteColor)),
                             ),
                           );
                         }

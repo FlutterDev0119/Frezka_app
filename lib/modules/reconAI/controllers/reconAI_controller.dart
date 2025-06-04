@@ -461,13 +461,80 @@ class ReconciliationPopup extends StatelessWidget {
               ),
             ),
             SizedBox(height: 16),
+            // ...messages.map((message) => Padding(
+            //       padding: const EdgeInsets.only(bottom: 8),
+            //       child: Card(margin: EdgeInsets.all(2),color: appDashBoardCardColor, child: Text(message.message).paddingAll(8)),
+            //     )),
             ...messages.map((message) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Card(margin: EdgeInsets.all(2),color: appDashBoardCardColor, child: Text(message.message).paddingAll(8)),
-                )),
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Card(
+                margin: EdgeInsets.all(2),
+                color: appDashBoardCardColor,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: renderContent(message.message), // Use the table renderer
+                ),
+              ),
+            )),
+
           ],
         ),
       ),
     );
+  }
+  Widget renderContent(String data) {
+
+    if (isTableData(data)) {
+      final lines = data.trim().split('\n');
+      final rows = <List<String>>[];
+
+      for (var line in lines) {
+        final cells = line
+            .split('|')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toList();
+        if (cells.isNotEmpty) {
+          rows.add(cells);
+        }
+      }
+
+      if (rows.isEmpty) {
+        return Text(data, style: const TextStyle(fontSize: 16));
+      }
+
+      final maxCols = rows.map((r) => r.length).fold<int>(0, (a, b) => a > b ? a : b);
+
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Table(
+          border: TableBorder.all(),
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+          columnWidths: {
+            for (int i = 0; i < maxCols; i++) i: IntrinsicColumnWidth(),
+          },
+          children: rows.map((row) {
+            final padded = List<String>.from(row);
+            while (padded.length < maxCols) {
+              padded.add('');
+            }
+            return TableRow(
+              children: padded.map((cell) {
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(cell, style: const TextStyle(fontSize: 14)),
+                );
+              }).toList(),
+            );
+          }).toList(),
+        ),
+      );
+    } else {
+      return Text(data, style: const TextStyle(fontSize: 16));
+    }
+  }
+
+  bool isTableData(String data) {
+    return data.contains('|') && data.contains('\n');
   }
 }

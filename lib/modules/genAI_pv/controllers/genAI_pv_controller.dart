@@ -337,7 +337,7 @@ isNarrativeGeneration.value = false;
     }
   }
   Future<void> narrativeGeneration({
-    required String query,
+    // required String query,
     required List<String> safetyReport,
     required String prompt,
     required List<String> checkbox,
@@ -346,10 +346,10 @@ isNarrativeGeneration.value = false;
       isLoading.value = true;
 
       final request = {
-        "query": query,
+        // "query": query,
         "SafetyReport": safetyReport,
         "checkbox": checkbox,
-        "prompt": prompt,
+        "prompt": "",
         "userId": id,
         "user_name": Fullname,
       };
@@ -359,9 +359,8 @@ isNarrativeGeneration.value = false;
 
       final response = await GenAIPVServiceApis.fetchNarrativeGeneration(request: request);
       narrativeGenerationRes.value = response;
-    } catch (e, stackTrace) {
-      log('❌ Error fetching Narrative Generation: $e');
-      log('📍 StackTrace: $stackTrace');
+    } catch (e) {
+      Get.snackbar('Error', e.toString()); // or log or alert
     } finally {
       isLoading.value = false;
     }

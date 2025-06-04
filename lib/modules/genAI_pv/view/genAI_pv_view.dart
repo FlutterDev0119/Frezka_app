@@ -684,7 +684,7 @@ class GenAIPVScreen extends StatelessWidget {
                                   ),
                                   child: IconButton(
                                     icon: Icon(Icons.login_outlined, color:controller.selectedTags.isEmpty ? appBackGroundColor: appWhiteColor, size: 20),
-                                    onPressed: () {
+                                    onPressed: () async{
                                       final xmlContents = controller.selectedXmlContents
                                           .map((e) => e.xmlContent ?? "")
                                           .where((content) => content.isNotEmpty)
@@ -695,21 +695,22 @@ class GenAIPVScreen extends StatelessWidget {
                                       //   log(element);
                                       // });
                                       log("--------643---------narrativeGeneration---------");
-                                      // if(controller.selectedTags.isNotEmpty)   {
-                                        controller
+                                      if (controller.selectedTags.isNotEmpty) {
+                                      await controller
                                           .narrativeGeneration(
-                                            query: controller.dataLakeInput.value.toString(),
-                                          safetyReport: xmlContents,
-                                          prompt: controller.dataLakeInput.value.toString(),
-                                          checkbox: controller.selectedTags.toList(),
-                                         )
+                                        // query: controller.dataLakeInput.value.toString(),
+                                        safetyReport: xmlContents,
+                                        prompt: "",//controller.dataLakeInput.value.toString()
+                                        checkbox: controller.selectedTags.toList(),
+                                      )
                                           .then(
-                                            (value) {
+                                        (value) {
                                           controller.isNarrativeGeneration(true);
                                         },
-                                      );}
-                                    // },
-                                  ),
+                                      );
+                                    }
+                                  },
+                                ),
                                 ),
                               ],
                             ),
