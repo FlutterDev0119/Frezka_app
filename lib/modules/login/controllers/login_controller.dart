@@ -70,8 +70,8 @@ class LoginController extends BaseController {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     Map<String, dynamic> request = {
-      ConstantKeys.emailKey:  "sandesh.singhal@pvanalytica.com",//emailCont.text.trim(),//"sandesh.singhal@pvanalytica.com",
-      ConstantKeys.passwordKey:  "Pvana@123",//passwordCont.text.trim(),//"Pvana@123",
+      ConstantKeys.emailKey: "sandesh.singhal@pvanalytica.com",// emailCont.text.trim(),//"sandesh.singhal@pvanalytica.com",
+      ConstantKeys.passwordKey: "Pvana@123",// passwordCont.text.trim(),//"Pvana@123",
     };
     print(request);
     print(request[ConstantKeys.passwordKey]);

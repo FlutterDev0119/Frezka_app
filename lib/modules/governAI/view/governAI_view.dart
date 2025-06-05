@@ -200,8 +200,8 @@ class _GovernAIScreenState extends State<GovernAIScreen> {
                     }),
                   ),
                 ),
-                Obx(() => controller.filteredFiles.isNotEmpty ? _buildHeaderRow(context) : SizedBox()),
-                Obx(() => controller.filteredFiles.isNotEmpty ? SizedBox(height: 300, child: _buildFileList()) : SizedBox()),
+                Obx(() => controller.allFiles.isNotEmpty ? _buildHeaderRow(context) : SizedBox()),
+                Obx(() => controller.allFiles.isNotEmpty ? SizedBox(height: 300, child: _buildFileList()) : SizedBox()),
             Obx(() {
               if (controller.filteredFiles.isNotEmpty) {
                 return Padding(

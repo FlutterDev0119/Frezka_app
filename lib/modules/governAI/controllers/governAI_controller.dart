@@ -84,23 +84,28 @@ class GovernAIController extends GetxController {
     try {
       isLoading(true);
       final result = await GovernAIServiceApis.fetchTracesList(tappedCategory, tappedDate, page);
-      // allFiles.clear();
+
       if (page == 1) {
-        allFiles.assignAll(result.toSet().toList());
+        allFiles.assignAll(result);
       } else {
         allFiles.addAll(result);
-        allFiles.assignAll(allFiles.toSet().toList());
       }
-      filteredFiles.assignAll(allFiles);
-      traceList.assignAll(allFiles);
+
+      final uniqueList = allFiles.toSet().toList();
+      allFiles.assignAll(uniqueList);
+      filteredFiles.assignAll(uniqueList);
+      traceList.assignAll(uniqueList);
       currentPage.value = page;
 
+      print("----------1-------------${filteredFiles.length}");
+      print("---------1--------------${allFiles.length}");
     } catch (e) {
       print('Error fetching traces: $e');
     } finally {
       isLoading(false);
     }
   }
+
 
   // Fetch CountTraces list from API
   Future<void> fetchCountTraces() async {

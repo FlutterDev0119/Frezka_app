@@ -85,6 +85,7 @@ class PromptAdminController extends BaseController {
   final selectedTemplateFileNames = <String, String>{}.obs;
   RxList<File> imageTempFiles = <File>[].obs;
   RxList<String> fileTempNames = <String>[].obs;
+  Map<String, File> selectedFiles = {};
 
   void addItem(String item) {
     if (!selectedItems.contains(item)) {
@@ -284,6 +285,7 @@ class PromptAdminController extends BaseController {
             imageFiles.add(imageSource);
             fileNames.add(fileName);
             selectedFileNames[item] = fileName;
+            selectedFiles[item] = imageSource;
           },
         ),
         isScrollControlled: true,

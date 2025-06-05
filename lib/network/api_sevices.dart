@@ -445,27 +445,50 @@ class GovernAIServiceApis {
   //     throw Exception('Error fetching TracesList:----------- $e');
   //   }
   // }
-  static Future<List<TraceData>> fetchTracesList(String key, String date,int page) async {
+
+  static Future<List<TraceData>> fetchTracesList(String key, String date, int page) async {
     try {
       final response = await buildHttpResponse(
         endPoint: "${APIEndPoints.fetchTrace}?key=$key&date=$date&page=$page",
         method: MethodType.get,
       );
 
-      print("API Response: $response");
+      print("API Response: ${jsonEncode(response)}");
 
-      // ✅ Correct key is "data", not "traces"
-      if (response is Map && response['data'] is List) {
-        return (response['data'] as List)
+      // ✅ Correctly parse 'traces' list
+      if (response is Map && response['traces'] is List) {
+        return (response['traces'] as List)
             .map((data) => TraceData.fromJson(Map<String, dynamic>.from(data)))
             .toList();
       } else {
-        throw Exception('Failed to load Traces — Expected "data" key with List.');
+        throw Exception('Failed to load Traces — Expected "traces" key with List.');
       }
     } catch (e) {
       throw Exception('Error fetching TracesList:----------- $e');
     }
   }
+
+  // static Future<List<TraceData>> fetchTracesList(String key, String date,int page) async {
+  //   try {
+  //     final response = await buildHttpResponse(
+  //       endPoint: "${APIEndPoints.fetchTrace}?key=$key&date=$date&page=$page",
+  //       method: MethodType.get,
+  //     );
+  //
+  //     print("API Response: $response");
+  //
+  //     // ✅ Correct key is "data", not "traces"
+  //     if (response is Map && response['data'] is List) {
+  //       return (response['data'] as List)
+  //           .map((data) => TraceData.fromJson(Map<String, dynamic>.from(data)))
+  //           .toList();
+  //     } else {
+  //       throw Exception('Failed to load Traces — Expected "data" key with List.');
+  //     }
+  //   } catch (e) {
+  //     throw Exception('Error fetching TracesList:----------- $e');
+  //   }
+  // }
 
 }
 

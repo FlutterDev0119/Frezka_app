@@ -551,10 +551,15 @@ class PromptAdminScreen extends StatelessWidget {
                             child: ElevatedButton(
                               onPressed: () async {
                                 // controller.createNewPrompt();
-                                if (controller.currentIndex.value < 4) {
+                                if (controller.currentIndex.value < 3) {
                                   controller.currentIndex.value++;
                                 } else {
-                                  controller.currentIndex.value = 0;
+                                  if(controller.inputController.text.isNotEmpty && controller.currentIndex.value == 3){
+                                    controller.currentIndex.value++;
+                                  }else{
+                                    toast("Prompt name is required");
+                                  }
+                                  // controller.currentIndex.value = 0;
                                 }
                                 if (controller.currentIndex.value == 4) {
 
@@ -576,7 +581,11 @@ class PromptAdminScreen extends StatelessWidget {
                                   };
 
                                   log("Payload: ${jsonEncode(payload)}");
+                                  if( controller.inputController.text.isNotEmpty){
                                   await controller.createNewPrompt(payload);
+                                  }else{
+                                    toast("Prompt name is required");
+                                  }
                                 }
                               },
                               style: ElevatedButton.styleFrom(

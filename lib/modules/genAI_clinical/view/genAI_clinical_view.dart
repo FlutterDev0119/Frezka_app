@@ -402,6 +402,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:open_file/open_file.dart';
+import 'package:pdf/pdf.dart';
 
 import '../../../generated/assets.dart';
 import '../../../utils/common/colors.dart';
@@ -459,9 +460,10 @@ class GenAIClinicalScreen extends StatelessWidget {
                           }).toList(),
                           onChanged: (newValue) {
                             controller.genAIDropdownValue.value = newValue!;
-                            if(newValue == "Upload File"){
+                            if (newValue == "Upload File") {
                               controller.fileCopyTap(false);
-                            };
+                            }
+                            ;
                           },
                         )),
                   ),
@@ -482,11 +484,11 @@ class GenAIClinicalScreen extends StatelessWidget {
                                   child: controller.genAIDropdownValue.value == 'Upload File'
                                       ? Obx(() {
                                           final files = controller.fileNames;
-        
+
                                           if (files.isEmpty) {
                                             return Text('Select File', style: primaryTextStyle());
                                           }
-        
+
                                           return SingleChildScrollView(
                                             scrollDirection: Axis.horizontal,
                                             child: Row(
@@ -539,21 +541,21 @@ class GenAIClinicalScreen extends StatelessWidget {
                                                                   builder: (_) => PDFViewerPage(filePath: filePath),
                                                                 ),
                                                               );
-                                                            // } else if (['png', 'jpg'].contains(extension)) {
-                                                            //   showDialog(
-                                                            //     context: context,
-                                                            //     builder: (_) => AlertDialog(
-                                                            //       title: Text('Image Preview'),
-                                                            //       content: Image.file(file),
-                                                            //       actions: [
-                                                            //         AppButton(
-                                                            //           textStyle: TextStyle(color: appBackGroundColor),
-                                                            //           onTap: () => Get.back(),
-                                                            //           child: Text("Close"),
-                                                            //         ),
-                                                            //       ],
-                                                            //     ),
-                                                            //   );
+                                                              // } else if (['png', 'jpg'].contains(extension)) {
+                                                              //   showDialog(
+                                                              //     context: context,
+                                                              //     builder: (_) => AlertDialog(
+                                                              //       title: Text('Image Preview'),
+                                                              //       content: Image.file(file),
+                                                              //       actions: [
+                                                              //         AppButton(
+                                                              //           textStyle: TextStyle(color: appBackGroundColor),
+                                                              //           onTap: () => Get.back(),
+                                                              //           child: Text("Close"),
+                                                              //         ),
+                                                              //       ],
+                                                              //     ),
+                                                              //   );
                                                             } else if (['docx', 'xlsx', 'xls'].contains(extension)) {
                                                               final result = await ofx.OpenFile.open(filePath);
 
@@ -672,7 +674,7 @@ class GenAIClinicalScreen extends StatelessWidget {
                                                   toast("Please Include your query.");
                                                   return;
                                                 }
-        
+
                                                 if (controller.dataLakeInput.value.isNotEmpty) {
                                                   controller
                                                       .fetchClinical(
@@ -681,7 +683,7 @@ class GenAIClinicalScreen extends StatelessWidget {
                                                     userName: Fullname,
                                                   )
                                                       .then(
-                                                        (value) {
+                                                    (value) {
                                                       controller.isShowSqlIcon.value = true;
                                                     },
                                                   );
@@ -781,7 +783,7 @@ class GenAIClinicalScreen extends StatelessWidget {
                                                         ),
                                                       )
                                                     : SizedBox(),
-        
+
                                                 // Icon(Icons.file_copy_rounded, color: appBackGroundColor),
                                               );
                                       }));
@@ -796,44 +798,44 @@ class GenAIClinicalScreen extends StatelessWidget {
               ),
               10.height,
 
-        /// Show data of FetchClinicalDataRes with image and scrollable in both axes
-        Obx(() {
-          if (controller.fileCopyTap == true ) {
-            final res = controller.fetchClinicalData.value;
-            if (res == null || res.studies.isEmpty) {
-              return SizedBox.shrink();
-            }
-            // Show the full JSON response in a scrollable box
-            final prettyJson = const JsonEncoder.withIndent('  ').convert(
-              res.studies.map((e) => e.toJson()).toList(),
-            );
-            return Container(
-              width: double.infinity,
-              height: 300,
-              margin: EdgeInsets.symmetric(vertical: 10),
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: appWhiteColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: appBackGroundColor.withOpacity(0.2)),
-              ),
-              child: Scrollbar(
-                thumbVisibility: true,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: SelectableText(
-                      prettyJson,
-                      style: TextStyle(fontFamily: 'monospace', fontSize: 13),
+              /// Show data of FetchClinicalDataRes with image and scrollable in both axes
+              Obx(() {
+                if (controller.fileCopyTap == true) {
+                  final res = controller.fetchClinicalData.value;
+                  if (res == null || res.studies.isEmpty) {
+                    return SizedBox.shrink();
+                  }
+                  // Show the full JSON response in a scrollable box
+                  final prettyJson = const JsonEncoder.withIndent('  ').convert(
+                    res.studies.map((e) => e.toJson()).toList(),
+                  );
+                  return Container(
+                    width: double.infinity,
+                    height: 300,
+                    margin: EdgeInsets.symmetric(vertical: 10),
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: appWhiteColor,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: appBackGroundColor.withOpacity(0.2)),
                     ),
-                  ),
-                ),
-              ),
-            );
-          }
-          return SizedBox.shrink();
-        }),
+                    child: Scrollbar(
+                      thumbVisibility: true,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.vertical,
+                          child: SelectableText(
+                            prettyJson,
+                            style: TextStyle(fontFamily: 'monospace', fontSize: 13),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                return SizedBox.shrink();
+              }),
               // Curate the Response Section
               Container(
                 padding: EdgeInsets.all(10),
@@ -895,7 +897,7 @@ class GenAIClinicalScreen extends StatelessWidget {
                             ],
                           );
                         }
-        
+
                         return Row(
                           children: [
                             Container(
@@ -970,7 +972,7 @@ class GenAIClinicalScreen extends StatelessWidget {
                               width: 40,
                               // height: 40,
                               decoration: BoxDecoration(
-                                color: controller.selectedTags.isEmpty? appWhiteColor:appBackGroundColor,
+                                color: controller.selectedTags.isEmpty ? appWhiteColor : appBackGroundColor,
                                 borderRadius: BorderRadius.circular(8), // rounded square
                               ),
                               child: IconButton(
@@ -994,7 +996,7 @@ class GenAIClinicalScreen extends StatelessWidget {
                                       // checkbox: controller.selectedTags.toList(),
                                       // narrative: "")
                                       .then(
-                                        (value) {
+                                    (value) {
                                       controller.isAdditionalNarrative(true);
                                     },
                                   );
@@ -1046,9 +1048,9 @@ class GenAIClinicalScreen extends StatelessWidget {
                                   children: tags.map((tag) {
                                     final isSelected = controller.selectedParentTag.value == tag;
                                     final isInSelectedTags = controller.selectedTags.contains(tag);
-        
+
                                     final showRedBorder = isSelected && isInSelectedTags;
-        
+
                                     return Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                                       child: Container(
@@ -1158,7 +1160,7 @@ class GenAIClinicalScreen extends StatelessWidget {
                                               ),
                                             ),
                                           ),
-        
+
                                           // Chip List Section
                                           Expanded(
                                             child: Obx(
@@ -1169,7 +1171,7 @@ class GenAIClinicalScreen extends StatelessWidget {
                                                   children: controller.filteredClassificationMap.entries.map((entry) {
                                                     final category = entry.key; // Investigator Analysis or Site Analysis
                                                     final attributes = entry.value;
-        
+
                                                     return Column(
                                                       crossAxisAlignment: CrossAxisAlignment.start,
                                                       children: [
@@ -1225,7 +1227,7 @@ class GenAIClinicalScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-        
+
                       const SizedBox(height: 16),
                       Text(
                         'Personalize The Prompt',
@@ -1273,17 +1275,17 @@ class GenAIClinicalScreen extends StatelessWidget {
                                 //   return;
                                 // } else {
 
-                                  controller
-                                      .additionalNarrative(
-                                          query: controller.dataLakeInput.value.toString(),
-                                          SafetyReport: prettyJson.toList(),
-                                          checkbox: controller.selectedTags.toList(),
-                                          narrative: "")
-                                      .then(
-                                    (value) {
-                                      controller.isAdditionalNarrative(true);
-                                    },
-                                  );
+                                controller
+                                    .additionalNarrative(
+                                        query: controller.dataLakeInput.value.toString(),
+                                        SafetyReport: prettyJson.toList(),
+                                        checkbox: controller.selectedTags.toList(),
+                                        narrative: "")
+                                    .then(
+                                  (value) {
+                                    controller.isAdditionalNarrative(true);
+                                  },
+                                );
                                 // }
                                 // Handle translation
                               },
@@ -1397,801 +1399,719 @@ class GenAIClinicalScreen extends StatelessWidget {
               //     }
               // )
               Obx(
-                    () {
+                () {
                   return controller.isAdditionalNarrative.value == true
                       ? Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: appBackGroundColor.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 15),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
+                          width: double.infinity,
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: appBackGroundColor.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 15),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(Icons.auto_awesome, size: 18), // sparkle icon
-                                const SizedBox(width: 4),
-                                const Text(
-                                  'AI Powered Response',
-                                  style: TextStyle(fontWeight: FontWeight.w600),
-                                ),
-                                const SizedBox(width: 8),
+                                SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.auto_awesome, size: 18), // sparkle icon
+                                      const SizedBox(width: 4),
+                                      const Text(
+                                        'AI Powered Response',
+                                        style: TextStyle(fontWeight: FontWeight.w600),
+                                      ),
+                                      const SizedBox(width: 8),
 
-                                // Copy response
-                                IconButton(
-                                  icon: const Icon(Icons.content_copy),
-                                  tooltip: 'Copy response',
-                                  onPressed: () {
-                                    final text = controller.additionalNarrativeRes.value?.output ?? '';
-                                    if (text.isNotEmpty) {
-                                      Clipboard.setData(ClipboardData(text: text));
-                                      toast('Response copied!');
-                                    }
-                                  },
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                ),
+                                      // Copy response
+                                      IconButton(
+                                        icon: const Icon(Icons.content_copy),
+                                        tooltip: 'Copy response',
+                                        onPressed: () {
+                                          final text = controller.additionalNarrativeRes.value?.output ?? '';
+                                          final output = controller.executePromptRes.value?.output ?? '';
 
-                                // Show prompt
-                                // IconButton(
-                                //   icon: const Icon(Icons.visibility),
-                                //   tooltip: 'Show prompt',
-                                //   onPressed: () {
-                                //     final prompt = controller.personalizeController.text;
-                                //     showDialog(
-                                //       context: Get.context!,
-                                //       builder: (_) => AlertDialog(
-                                //         title: Text('Prompt'),
-                                //         content: Text(prompt.isNotEmpty ? prompt : 'No prompt available.'),
-                                //         actions: [
-                                //           AppButton(
-                                //             onTap: () => Get.back(),
-                                //             child: Text('Close',style:TextStyle(color: appWhiteColor),),
-                                //             color: appBackGroundColor,
-                                //           ),
-                                //         ],
-                                //       ),
-                                //     );
-                                //   },
-                                //   padding: EdgeInsets.zero,
-                                //   constraints: const BoxConstraints(),
-                                // ),
-                                IconButton(
-                                  icon: const Icon(Icons.visibility),
-                                  tooltip: 'Show prompt',
-                                  onPressed: () {
-                                    final executeText = controller.additionalNarrativeRes.value?.output ?? '';
-                                    final output = controller.executePromptRes.value?.output ?? '';
-
-                                    Widget buildContent(String data) {
-                                      if (controller.isTableData(data)) {
-                                        final lines = data.trim().split('\n');
-                                        final rows = <List<String>>[];
-
-                                        for (var line in lines) {
-                                          final trimmed = line.trim();
-                                          if (trimmed.startsWith('|') &&
-                                              !RegExp(r'^\|[\s\-|:]+\|$').hasMatch(trimmed)) {
-                                            final cells = trimmed
-                                                .split('|')
-                                                .map((e) => e.trim())
-                                                .where((e) => e.isNotEmpty)
-                                                .toList();
-                                            rows.add(cells);
+                                          if (text.isNotEmpty || output.isNotEmpty) {
+                                            final combined = '${text.trim()}\n\n${output.trim()}'.trim();
+                                            Clipboard.setData(ClipboardData(text: combined));
+                                            toast('Response copied!');
                                           }
-                                        }
+                                        },
 
-                                        if (rows.isEmpty) {
-                                          return Text(data, style: const TextStyle(fontSize: 14));
-                                        }
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                      ),
 
-                                        final maxCols = rows.map((r) => r.length).fold<int>(0, (a, b) => a > b ? a : b);
+                                      IconButton(
+                                        icon: const Icon(Icons.visibility),
+                                        tooltip: 'Show prompt',
+                                        onPressed: () {
+                                          final executeText = controller.additionalNarrativeRes.value?.output ?? '';
+                                          final output = controller.executePromptRes.value?.output ?? '';
 
-                                        return SingleChildScrollView(
-                                          scrollDirection: Axis.horizontal,
-                                          child: Table(
-                                            border: TableBorder.all(),
-                                            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                                            columnWidths: {
-                                              for (int i = 0; i < maxCols; i++) i: IntrinsicColumnWidth(),
-                                            },
-                                            children: rows.map((row) {
-                                              final padded = List<String>.from(row);
-                                              while (padded.length < maxCols) padded.add('');
-                                              return TableRow(
-                                                children: padded.map((cell) {
-                                                  return Padding(
-                                                    padding: const EdgeInsets.all(8.0),
-                                                    child: Text(cell, style: const TextStyle(fontSize: 14)),
-                                                  );
-                                                }).toList(),
-                                              );
-                                            }).toList(),
-                                          ),
-                                        );
-                                      } else {
-                                        // Handle text with ### headers and **bold** formatting
-                                        final lines = data.split('\n');
+                                          Widget buildContent(String data) {
+                                            if (controller.isTableData(data)) {
+                                              final lines = data.trim().split('\n');
+                                              final rows = <List<String>>[];
 
-                                        return Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: lines.map((line) {
-                                            if (line.trim().startsWith('###')) {
-                                              final headerText = line.replaceFirst('###', '').trim();
-                                              return Padding(
-                                                padding: const EdgeInsets.only(bottom: 8.0, top: 12.0),
-                                                child: Text(
-                                                  headerText,
-                                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                                ),
-                                              );
-                                            } else {
-                                              final spans = <TextSpan>[];
-                                              final regex = RegExp(r'\*\*(.*?)\*\*');
-                                              var currentIndex = 0;
-
-                                              for (final match in regex.allMatches(line)) {
-                                                if (match.start > currentIndex) {
-                                                  spans.add(TextSpan(text: line.substring(currentIndex, match.start)));
+                                              for (var line in lines) {
+                                                final trimmed = line.trim();
+                                                if (trimmed.startsWith('|') && !RegExp(r'^\|[\s\-|:]+\|$').hasMatch(trimmed)) {
+                                                  final cells = trimmed.split('|').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+                                                  rows.add(cells);
                                                 }
-                                                spans.add(TextSpan(
-                                                  text: match.group(1),
-                                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                                ));
-                                                currentIndex = match.end;
                                               }
 
-                                              if (currentIndex < line.length) {
-                                                spans.add(TextSpan(text: line.substring(currentIndex)));
+                                              if (rows.isEmpty) {
+                                                return Text(data, style: const TextStyle(fontSize: 14));
                                               }
 
-                                              return Padding(
-                                                padding: const EdgeInsets.only(bottom: 4.0),
-                                                child: RichText(
-                                                  text: TextSpan(
-                                                    children: spans,
-                                                    style: const TextStyle(fontSize: 14, color: Colors.black),
-                                                  ),
+                                              final maxCols = rows.map((r) => r.length).fold<int>(0, (a, b) => a > b ? a : b);
+
+                                              return SingleChildScrollView(
+                                                scrollDirection: Axis.horizontal,
+                                                child: Table(
+                                                  border: TableBorder.all(),
+                                                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                                                  columnWidths: {
+                                                    for (int i = 0; i < maxCols; i++) i: IntrinsicColumnWidth(),
+                                                  },
+                                                  children: rows.asMap().entries.map((entry) {
+                                                    final index = entry.key;
+                                                    final row = entry.value;
+
+                                                    final padded = List<String>.from(row);
+                                                    while (padded.length < maxCols) padded.add('');
+
+                                                    return TableRow(
+                                                      decoration: index == 0
+                                                          ? null
+                                                          : const BoxDecoration(
+                                                        color: Colors.white, // White background for non-header rows
+                                                      ),
+                                                      children: padded.map((cell) {
+                                                        return Padding(
+                                                          padding: const EdgeInsets.all(8.0),
+                                                          child: Text(
+                                                            cell,
+                                                            style: TextStyle(
+                                                              fontSize: 14,
+                                                              fontWeight: index == 0 ? FontWeight.bold : FontWeight.normal, // Bold for header
+                                                            ),
+                                                          ),
+                                                        );
+                                                      }).toList(),
+                                                    );
+                                                  }).toList(),
                                                 ),
                                               );
                                             }
-                                          }).toList(),
-                                        );
-                                      }
-                                    }
 
-                                    showDialog(
-                                      context: Get.context!,
-                                      builder: (_) => AlertDialog(
-                                        title: const Text('Prompt'),
-                                        content: SingleChildScrollView(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              if (output.isNotEmpty) ...[
-                                                const SizedBox(height: 8),
-                                                buildContent(output),
-                                                const SizedBox(height: 20),
-                                              ],
-                                              if (executeText.isNotEmpty) ...[
-                                                const SizedBox(height: 8),
-                                                buildContent(executeText),
-                                              ],
-                                              if (output.isEmpty && executeText.isEmpty)
-                                                const Text('No response available.'),
-                                            ],
-                                          ),
-                                        ),
-                                        actions: [
-                                          AppButton(
-                                            onTap: () => Get.back(),
-                                            child: Text('Close', style: TextStyle(color: appWhiteColor)),
-                                            color: appBackGroundColor,
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                ),
+                                            else {
+                                              // Handle text with ### headers and **bold** formatting
+                                              final lines = data.split('\n');
 
+                                              return Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: lines.map((line) {
+                                                  if (line.trim().startsWith('###')) {
+                                                    final headerText = line.replaceFirst('###', '').trim();
+                                                    return Padding(
+                                                      padding: const EdgeInsets.only(bottom: 8.0, top: 12.0),
+                                                      child: Text(
+                                                        headerText,
+                                                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                                      ),
+                                                    );
+                                                  } else {
+                                                    final spans = <TextSpan>[];
+                                                    final regex = RegExp(r'\*\*(.*?)\*\*');
+                                                    var currentIndex = 0;
 
+                                                    for (final match in regex.allMatches(line)) {
+                                                      if (match.start > currentIndex) {
+                                                        spans.add(TextSpan(text: line.substring(currentIndex, match.start)));
+                                                      }
+                                                      spans.add(TextSpan(
+                                                        text: match.group(1),
+                                                        style: const TextStyle(fontWeight: FontWeight.bold),
+                                                      ));
+                                                      currentIndex = match.end;
+                                                    }
 
-                                // Download as .txt
-                                IconButton(
-                                  icon: const Icon(Icons.description_outlined),
-                                  tooltip: 'Download as .txt',
-                                  onPressed: () async {
-                                    final text = controller.additionalNarrativeRes.value?.output ?? '';
-                                    if (text.isEmpty) {
-                                      toast('No response to download.');
-                                      return;
-                                    }
-                                    final directory = await getTemporaryDirectory();
-                                    final file = File('${directory.path}/response.txt');
-                                    await file.writeAsString(text);
-                                    toast('TXT downloaded to ${file.path}');
-                                    await OpenFile.open(file.path);
-                                  },
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                ),
+                                                    if (currentIndex < line.length) {
+                                                      spans.add(TextSpan(text: line.substring(currentIndex)));
+                                                    }
 
-                                // Download as .xlsx
-                                IconButton(
-                                  icon: const Icon(Icons.table_chart_outlined),
-                                  tooltip: 'Download as .xlsx',
-                                  onPressed: () async {
-                                    final text = controller.additionalNarrativeRes.value?.output ?? '';
-                                    if (text.isEmpty) {
-                                      toast('No response to download.');
-                                      return;
-                                    }
-                                    // Simple xlsx: one cell with the response
-                                    // You may want to use a package like excel: ^2.0.0
-
-                                    final excel = ex.Excel.createExcel();
-                                    final sheet = excel['Sheet1'];
-                                    sheet.appendRow([ex.TextCellValue(text)]);
-                                    // sheet.appendRow([text]);
-                                    final directory = await getTemporaryDirectory();
-                                    final file = File('${directory.path}/response.xlsx');
-                                    await file.writeAsBytes(excel.encode()!);
-                                    toast('XLSX downloaded to ${file.path}');
-                                    await OpenFile.open(file.path);
-                                  },
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                ),
-
-                                // Download as .pdf
-                                IconButton(
-                                  icon: const Icon(Icons.picture_as_pdf),
-                                  tooltip: 'Download as .pdf',
-                                  onPressed: () async {
-                                    final text = controller.additionalNarrativeRes.value?.output ?? '';
-                                    if (text.isEmpty) {
-                                      toast('No response to download.');
-                                      return;
-                                    }
-                                    // Use pdf package
-
-                                    final pdf = pw.Document();
-                                    pdf.addPage(
-                                      pw.Page(
-                                        build: (pw.Context context) => pw.Text(text),
-                                      ),
-                                    );
-                                    final directory = await getTemporaryDirectory();
-                                    final file = File('${directory.path}/response.pdf');
-                                    await file.writeAsBytes(await pdf.save());
-                                    toast('PDF downloaded to ${file.path}');
-                                    await OpenFile.open(file.path);
-                                  },
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                ),
-
-                                // // Expand / collapse
-                                // IconButton(
-                                //   icon: Obx(() => Icon(controller.isExpanded.value ? Icons.close_fullscreen : Icons.open_in_full)),
-                                //   tooltip: controller.isExpanded.value ? 'Collapse response' : 'Expand response',
-                                //   onPressed: () {
-                                //     controller.isExpanded.toggle();
-                                //   },
-                                //   padding: EdgeInsets.zero,
-                                //   constraints: const BoxConstraints(),
-                                // ),
-
-                                // Show response in full screen dialog
-                                // IconButton(
-                                //   icon: const Icon(Icons.fullscreen),
-                                //   tooltip: 'Show response fullscreen',
-                                //   onPressed: () {
-                                //     final text = controller.additionalNarrativeRes.value?.output ?? '';
-                                //     final exucuteText = controller.executePromptRes.value?.output ?? '';
-                                //     showDialog(
-                                //       context: Get.context!,
-                                //       barrierDismissible: true,
-                                //       builder: (context) {
-                                //         return Dialog(
-                                //           insetPadding: EdgeInsets.zero,
-                                //           backgroundColor: Colors.transparent,
-                                //           child: Container(
-                                //             width: double.infinity,
-                                //             height: double.infinity,
-                                //             color: Colors.white,
-                                //             child: Column(
-                                //               children: [
-                                //                 AppBar(
-                                //                   backgroundColor: appBackGroundColor,
-                                //                   automaticallyImplyLeading: false,
-                                //                   title: const Text('AI Powered Response', style: TextStyle(color: Colors.white)),
-                                //                   actions: [
-                                //                     IconButton(
-                                //                       icon: const Icon(Icons.close, color: Colors.white),
-                                //                       onPressed: () => Navigator.of(context).pop(),
-                                //                     ),
-                                //                   ],
-                                //                 ),
-                                //                 Expanded(
-                                //                   child: Padding(
-                                //                     padding: const EdgeInsets.all(16.0),
-                                //                     child: SingleChildScrollView(
-                                //                       child:
-                                //                       Column(
-                                //                         children: [
-                                //                           Text(
-                                //                             text,
-                                //                             style: const TextStyle(fontSize: 16),
-                                //                           ),
-                                //                           20.height,
-                                //                           Text(
-                                //                             exucuteText.toString(),
-                                //                             style: const TextStyle(fontSize: 16),
-                                //                           ),
-                                //                         ],
-                                //                       ),
-                                //                     ),
-                                //                   ),
-                                //                 ),
-                                //               ],
-                                //             ),
-                                //           ),
-                                //         );
-                                //       },
-                                //     );
-                                //   },
-                                //   padding: EdgeInsets.zero,
-                                //   constraints: const BoxConstraints(),
-                                // ),
-                                IconButton(
-                                  icon: const Icon(Icons.fullscreen),
-                                  tooltip: 'Show response fullscreen',
-                                  onPressed: () {
-                                    final exucuteText = controller.additionalNarrativeRes.value?.output ?? '';
-                                    final text = controller.executePromptRes.value?.output ?? '';
-
-                                    Widget renderContent(String data) {
-                                      if (controller.isTableData(data)) {
-                                        final lines = data.trim().split('\n');
-                                        final rows = <List<String>>[];
-
-                                        for (var line in lines) {
-                                          final trimmed = line.trim();
-                                          if (trimmed.startsWith('|') &&
-                                              !RegExp(r'^\|[\s\-|:]+\|$').hasMatch(trimmed)) {
-                                            final cells = trimmed
-                                                .split('|')
-                                                .map((e) => e.trim())
-                                                .where((e) => e.isNotEmpty)
-                                                .toList();
-                                            rows.add(cells);
-                                          }
-                                        }
-
-                                        if (rows.isEmpty) {
-                                          return Text(data, style: const TextStyle(fontSize: 16));
-                                        }
-
-                                        final maxCols = rows.map((r) => r.length).fold<int>(0, (a, b) => a > b ? a : b);
-
-                                        return SingleChildScrollView(
-                                          scrollDirection: Axis.horizontal,
-                                          child: Table(
-                                            border: TableBorder.all(),
-                                            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                                            columnWidths: {
-                                              for (int i = 0; i < maxCols; i++) i: IntrinsicColumnWidth(),
-                                            },
-                                            children: rows.map((row) {
-                                              final padded = List<String>.from(row);
-                                              while (padded.length < maxCols) {
-                                                padded.add('');
-                                              }
-                                              return TableRow(
-                                                children: padded.map((cell) {
-                                                  return Padding(
-                                                    padding: const EdgeInsets.all(8.0),
-                                                    child: Text(cell, style: const TextStyle(fontSize: 16)),
-                                                  );
+                                                    return Padding(
+                                                      padding: const EdgeInsets.only(bottom: 4.0),
+                                                      child: RichText(
+                                                        text: TextSpan(
+                                                          children: spans,
+                                                          style: const TextStyle(fontSize: 14, color: Colors.black),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }
                                                 }).toList(),
                                               );
-                                            }).toList(),
-                                          ),
-                                        );
-                                      } else {
-                                        // Markdown-like header and bold formatting
-                                        final lines = data.split('\n');
-
-                                        return Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: lines.map((line) {
-                                            if (line.trim().startsWith('###')) {
-                                              final headerText = line.replaceFirst('###', '').trim();
-                                              return Padding(
-                                                padding: const EdgeInsets.only(bottom: 8.0, top: 12.0),
-                                                child: Text(
-                                                  headerText,
-                                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                                ),
-                                              );
-                                            } else {
-                                              final spans = <TextSpan>[];
-                                              final regex = RegExp(r'\*\*(.*?)\*\*');
-                                              var currentIndex = 0;
-
-                                              for (final match in regex.allMatches(line)) {
-                                                if (match.start > currentIndex) {
-                                                  spans.add(TextSpan(text: line.substring(currentIndex, match.start)));
-                                                }
-                                                spans.add(TextSpan(
-                                                  text: match.group(1),
-                                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                                ));
-                                                currentIndex = match.end;
-                                              }
-
-                                              if (currentIndex < line.length) {
-                                                spans.add(TextSpan(text: line.substring(currentIndex)));
-                                              }
-
-                                              return Padding(
-                                                padding: const EdgeInsets.only(bottom: 4.0),
-                                                child: RichText(
-                                                  text: TextSpan(
-                                                    children: spans,
-                                                    style: const TextStyle(fontSize: 16, color: Colors.black),
-                                                  ),
-                                                ),
-                                              );
                                             }
-                                          }).toList(),
-                                        );
-                                      }
-                                    }
+                                          }
 
-                                    showDialog(
-                                      context: Get.context!,
-                                      barrierDismissible: true,
-                                      builder: (context) {
-                                        return Dialog(
-                                          insetPadding: EdgeInsets.zero,
-                                          backgroundColor: Colors.transparent,
-                                          child: Container(
-                                            width: double.infinity,
-                                            height: double.infinity,
-                                            color: Colors.white,
-                                            child: Column(
-                                              children: [
-                                                AppBar(
-                                                  backgroundColor: appBackGroundColor,
-                                                  automaticallyImplyLeading: false,
-                                                  title: const Text('AI Powered Response',
-                                                      style: TextStyle(color: Colors.white)),
-                                                  actions: [
-                                                    IconButton(
-                                                      icon: const Icon(Icons.close, color: Colors.white),
-                                                      onPressed: () => Navigator.of(context).pop(),
-                                                    ),
+                                          showDialog(
+                                            context: Get.context!,
+                                            builder: (_) => AlertDialog(
+                                              title: const Text('Prompt'),
+                                              content: SingleChildScrollView(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    if (output.isNotEmpty) ...[
+                                                      const SizedBox(height: 8),
+                                                      buildContent(output),
+                                                      const SizedBox(height: 20),
+                                                    ],
+                                                    if (executeText.isNotEmpty) ...[
+                                                      const SizedBox(height: 8),
+                                                      buildContent(executeText),
+                                                    ],
+                                                    if (output.isEmpty && executeText.isEmpty) const Text('No response available.'),
                                                   ],
                                                 ),
-                                                Expanded(
-                                                  child: Padding(
-                                                    padding: const EdgeInsets.all(16.0),
-                                                    child: SingleChildScrollView(
-                                                      child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                        children: [
-                                                          if (text.isNotEmpty) ...[
-                                                            const Text('Additional Narrative',
-                                                                style: TextStyle(
-                                                                    fontWeight: FontWeight.bold, fontSize: 18)),
-                                                            const SizedBox(height: 8),
-                                                            renderContent(text),
-                                                            const SizedBox(height: 24),
-                                                          ],
-                                                          if (exucuteText.isNotEmpty) ...[
-                                                            const Text('Prompt Result',
-                                                                style: TextStyle(
-                                                                    fontWeight: FontWeight.bold, fontSize: 18)),
-                                                            const SizedBox(height: 8),
-                                                            renderContent(exucuteText),
-                                                          ]
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
+                                              ),
+                                              actions: [
+                                                AppButton(
+                                                  onTap: () => Get.back(),
+                                                  child: Text('Close', style: TextStyle(color: appWhiteColor)),
+                                                  color: appBackGroundColor,
                                                 ),
                                               ],
                                             ),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  },
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                )
+                                          );
+                                        },
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                      ),
 
+                                      // Download as .txt
+                                      IconButton(
+                                        icon: const Icon(Icons.description_outlined),
+                                        tooltip: 'Download as .txt',
+                                        onPressed: () async {
+                                          final text = controller.additionalNarrativeRes.value?.output ?? '';
+                                          final output = controller.executePromptRes.value?.output ?? '';
 
-                              ],
-                            ),
-                          ),
-                          10.height,
+                                          if (text.isEmpty && output.isEmpty) {
+                                            toast('No response to download.');
+                                            return;
+                                          }
 
-                          Obx(() {
-                            final executeText = controller.additionalNarrativeRes.value?.output ?? '';
-                            final output = controller.executePromptRes.value?.output ?? '';
+                                          final combined = [
+                                            if (text.isNotEmpty) 'Narrative:\n$text',
+                                            if (output.isNotEmpty) 'Output:\n$output',
+                                          ].join('\n\n');
 
-                            Widget renderContent(String text) {
-                              if (controller.isTableData(text)) {
-                                final lines = text.trim().split('\n');
-                                final rows = <List<String>>[];
+                                          final directory = await getTemporaryDirectory();
+                                          final file = File('${directory.path}/response.txt');
+                                          await file.writeAsString(combined);
 
-                                for (var line in lines) {
-                                  final trimmed = line.trim();
-                                  if (trimmed.startsWith('|') &&
-                                      !RegExp(r'^\|[\s\-|:]+\|$').hasMatch(trimmed)) {
-                                    final cells = trimmed
-                                        .split('|')
-                                        .map((e) => e.trim())
-                                        .where((e) => e.isNotEmpty)
-                                        .toList();
-                                    rows.add(cells);
-                                  }
-                                }
+                                          toast('TXT downloaded to ${file.path}');
+                                          await OpenFile.open(file.path);
+                                        },
 
-                                if (rows.isEmpty) {
-                                  return Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(text, style: TextStyle(fontSize: 16)),
-                                  );
-                                }
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                      ),
 
-                                final maxCols =
-                                rows.map((r) => r.length).fold<int>(0, (a, b) => a > b ? a : b);
+                                      // Download as .xlsx
+                                      IconButton(
+                                        icon: const Icon(Icons.table_chart_outlined),
+                                        tooltip: 'Download as .xlsx',
+                                        onPressed: () async {
+                                          final text = controller.additionalNarrativeRes.value?.output ?? '';
+                                          final output = controller.executePromptRes.value?.output ?? '';
 
-                                return Scrollbar(
-                                  thumbVisibility: true,
-                                  interactive: true,
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: Scrollbar(
-                                      thumbVisibility: true,
-                                      interactive: true,
-                                      child: SingleChildScrollView(
-                                        scrollDirection: Axis.vertical,
-                                        child: Table(
-                                          border: TableBorder.all(),
-                                          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                                          columnWidths: {
-                                            for (int i = 0; i < maxCols; i++) i: IntrinsicColumnWidth(),
-                                          },
-                                          children: rows.map((row) {
-                                            final padded = List<String>.from(row);
-                                            while (padded.length < maxCols) {
-                                              padded.add('');
+                                          if (text.isEmpty && output.isEmpty) {
+                                            toast('No response to download.');
+                                            return;
+                                          }
+
+                                          final excel = ex.Excel.createExcel();
+                                          final sheet = excel['Sheet1'];
+
+                                          // Add headers and content
+                                          if (text.isNotEmpty) {
+                                            sheet.appendRow([ex.TextCellValue(''), ex.TextCellValue(text)]);
+                                          }
+                                          if (output.isNotEmpty) {
+                                            sheet.appendRow([ex.TextCellValue(''), ex.TextCellValue(output)]);
+                                          }
+
+                                          final directory = await getTemporaryDirectory();
+                                          final file = File('${directory.path}/response.xlsx');
+                                          await file.writeAsBytes(excel.encode()!);
+
+                                          toast('XLSX downloaded to ${file.path}');
+                                          await OpenFile.open(file.path);
+                                        },
+
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                      ),
+
+                                      // Download as .pdf
+                                      IconButton(
+                                        icon: const Icon(Icons.picture_as_pdf),
+                                        tooltip: 'Download as .pdf',
+                                        // onPressed: () async {
+                                        //   final text = controller.additionalNarrativeRes.value?.output ?? '';
+                                        //   if (text.isEmpty) {
+                                        //     toast('No response to download.');
+                                        //     return;
+                                        //   }
+                                        //   // Use pdf package
+                                        //
+                                        //   final pdf = pw.Document();
+                                        //   pdf.addPage(
+                                        //     pw.Page(
+                                        //       build: (pw.Context context) => pw.Text(text),
+                                        //     ),
+                                        //   );
+                                        //   final directory = await getTemporaryDirectory();
+                                        //   final file = File('${directory.path}/response.pdf');
+                                        //   await file.writeAsBytes(await pdf.save());
+                                        //   toast('PDF downloaded to ${file.path}');
+                                        //   await OpenFile.open(file.path);
+                                        // },
+                                        onPressed: () async {
+                                          final text = controller.additionalNarrativeRes.value?.output ?? '';
+                                          final output = controller.executePromptRes.value?.output ?? '';
+
+                                          if (text.isEmpty && output.isEmpty) {
+                                            toast('No response to download.');
+                                            return;
+                                          }
+
+                                          final pdf = pw.Document();
+
+                                          pw.Widget buildTable(String data) {
+                                            final lines = data.trim().split('\n');
+                                            final rows = <List<String>>[];
+
+                                            for (var line in lines) {
+                                              final trimmed = line.trim();
+                                              if (trimmed.startsWith('|') && !RegExp(r'^\|[\s\-|:]+\|$').hasMatch(trimmed)) {
+                                                final cells = trimmed
+                                                    .split('|')
+                                                    .map((e) => e.trim())
+                                                    .where((e) => e.isNotEmpty)
+                                                    .toList();
+                                                rows.add(cells);
+                                              }
                                             }
-                                            return TableRow(
-                                              children: padded.map((cell) {
-                                                return Padding(
-                                                  padding: const EdgeInsets.all(8.0),
-                                                  child: Text(cell, style: TextStyle(fontSize: 16)),
+
+                                            if (rows.isEmpty) return pw.Text(data, style: pw.TextStyle(fontSize: 12));
+
+                                            final maxCols = rows.map((r) => r.length).fold<int>(0, (a, b) => a > b ? a : b);
+
+                                            return pw.Table(
+                                              border: pw.TableBorder.all(),
+                                              defaultVerticalAlignment: pw.TableCellVerticalAlignment.middle,
+                                              columnWidths: {
+                                                for (int i = 0; i < maxCols; i++) i: const pw.IntrinsicColumnWidth(),
+                                              },
+                                              children: rows.asMap().entries.map((entry) {
+                                                final index = entry.key;
+                                                final row = entry.value;
+
+                                                final padded = List<String>.from(row);
+                                                while (padded.length < maxCols) padded.add('');
+
+                                                return pw.TableRow(
+                                                  decoration: index == 0
+                                                      ? null
+                                                      : const pw.BoxDecoration(color: PdfColors.white),
+                                                  children: padded.map((cell) {
+                                                    return pw.Padding(
+                                                      padding: const pw.EdgeInsets.all(8.0),
+                                                      child: pw.Text(
+                                                        cell,
+                                                        style: pw.TextStyle(
+                                                          fontSize: 12,
+                                                          fontWeight: index == 0 ? pw.FontWeight.bold : pw.FontWeight.normal,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }).toList(),
                                                 );
                                               }).toList(),
                                             );
-                                          }).toList(),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              } else {
-                                final lines = text.split('\n');
-
-                                return Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: lines.map((line) {
-                                      if (line.trim().startsWith('###')) {
-                                        final headerText = line.replaceFirst('###', '').trim();
-                                        return Padding(
-                                          padding: const EdgeInsets.only(bottom: 8.0, top: 12.0),
-                                          child: Text(
-                                            headerText,
-                                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                          ),
-                                        );
-                                      } else {
-                                        final spans = <TextSpan>[];
-                                        final regex = RegExp(r'\*\*(.*?)\*\*');
-                                        var currentIndex = 0;
-
-                                        for (final match in regex.allMatches(line)) {
-                                          if (match.start > currentIndex) {
-                                            spans.add(TextSpan(text: line.substring(currentIndex, match.start)));
                                           }
-                                          spans.add(TextSpan(
-                                            text: match.group(1),
-                                            style: TextStyle(fontWeight: FontWeight.bold),
-                                          ));
-                                          currentIndex = match.end;
-                                        }
 
-                                        if (currentIndex < line.length) {
-                                          spans.add(TextSpan(text: line.substring(currentIndex)));
-                                        }
+                                          pdf.addPage(
+                                            pw.MultiPage(
+                                              build: (context) => [
+                                                if (text.isNotEmpty) ...[
+                                                  pw.Text('', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                                                  pw.SizedBox(height: 8),
+                                                  buildTable(text),
+                                                  pw.SizedBox(height: 20),
+                                                ],
+                                                if (output.isNotEmpty) ...[
+                                                  pw.Text('', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                                                  pw.SizedBox(height: 8),
+                                                  buildTable(output),
+                                                ],
+                                              ],
+                                            ),
+                                          );
 
-                                        return RichText(
-                                          text: TextSpan(
-                                            children: spans,
-                                            style: TextStyle(fontSize: 16, color: Colors.black),
-                                          ),
+                                          final directory = await getTemporaryDirectory();
+                                          final file = File('${directory.path}/response.pdf');
+                                          await file.writeAsBytes(await pdf.save());
+
+                                          toast('PDF downloaded to ${file.path}');
+                                          await OpenFile.open(file.path);
+                                        },
+
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.fullscreen),
+                                        tooltip: 'Show response fullscreen',
+                                        onPressed: () {
+                                          final exucuteText = controller.additionalNarrativeRes.value?.output ?? '';
+                                          final text = controller.executePromptRes.value?.output ?? '';
+
+                                          Widget renderContent(String data) {
+                                            if (controller.isTableData(data)) {
+                                              final lines = data.trim().split('\n');
+                                              final rows = <List<String>>[];
+
+                                              for (var line in lines) {
+                                                final trimmed = line.trim();
+                                                if (trimmed.startsWith('|') && !RegExp(r'^\|[\s\-|:]+\|$').hasMatch(trimmed)) {
+                                                  final cells = trimmed.split('|').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+                                                  rows.add(cells);
+                                                }
+                                              }
+
+                                              if (rows.isEmpty) {
+                                                return Text(data, style: const TextStyle(fontSize: 16));
+                                              }
+
+                                              final maxCols = rows.map((r) => r.length).fold<int>(0, (a, b) => a > b ? a : b);
+
+                                              return SingleChildScrollView(
+                                                scrollDirection: Axis.horizontal,
+                                                child: Table(
+                                                  border: TableBorder.all(),
+                                                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                                                  columnWidths: {
+                                                    for (int i = 0; i < maxCols; i++) i: IntrinsicColumnWidth(),
+                                                  },
+                                                  children: rows.asMap().entries.map((entry) {
+                                                    final index = entry.key;
+                                                    final row = entry.value;
+
+                                                    final padded = List<String>.from(row);
+                                                    while (padded.length < maxCols) {
+                                                      padded.add('');
+                                                    }
+
+                                                    return TableRow(
+                                                      decoration: index == 0
+                                                          ? null
+                                                          : const BoxDecoration(
+                                                              color: Colors.white, // white background for non-header rows
+                                                            ),
+                                                      children: padded.map((cell) {
+                                                        return Padding(
+                                                          padding: const EdgeInsets.all(8.0),
+                                                          child: Text(
+                                                            cell,
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                              fontWeight: index == 0 ? FontWeight.bold : FontWeight.normal, // bold header
+                                                            ),
+                                                          ),
+                                                        );
+                                                      }).toList(),
+                                                    );
+                                                  }).toList(),
+                                                ),
+                                              );
+                                            } else {
+                                              // Markdown-like header and bold formatting
+                                              final lines = data.split('\n');
+
+                                              return Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: lines.map((line) {
+                                                  if (line.trim().startsWith('###')) {
+                                                    final headerText = line.replaceFirst('###', '').trim();
+                                                    return Padding(
+                                                      padding: const EdgeInsets.only(bottom: 8.0, top: 12.0),
+                                                      child: Text(
+                                                        headerText,
+                                                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                                      ),
+                                                    );
+                                                  } else {
+                                                    final spans = <TextSpan>[];
+                                                    final regex = RegExp(r'\*\*(.*?)\*\*');
+                                                    var currentIndex = 0;
+
+                                                    for (final match in regex.allMatches(line)) {
+                                                      if (match.start > currentIndex) {
+                                                        spans.add(TextSpan(text: line.substring(currentIndex, match.start)));
+                                                      }
+                                                      spans.add(TextSpan(
+                                                        text: match.group(1),
+                                                        style: const TextStyle(fontWeight: FontWeight.bold),
+                                                      ));
+                                                      currentIndex = match.end;
+                                                    }
+
+                                                    if (currentIndex < line.length) {
+                                                      spans.add(TextSpan(text: line.substring(currentIndex)));
+                                                    }
+
+                                                    return Padding(
+                                                      padding: const EdgeInsets.only(bottom: 4.0),
+                                                      child: RichText(
+                                                        text: TextSpan(
+                                                          children: spans,
+                                                          style: const TextStyle(fontSize: 16, color: Colors.black),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }
+                                                }).toList(),
+                                              );
+                                            }
+                                          }
+
+                                          showDialog(
+                                            context: Get.context!,
+                                            barrierDismissible: true,
+                                            builder: (context) {
+                                              return Dialog(
+                                                insetPadding: EdgeInsets.zero,
+                                                backgroundColor: Colors.transparent,
+                                                child: Container(
+                                                  width: double.infinity,
+                                                  height: double.infinity,
+                                                  color: Colors.white,
+                                                  child: Column(
+                                                    children: [
+                                                      AppBar(
+                                                        backgroundColor: appBackGroundColor,
+                                                        automaticallyImplyLeading: false,
+                                                        title: const Text('AI Powered Response', style: TextStyle(color: Colors.white)),
+                                                        actions: [
+                                                          IconButton(
+                                                            icon: const Icon(Icons.close, color: Colors.white),
+                                                            onPressed: () => Navigator.of(context).pop(),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      Expanded(
+                                                        child: Padding(
+                                                          padding: const EdgeInsets.all(16.0),
+                                                          child: SingleChildScrollView(
+                                                            child: Column(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: [
+                                                                if (text.isNotEmpty) ...[
+                                                                  const Text('Additional Narrative',
+                                                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                                                                  const SizedBox(height: 8),
+                                                                  renderContent(text),
+                                                                  const SizedBox(height: 24),
+                                                                ],
+                                                                if (exucuteText.isNotEmpty) ...[
+                                                                  const Text('Prompt Result',
+                                                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                                                                  const SizedBox(height: 8),
+                                                                  renderContent(exucuteText),
+                                                                ]
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          );
+                                        },
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                10.height,
+                                Obx(() {
+                                  final executeText = controller.additionalNarrativeRes.value?.output ?? '';
+                                  final output = controller.executePromptRes.value?.output ?? '';
+
+                                  Widget renderContent(String text) {
+                                    if (controller.isTableData(text)) {
+                                      final lines = text.trim().split('\n');
+                                      final rows = <List<String>>[];
+
+                                      for (var line in lines) {
+                                        final trimmed = line.trim();
+                                        if (trimmed.startsWith('|') && !RegExp(r'^\|[\s\-|:]+\|$').hasMatch(trimmed)) {
+                                          final cells = trimmed.split('|').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+                                          rows.add(cells);
+                                        }
+                                      }
+
+                                      if (rows.isEmpty) {
+                                        return Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(text, style: TextStyle(fontSize: 16)),
                                         );
                                       }
-                                    }).toList(),
-                                  ),
-                                );
-                              }
-                            }
 
-                            final verticalController = ScrollController();
+                                      final maxCols = rows.map((r) => r.length).fold<int>(0, (a, b) => a > b ? a : b);
 
-                            return Scrollbar(
-                              controller: verticalController,
-                              thumbVisibility: true,
-                              interactive: true,
-                              child: SingleChildScrollView(
-                                controller: verticalController,
-                                scrollDirection: Axis.vertical,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (output.isNotEmpty) renderContent(output),
-                                    const SizedBox(height: 20),
-                                    if (executeText.isNotEmpty) renderContent(executeText),
-                                  ],
-                                ),
-                              ),
-                            );
-                          })
+                                      return Scrollbar(
+                                        thumbVisibility: true,
+                                        interactive: true,
+                                        child: SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          child: Scrollbar(
+                                            thumbVisibility: true,
+                                            interactive: true,
+                                            child: SingleChildScrollView(
+                                              scrollDirection: Axis.vertical,
+                                              child: Table(
+                                                border: TableBorder.all(),
+                                                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                                                columnWidths: {
+                                                  for (int i = 0; i < maxCols; i++) i: IntrinsicColumnWidth(),
+                                                },
+                                                children: rows.asMap().entries.map((entry) {
+                                                  final index = entry.key;
+                                                  final row = entry.value;
 
-                          //         Obx(() {
-                  //           final  exucuteText= controller.additionalNarrativeRes.value?.output ?? '';
-                  //           final output = controller.executePromptRes.value?.output ?? '';
-                  //
-                  //           Widget renderContent(String text) {
-                  //             if (controller.isTableData(text)) {
-                  //               final lines = text.trim().split('\n');
-                  //               final rows = <List<String>>[];
-                  //
-                  //               for (var line in lines) {
-                  //                 final trimmed = line.trim();
-                  //                 if (trimmed.startsWith('|') &&
-                  //                     !RegExp(r'^\|[\s\-|:]+\|$').hasMatch(trimmed)) {
-                  //                   final cells = trimmed
-                  //                       .split('|')
-                  //                       .map((e) => e.trim())
-                  //                       .where((e) => e.isNotEmpty)
-                  //                       .toList();
-                  //                   rows.add(cells);
-                  //                 }
-                  //               }
-                  //
-                  //               if (rows.isEmpty) {
-                  //                 return Padding(
-                  //                   padding: const EdgeInsets.all(8.0),
-                  //                   child: Text(text, style: TextStyle(fontSize: 16)),
-                  //                 );
-                  //               }
-                  //
-                  //               final maxCols =
-                  //               rows.map((r) => r.length).fold<int>(0, (a, b) => a > b ? a : b);
-                  //
-                  //               return Scrollbar(
-                  //                 thumbVisibility: true,
-                  //                 interactive: true,
-                  //                 child: SingleChildScrollView(
-                  //                   scrollDirection: Axis.horizontal,
-                  //                   child: Scrollbar(
-                  //                     thumbVisibility: true,
-                  //                     interactive: true,
-                  //                     child: SingleChildScrollView(
-                  //                       scrollDirection: Axis.vertical,
-                  //                       child: Table(
-                  //                         border: TableBorder.all(),
-                  //                         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                  //                         columnWidths: {
-                  //                           for (int i = 0; i < maxCols; i++) i: IntrinsicColumnWidth(),
-                  //                         },
-                  //                         children: rows.map((row) {
-                  //                           final padded = List<String>.from(row);
-                  //                           while (padded.length < maxCols) {
-                  //                             padded.add('');
-                  //                           }
-                  //                           return TableRow(
-                  //                             children: padded.map((cell) {
-                  //                               return Padding(
-                  //                                 padding: const EdgeInsets.all(8.0),
-                  //                                 child: Text(cell, style: TextStyle(fontSize: 16)),
-                  //                               );
-                  //                             }).toList(),
-                  //                           );
-                  //                         }).toList(),
-                  //                       ),
-                  //                     ),
-                  //                   ),
-                  //                 ),
-                  //               );
-                  //             } else {
-                  //               return Padding(
-                  //                 padding: const EdgeInsets.all(12.0),
-                  //                 child: Text(text, style: TextStyle(fontSize: 16)),
-                  //               );
-                  //             }
-                  //           }
-                  //
-                  //           final verticalController = ScrollController();
-                  //
-                  //           return Scrollbar(
-                  //             controller: verticalController,
-                  //             thumbVisibility: true,
-                  //             interactive: true,
-                  //             child: SingleChildScrollView(
-                  //               controller: verticalController,
-                  //               scrollDirection: Axis.vertical,
-                  //               child: Column(
-                  //                 crossAxisAlignment: CrossAxisAlignment.start,
-                  //                 children: [
-                  //                   if (output.isNotEmpty) renderContent(output),
-                  //                   const SizedBox(height: 20),
-                  //                   if (exucuteText.isNotEmpty) renderContent(exucuteText),
-                  //                 ],
-                  //               ),
-                  //             ),
-                  //           );
-                  //         })
+                                                  final padded = List<String>.from(row);
+                                                  while (padded.length < maxCols) {
+                                                    padded.add('');
+                                                  }
 
+                                                  return TableRow(
+                                                    decoration: index == 0
+                                                        ? null
+                                                        : BoxDecoration(
+                                                            color: Colors.white, // White background for non-header rows
+                                                          ),
+                                                    children: padded.map((cell) {
+                                                      return Padding(
+                                                        padding: const EdgeInsets.all(8.0),
+                                                        child: Text(
+                                                          cell,
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight: index == 0 ? FontWeight.bold : FontWeight.normal, // Bold header
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }).toList(),
+                                                  );
+                                                }).toList(),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      final lines = text.split('\n');
 
-                        ],
-                      ),
-                    ),
-                  )
+                                      return Padding(
+                                        padding: const EdgeInsets.all(12.0),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: lines.map((line) {
+                                            if (line.trim().startsWith('###')) {
+                                              final headerText = line.replaceFirst('###', '').trim();
+                                              return Padding(
+                                                padding: const EdgeInsets.only(bottom: 8.0, top: 12.0),
+                                                child: Text(
+                                                  headerText,
+                                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                                ),
+                                              );
+                                            } else {
+                                              final spans = <TextSpan>[];
+                                              final regex = RegExp(r'\*\*(.*?)\*\*');
+                                              var currentIndex = 0;
+
+                                              for (final match in regex.allMatches(line)) {
+                                                if (match.start > currentIndex) {
+                                                  spans.add(TextSpan(text: line.substring(currentIndex, match.start)));
+                                                }
+                                                spans.add(TextSpan(
+                                                  text: match.group(1),
+                                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                                ));
+                                                currentIndex = match.end;
+                                              }
+
+                                              if (currentIndex < line.length) {
+                                                spans.add(TextSpan(text: line.substring(currentIndex)));
+                                              }
+
+                                              return RichText(
+                                                text: TextSpan(
+                                                  children: spans,
+                                                  style: TextStyle(fontSize: 16, color: Colors.black),
+                                                ),
+                                              );
+                                            }
+                                          }).toList(),
+                                        ),
+                                      );
+                                    }
+                                  }
+
+                                  final verticalController = ScrollController();
+
+                                  return Scrollbar(
+                                    controller: verticalController,
+                                    thumbVisibility: true,
+                                    interactive: true,
+                                    child: SingleChildScrollView(
+                                      controller: verticalController,
+                                      scrollDirection: Axis.vertical,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          if (output.isNotEmpty) renderContent(output),
+                                          const SizedBox(height: 20),
+                                          if (executeText.isNotEmpty) renderContent(executeText),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                })
+                              ],
+                            ),
+                          ),
+                        )
                       : SizedBox();
                 },
               ),
-              // controller.isAdditionalNarrative.value
-              //     ? Container(
-              //         width: double.infinity,
-              //         padding: EdgeInsets.all(10),
-              //         decoration: BoxDecoration(
-              //           color: appBackGroundColor.withOpacity(0.3),
-              //           borderRadius: BorderRadius.circular(15),
-              //         ),
-              //         child: Padding(
-              //           padding: const EdgeInsets.only(top: 15),
-              //           child: Column(
-              //             crossAxisAlignment: CrossAxisAlignment.start,
-              //             children: [
-              //               Text(
-              //                 controller.additionalNarrativeRes.value?.output ?? '',
-              //                 style: TextStyle(fontSize: 16),
-              //               ),
-              //             ],
-              //           ),
-              //         ),
-              //       )
-              //     : SizedBox()
             ],
           ),
         ),
