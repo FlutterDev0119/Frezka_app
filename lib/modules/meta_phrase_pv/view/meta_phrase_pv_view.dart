@@ -187,7 +187,7 @@ class MetaPhraseScreen extends StatelessWidget {
     String? firstName = user.firstName;
     String? lastName = user.lastName;
     String? email = user.email;
-    return Padding(
+    return   Padding(
       padding: const EdgeInsets.all(8.0),
       child: SingleChildScrollView(
         child: Column(
@@ -225,6 +225,9 @@ class MetaPhraseScreen extends StatelessWidget {
                controller.isShowDowanlaodButton.value = false;
                controller.selectedMode.value = 'Review';
                controller.selected.value = 'Review';
+                controller.isCredentialsConfirm.value = false;
+                controller.isFinalizeDownloadshow.value = false;
+                controller.hasShownPeerReviewDialog.value = false;
               },
               child: Align(
                 alignment: Alignment.centerRight,
@@ -240,11 +243,13 @@ class MetaPhraseScreen extends StatelessWidget {
                   /// Button Row with icons & dynamic colors
                   Obx(() {
                     String mode = controller.selectedMode.value;
-
+                    log('-----mode----$mode');
                     Color getColor(String label) {
+                      log("----lable---$label");
                       int currentIndex = controller.modes.indexOf(mode);
                       int labelIndex = controller.modes.indexOf(label);
-
+                      log("----currentIndex---$currentIndex");
+                      log("----labelIndex---$labelIndex");
                       if (label == mode) return appBackGroundColor;
                       if (labelIndex < currentIndex) return appGreenColor;
 
@@ -274,7 +279,7 @@ class MetaPhraseScreen extends StatelessWidget {
                             child: Container(
                               child: Card(
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                color: (controller.isShowDowanlaodButton.value == true || controller.selected.value == "Certify") ? appGreenColor : getColor(label),
+                                color: (controller.isShowDowanlaodButton.value == true ) ? appGreenColor : getColor(label),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                                   child: Column(
@@ -304,6 +309,7 @@ class MetaPhraseScreen extends StatelessWidget {
 
                   Obx(
                      () {
+                       log("---------------------${controller.isCredentialsConfirm.value}-----------------cred");
                       return controller.isCredentialsConfirm.value == false
                           ? Column(
                               children: [
@@ -363,7 +369,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                               ),
                                             ),
                                           ),
-                                          Row(
+                                           Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
                                               controller.selectedMode.value == "Edit" && controller.isReverse.value == false
@@ -398,7 +404,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                                       onPressed: () {},
                                                     )
                                                   : SizedBox(),
-                                              (controller.selectedMode.value == "Review" || controller.selectedMode.value == "Edit"||controller.selectedMode.value == "Certify")
+                                              (controller.selectedMode.value == "Review" || controller.selectedMode.value == "Edit" || controller.selectedMode.value == "Peer Review" ||controller.selectedMode.value == "Certify")
                                                   ? IconButton(
                                                       iconSize: 20,
                                                       visualDensity: VisualDensity.compact,
@@ -432,7 +438,7 @@ class MetaPhraseScreen extends StatelessWidget {
 
                                               )
                                                   : SizedBox(),
-                                              (controller.selectedMode.value == "Review" || controller.selectedMode.value == "Edit" || controller.selectedMode.value == "Certify")
+                                              (controller.selectedMode.value == "Review" || controller.selectedMode.value == "Edit" || controller.selectedMode.value == "Peer Review" || controller.selectedMode.value == "Certify")
                                                   ? IconButton(
                                                       iconSize: 20,
                                                       visualDensity: VisualDensity.compact,
@@ -795,8 +801,19 @@ class MetaPhraseScreen extends StatelessWidget {
                   ),
 
                   /// Dropdown styled like a button
-           Obx(() {
+                  controller.isFinalizeDownloadshow.value == true? SizedBox():  Obx(() {
             log("-------------isshow------------------${controller.isShowDowanlaodButton.value}");
+            log('----------------------${controller.selectedMode.value}------------------------------------');
+            if ('Peer Review' == controller.selectedMode.value) {
+
+              controller.selectedMode.value = 'Peer Review';
+              controller.selected.value = 'Peer Review';
+            }
+            if ('Finalize' == controller.selectedMode.value) {
+              controller.selectedMode.value = 'Finalize';
+              controller.selected.value = 'Certify';
+               controller.selected.value == 'Certify';
+            }
                     final selected = controller.selectedMode.value;
                     final certifyOptions = ['Finalize', 'Return', 'Reject'];
                     if (selected == 'Peer Review' && controller.isEditing.value == true && controller.hasShownPeerReviewDialog.isFalse) {
@@ -838,11 +855,19 @@ class MetaPhraseScreen extends StatelessWidget {
                                                 final List<PopupMenuEntry<String>> items = [];
                                                 for (int i = 0; i < controller.modes.length; i++) {
                                                   final value = controller.modes[i];
-                                                  final isPeerReview = value == 'Peer Review';
+
+
+
+                                                        final isPeerReview = value == 'Peer Review';
                                                   final isDisabled =
                                                       ((controller.selected.value == 'Review' || controller.selected.value == 'Edit') &&
                                                           isPeerReview &&
                                                           !controller.isEditing.value);
+                                                  if ('Peer Review' == controller.selectedMode.value) {
+
+                                                    controller.selectedMode.value = 'Peer Review';
+                                                    controller.selected.value = 'Peer Review';
+                                                  }
 
                                                   items.add(
                                                     PopupMenuItem<String>(
@@ -880,7 +905,9 @@ class MetaPhraseScreen extends StatelessWidget {
                                                                   if (option == "Finalize") {
                                                                     Get.back();
                                                                     showCredentialsDialog(context, controller);
+                                                                    log("-------904------");
                                                                     controller.isReturnSelected.value = false;
+
                                                                     controller.isRejectSelected.value = false;
                                                                   } else if (option == "Return") {
                                                                     Get.back();
@@ -976,7 +1003,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                           },
                                         ))
                                     : Container(
-                                        width: 150,
+                                        width:  controller.selected.value == 'Peer Review' ? 180 :controller.selected.value == 'Edit'?120 :150,
                                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(12),
@@ -1057,6 +1084,8 @@ class MetaPhraseScreen extends StatelessWidget {
                                                                   if (option == "Finalize") {
                                                                     Get.back();
                                                                     showCredentialsDialog(context, controller);
+                                                                    log("-------1083------");
+
                                                                     controller.isReturnSelected.value = false;
                                                                     controller.isRejectSelected.value = false;
                                                                   } else if (option == "Return") {
@@ -1124,47 +1153,6 @@ class MetaPhraseScreen extends StatelessWidget {
                                                           );
                                                         }).toList()
                                                       : _buildModeOptionsWithDividers(controller),
-                                                  // : controller.modes.map((value) {
-                                                  //     final isPeerReview = value == 'Peer Review';
-                                                  //     final isDisabled =
-                                                  //         (controller.selected.value == 'Review' && isPeerReview && !controller.isEditing.value);
-                                                  //     for (int i = 0; i < controller.modes.length; i++) {
-                                                  //       final value = controller.modes[i];
-                                                  //       items.add(
-                                                  //         PopupMenuItem<String>(
-                                                  //           enabled: !isDisabled,
-                                                  //           value: value,
-                                                  //           child: Text(
-                                                  //             value,
-                                                  //             style: TextStyle(
-                                                  //               color: isDisabled ? appWhiteColor.withOpacity(0.5) : appWhiteColor,
-                                                  //               fontSize: 14,
-                                                  //             ),
-                                                  //           ),
-                                                  //         ),
-                                                  //       );
-                                                  //
-                                                  //       // Add divider after each item except the last one
-                                                  //       if (i < controller.modes.length - 1) {
-                                                  //         items.add(
-                                                  //           const PopupMenuDivider(
-                                                  //             height: 1,
-                                                  //           ),
-                                                  //         );
-                                                  //       }
-                                                  //     }
-                                                  //     return PopupMenuItem<String>(
-                                                  //       enabled: !isDisabled,
-                                                  //       value: value,
-                                                  //       child: Text(
-                                                  //         value,
-                                                  //         style: TextStyle(
-                                                  //           color: isDisabled ? appWhiteColor.withOpacity(0.5) : appWhiteColor,
-                                                  //           fontSize: 14,
-                                                  //         ),
-                                                  //       ),
-                                                  //     );
-                                                  //   }).toList(),
                                                 );
 
                                                 if (selected != null) {
@@ -1223,56 +1211,6 @@ class MetaPhraseScreen extends StatelessWidget {
                                         ),
                                       ],
                                     ),
-                                    // child: Column(
-                                    //   children: certifyOptions.map((option) {
-                                    //     return InkWell(
-                                    //       onTap: () {
-                                    //         if (option == "Finalize") {
-                                    //           showCredentialsDialog(
-                                    //             context,
-                                    //             () {
-                                    //               Get.back();
-                                    //             },
-                                    //             () {
-                                    //               Get.back();
-                                    //             },
-                                    //           );
-                                    //           controller.isReturnSelected.value = false;
-                                    //           controller.isRejectSelected.value = false;
-                                    //         } else if (option == "Return") {
-                                    //           controller.isReturnSelected.value = true;
-                                    //           controller.isRejectSelected.value = false;
-                                    //         } else if (option == "Reject") {
-                                    //           controller.isRejectSelected.value = true;
-                                    //           controller.isReturnSelected.value = false;
-                                    //         }else{
-                                    //           controller.updateSelectedMode("Certify");
-                                    //         }
-                                    //
-                                    //         print("Selected: $option");
-                                    //       },
-                                    //       child: Padding(
-                                    //         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                                    //         child: Row(
-                                    //           children: [
-                                    //             Icon(
-                                    //                 option == "Return"
-                                    //                     ? Icons.keyboard_return
-                                    //                     : option == "Reject"
-                                    //                         ? Icons.close
-                                    //                         : Icons.check_circle_outline,
-                                    //                 color: Colors.blue),
-                                    //             const SizedBox(width: 10),
-                                    //             Text(
-                                    //               option,
-                                    //               style: const TextStyle(fontWeight: FontWeight.bold),
-                                    //             ),
-                                    //           ],
-                                    //         ),
-                                    //       ),
-                                    //     );
-                                    //   }).toList(),
-                                    // ),
                                   ),
                                 if (controller.isReturnSelected.value && controller.isHideReturnCard.value !=true)
                                   Obx(() {
@@ -1326,6 +1264,8 @@ class MetaPhraseScreen extends StatelessWidget {
                                               onPressed: () {
                                                 // Handle submit action
                                                 print('Submitted:--- ${controller.returnTextController.text}');
+                                                controller.selectedMode.value = 'Edit';
+                                                controller.selected.value = 'Edit';
                                                 controller.putJustification();
                                               },
                                               style: ElevatedButton.styleFrom(
@@ -1395,6 +1335,20 @@ class MetaPhraseScreen extends StatelessWidget {
                                             onPressed: () {
                                               // Handle submit action
                                               print('Submitted: ++++ ${controller.rejectTextController.text}');
+                                              controller.isCardSelected.value = false;
+                                              controller.selectedTranslationReport.value = null;
+                                              controller.translatedScrollController = ScrollController();
+                                              controller.translatedScrollController1 = ScrollController();
+                                              controller.translatedTextController = TextEditingController();
+                                              controller.fetchData();
+                                              controller.filteredReasons.assignAll(controller.reasons);
+                                              controller.filteredReturnReasons.assignAll(controller.returnReson);
+                                              controller.isEditing.value = false;
+                                              controller.isShowDowanlaodButton.value = false;
+                                              controller.selectedMode.value = 'Review';
+                                              controller.selected.value = 'Review';
+                                              // controller.isReject.value = true;
+                                              controller.isRejectSelected.value = false;
                                             },
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: appBackGroundColor,
@@ -1424,7 +1378,7 @@ class MetaPhraseScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ) ;
   }
 
   Widget _buildFileList() {
@@ -1559,7 +1513,11 @@ void showPeerReviewDialog(BuildContext context) {
                       // Confirm action
                       Get.back();
                       log('-----------------confirm------------------');
-                      controller.selected.value = "Certify";
+
+                      // controller.selected.value = "Certify";
+                      // 'Finalize' == controller.selectedMode.value
+                      controller.selectedMode.value = 'Certify';
+                      controller.selected.value = 'Certify';
                       controller.hasShownPeerReviewDialog.value = true;
                     },
                     child: Text(
@@ -1709,6 +1667,7 @@ void showCredentialsDialog(BuildContext context, controller) {
                       } else {
                         errorMessage.value = null;
                         controller.isCredentialsConfirm.value = true;
+                        controller.isFinalizeDownloadshow.value = true;
                         Get.back();
                       }
                     },

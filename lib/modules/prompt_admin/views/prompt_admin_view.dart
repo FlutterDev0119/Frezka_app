@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -544,64 +545,62 @@ class PromptAdminScreen extends StatelessWidget {
                           child: content,
                         );
                       }),
-                      Obx(
-                        () {
-                          return Align(
-                            alignment: Alignment.bottomRight,
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                // controller.createNewPrompt();
-                                if (controller.currentIndex.value < 3) {
+                      Obx(() {
+                        return Align(
+                          alignment: Alignment.bottomRight,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              // controller.createNewPrompt();
+                              if (controller.currentIndex.value < 3) {
+                                controller.currentIndex.value++;
+                              } else {
+                                if (controller.inputController.text.isNotEmpty && controller.currentIndex.value == 3) {
                                   controller.currentIndex.value++;
                                 } else {
-                                  if(controller.inputController.text.isNotEmpty && controller.currentIndex.value == 3){
-                                    controller.currentIndex.value++;
-                                  }else{
-                                    toast("Prompt name is required");
-                                  }
-                                  // controller.currentIndex.value = 0;
+                                  toast("Prompt name is required");
                                 }
-                                if (controller.currentIndex.value == 4) {
+                                // controller.currentIndex.value = 0;
+                              }
+                              if (controller.currentIndex.value == 4) {
+                                String promptName = getStringAsync("promptName").trim();
+                                String role = getStringAsync("Role").trim();
+                                List<String> sources = controller.selectedSources.toList();
+                                String action = controller.actionController.text.trim();
+                                String group = getStringAsync("group").trim();
 
-                                  String promptName = getStringAsync("promptName").trim();
-                                  String role = getStringAsync("Role").trim();
-                                  List<String> sources = controller.selectedSources.toList();
-                                  String action = controller.actionController.text.trim();
-                                  String group = getStringAsync("group").trim();
+                                Map<String, dynamic> payload = {
+                                  "prompt_name": promptName.isNotEmpty ? promptName : "",
+                                  "role": {
+                                    "user_role": role.isNotEmpty ? role : "",
+                                  },
+                                  "group": group.isNotEmpty ? group : "",
+                                  "source": sources.isNotEmpty ? sources : [],
+                                  "metadata": {controller.selectedTempFileData.value.isNotEmpty? controller.selectedTempFileData.value : "",controller.selectedFileData.value.isNotEmpty  ? controller.selectedFileData.value : ""},
+                                  "task": action.isNotEmpty ? action : "",
+                                };
 
-                                  Map<String, dynamic> payload = {
-                                    "prompt_name": promptName.isNotEmpty ? promptName : "",
-                                    "role": {
-                                      "user_role": role.isNotEmpty ? role : "",
-                                    },
-                                    "group": group.isNotEmpty ? group : "",
-                                    "source": sources.isNotEmpty ? sources : [],
-                                    "metadata": {},
-                                    "task": action.isNotEmpty ? action : "",
-                                  };
-
-                                  log("Payload: ${jsonEncode(payload)}");
-                                  if( controller.inputController.text.isNotEmpty){
+                                log("Payload: ${jsonEncode(payload)}");
+                                if (controller.inputController.text.isNotEmpty) {
                                   await controller.createNewPrompt(payload);
-                                  }else{
-                                    toast("Prompt name is required");
-                                  }
+                                } else {
+                                  toast("Prompt name is required");
                                 }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: appBackGroundColor,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              ),
-                              child: Text( controller.currentIndex.value == 3
-                                  ? "Save"
-                                  : controller.currentIndex.value == 4
-                                  ? "Finalized"
-                                  : "Next",
-                                  style: TextStyle(color: appWhiteColor)),
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: appBackGroundColor,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             ),
-                          );
-                        }
-                      ),
+                            child: Text(
+                                controller.currentIndex.value == 3
+                                    ? "Save"
+                                    : controller.currentIndex.value == 4
+                                        ? "Finalized"
+                                        : "Next",
+                                style: TextStyle(color: appWhiteColor)),
+                          ),
+                        );
+                      }),
                     ],
                   ),
                 ),
@@ -664,7 +663,7 @@ class PromptAdminScreen extends StatelessWidget {
         String? metaCodeData = controller.selectedFileNames["Code list"];
         String? metaTemplateData = controller.selectedTemplateFileNames["template"];
         hasValue = (metaCodeData != null && metaCodeData.isNotEmpty) || (metaTemplateData != null && metaTemplateData.isNotEmpty);
-      }else if (index == 3) {
+      } else if (index == 3) {
         String action = controller.actionController.text.trim();
         hasValue = action.isNotEmpty;
       }
@@ -676,10 +675,8 @@ class PromptAdminScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           margin: const EdgeInsets.symmetric(horizontal: 4),
           decoration: BoxDecoration(
-        color: isSelected
-            ? appBackGroundColor
-            : (hasValue ? appGreenColor : appWhiteColor),
-        borderRadius: BorderRadius.circular(12),
+            color: isSelected ? appBackGroundColor : (hasValue ? appGreenColor : appWhiteColor),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(color: appBackGroundColor, width: 1.5),
             boxShadow: const [
               BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
@@ -761,7 +758,7 @@ class PromptAdminScreen extends StatelessWidget {
                       value: controller.selectedRole.value,
                       onChanged: (String? newValue) async {
                         controller.selectedRole.value = newValue!;
-                        if(newValue !="Select a Role")controller.fetchRolePrompt(newValue);
+                        if (newValue != "Select a Role") controller.fetchRolePrompt(newValue);
                         await setValue("Role", newValue);
                       },
                       items: controller.roles.map((String role) {
@@ -942,139 +939,150 @@ class PromptAdminScreen extends StatelessWidget {
                             SizedBox(
                               width: item == "Other" ? 0 : 28,
                               height: 28,
-                              child: Obx(
-                                () {
-                                  final isLocked = controller.lockStates[item] ?? true;
-                                  return PopupMenuButton<String>(
-                                    padding: EdgeInsets.zero,
-                                    icon: item == "Other" ? SizedBox() : Icon(Icons.menu, size: 16, color: Colors.blue),
-                                    onSelected: (value) {
-                                      
-                                      switch (value) {
-                                        case 'View':
+                              child: Obx(() {
+                                final isLocked = controller.lockStates[item] ?? true;
+                                return PopupMenuButton<String>(
+                                  padding: EdgeInsets.zero,
+                                  icon: item == "Other" ? SizedBox() : Icon(Icons.menu, size: 16, color: Colors.blue),
+                                  onSelected: (value) {
+                                    switch (value) {
+                                      case 'View':
+                                        // if ("Code list" == item.toString()) {
+                                        //   showViewPopup(
+                                        //     context,
+                                        //     controller.selectedFileNames[item] ?? "No file chosen",
+                                        //     controller.selectedFileData.value ?? "",
+                                        //
+                                        //   );
+                                        // }
+                                        if ("Code list" == item.toString()) {
+                                          final fileName = controller.selectedFileNames[item] ?? "No file chosen";
+                                          final file = controller.selectedFiles[item]; // assuming selectedFiles: Map<String, File>
+
+                                          if (file != null) {
+                                            loadAndShowFile(context, fileName, file);
+                                          } else {
+                                            toast("No file selected.");
+                                          }
+                                        }
+
+                                        if ("Template" == item.toString()) {
                                           showViewPopup(
                                             context,
                                             controller.selectedFileNames[item] ?? "No file chosen",
+                                            controller.selectedTempFileData.value ?? "aa",
+                                            // value
                                           );
-                                          break;
-                                        case 'Replace':
-                                          showReplacePopup(
-                                            context,
-                                            controller.selectedFileNames[item] ?? "No file chosen",
-                                            () async {
-                                              // First clear the old file
-                                              controller.selectedFileNames[item] = "";
+                                        }
+                                        break;
+                                      case 'Replace':
+                                        showReplacePopup(
+                                          context,
+                                          controller.selectedFileNames[item] ?? "No file chosen",
+                                          () async {
+                                            // First clear the old file
+                                            controller.selectedFileNames[item] = "";
 
-                                              // Now immediately open the file picker to choose new file
-                                              final result = await Get.bottomSheet(
-                                                enableDrag: true,
-                                                isScrollControlled: true,
-                                                ImageSourceSelectionComponent(
-                                                  onSourceSelected: (imageSource) {
-                                                    hideKeyboard(context);
-                                                    controller.onSourceSelected(imageSource, item); // pass the item name
-                                                  },
-                                                ),
-                                              );
-                                            },
-                                            () {
-                                              controller.removeItem(item);
-                                            },
-                                          );
-                                          break;
-                                        case 'Unlock':
-                                          controller.lockStates[item] = !(controller.lockStates[item] ?? true);
-                                          break;
-                                        case 'Remove':
-                                          controller.removeItem(item);
-                                         if (controller.selectedFileNames[item]!.isNotEmpty) {
-                                           toast("code ");
-                                          controller.selectedFileNames[item] = "";}
-                                          if(controller.selectedTemplateFileNames[item]!.isNotEmpty){
-                                            controller.selectedTemplateFileNames[item]='';
+                                            // Now immediately open the file picker to choose new file
+                                            final result = await Get.bottomSheet(
+                                              enableDrag: true,
+                                              isScrollControlled: true,
+                                              ImageSourceSelectionComponent(
+                                                onSourceSelected: (imageSource) {
+                                                  hideKeyboard(context);
+                                                  controller.onSourceSelected(imageSource, item); // pass the item name
+                                                },
+                                              ),
+                                            );
+                                          },
+                                          () {
+                                            controller.removeItem(item);
+                                          },
+                                        );
+                                        break;
+                                      case 'Unlock':
+                                        controller.lockStates[item] = !(controller.lockStates[item] ?? true);
+                                        break;
+                                      case 'Remove':
+                                        // toast("ddd");
+                                        // toast(item);
+                                        // log(item);
+
+                                        if ("Code list" == item.toString()) {
+                                            toast("code ");
+                                            controller.removeItem(item);
+                                            controller.selectedFileNames.clear();
+                                            controller.imageFiles.clear();
+                                            controller.fileNames.clear();
+                                            controller.selectedFiles.clear()  ;
+                                            controller.selectedFileData.value = 'No content';
+                                        }
+                                        if ("Template" == item.toString()) {
+                                            controller.selectedTemplateFileNames.clear();
+                                            controller.removeItem(item);
+                                            controller.imageTempFiles.clear();
+                                            controller.fileTempNames.clear();
+                                            controller.selectedTemplateFileNames.clear();
+                                            controller.selectedTempFileData.value = 'No content';
                                             toast("temp");
-                                          }
+                                        }
 
-                                          break;
-                                      }
-                                    },
-                                    // itemBuilder: (context) => [
-                                    //   PopupMenuItem(
-                                    //       value: 'View',enabled: !isLocked, child: Row(children: [Icon(Icons.visibility, size: 16), SizedBox(width: 6), Text("View")])),
-                                    //   PopupMenuDivider(),
-                                    //   PopupMenuItem(
-                                    //       value: 'Replace',enabled: !isLocked, child: Row(children: [Icon(Icons.edit, size: 16), SizedBox(width: 6), Text("Replace")])),
-                                    //   PopupMenuDivider(),
-                                    //   // PopupMenuItem(
-                                    //   //     value: 'Unlock', child: Row(children: [Icon(Icons.lock_open, size: 16), SizedBox(width: 6), Text("Unlock")])),
-                                    //   PopupMenuItem(
-                                    //       value: 'Unlock',
-                                    //       child: Row(
-                                    //         children: [
-                                    //           Icon(isLocked ? Icons.lock_open : Icons.lock, size: 16),
-                                    //           SizedBox(width: 6),
-                                    //           Text(isLocked ? "Unlock" : "Lock"),
-                                    //         ],
-                                    //       )),
-                                    //   PopupMenuDivider(),
-                                    //   PopupMenuItem(
-                                    //       value: 'Remove',enabled: !isLocked, child: Row(children: [Icon(Icons.close, size: 16), SizedBox(width: 6), Text("Remove")])),
-                                    // ],
-                                    itemBuilder: (context) => [
-                                      PopupMenuItem(
-                                        value: 'View',
-                                        enabled: !isLocked, // disable if locked
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.visibility, size: 16, color: isLocked ? Colors.grey : null),
-                                            SizedBox(width: 6),
-                                            Text("View", style: TextStyle(color: isLocked ? Colors.grey : null)),
-                                          ],
-                                        ),
+                                        break;
+                                    }
+                                  },
+                                  itemBuilder: (context) => [
+                                    PopupMenuItem(
+                                      value: 'View',
+                                      enabled: !isLocked, // disable if locked
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.visibility, size: 16, color: isLocked ? Colors.grey : null),
+                                          SizedBox(width: 6),
+                                          Text("View", style: TextStyle(color: isLocked ? Colors.grey : null)),
+                                        ],
                                       ),
-                                      PopupMenuDivider(),
-                                      PopupMenuItem(
-                                        value: 'Replace',
-                                        enabled: !isLocked, // disable if locked
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.edit, size: 16, color: isLocked ? Colors.grey : null),
-                                            SizedBox(width: 6),
-                                            Text("Replace", style: TextStyle(color: isLocked ? Colors.grey : null)),
-                                          ],
-                                        ),
-                                      ),
-                                      PopupMenuDivider(),
-                                      PopupMenuItem(
-                                        value: 'Unlock',
-                                        child: Row(
-                                          children: [
-                                            Icon(isLocked ? Icons.lock_open : Icons.lock, size: 16),
-                                            SizedBox(width: 6),
-                                            Text(isLocked ? "Unlock" : "Lock"),
-                                          ],
-                                        ),
-                                      ),
-                                      PopupMenuDivider(),
-                                      PopupMenuItem(
-                                        value: 'Remove',
-                                        enabled: !isLocked, // disable if locked
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.close, size: 16, color: isLocked ? Colors.grey : null),
-                                            SizedBox(width: 6),
-                                            Text("Remove", style: TextStyle(color: isLocked ? Colors.grey : null)),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12), // adjust as needed
                                     ),
-                                  );
-                                }
-                              ),
+                                    PopupMenuDivider(),
+                                    PopupMenuItem(
+                                      value: 'Replace',
+                                      enabled: !isLocked, // disable if locked
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.edit, size: 16, color: isLocked ? Colors.grey : null),
+                                          SizedBox(width: 6),
+                                          Text("Replace", style: TextStyle(color: isLocked ? Colors.grey : null)),
+                                        ],
+                                      ),
+                                    ),
+                                    PopupMenuDivider(),
+                                    PopupMenuItem(
+                                      value: 'Unlock',
+                                      child: Row(
+                                        children: [
+                                          Icon(isLocked ? Icons.lock_open : Icons.lock, size: 16),
+                                          SizedBox(width: 6),
+                                          Text(isLocked ? "Unlock" : "Lock"),
+                                        ],
+                                      ),
+                                    ),
+                                    PopupMenuDivider(),
+                                    PopupMenuItem(
+                                      value: 'Remove',
+                                      enabled: !isLocked, // disable if locked
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.close, size: 16, color: isLocked ? Colors.grey : null),
+                                          SizedBox(width: 6),
+                                          Text("Remove", style: TextStyle(color: isLocked ? Colors.grey : null)),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12), // adjust as needed
+                                  ),
+                                );
+                              }),
                             ),
                           ],
                         ),
@@ -1279,8 +1287,7 @@ class PromptAdminScreen extends StatelessWidget {
     return Column(
       children: [
         SizedBox(height: 20),
-        Center(child: Text("Verify", style: TextStyle(fontSize: 20,color: appWhiteColor))),
-
+        Center(child: Text("Verify", style: TextStyle(fontSize: 20, color: appWhiteColor))),
 
         // ElevatedButton(
         //   onPressed: () => controller.verifyText.value = "Verified",
@@ -1290,45 +1297,168 @@ class PromptAdminScreen extends StatelessWidget {
     );
   }
 
-  void showViewPopup(
-    BuildContext context,
-    String filename,
-  ) {
+  // void showViewPopup(
+  //     BuildContext context,
+  //     String fileName,
+  //     String fileContent,
+  //     ) {
+  //   showDialog(
+  //     context: context,
+  //     barrierColor: Colors.black.withOpacity(0.3),
+  //     builder: (context) => Dialog(
+  //       backgroundColor: Colors.white,
+  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  //       child: ConstrainedBox(
+  //         constraints: BoxConstraints(
+  //           maxHeight: MediaQuery.of(context).size.height * 0.8, // Max 80% height
+  //           maxWidth: MediaQuery.of(context).size.width * 0.9,  // Max 90% width
+  //         ),
+  //         child: Padding(
+  //           padding: const EdgeInsets.all(16),
+  //           child: Column(
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               /// Header Row
+  //               Row(
+  //                 children: [
+  //                   Expanded(
+  //                     child: Text(
+  //                       fileName,
+  //                       style: const TextStyle(
+  //                         fontSize: 16,
+  //                         fontWeight: FontWeight.bold,
+  //                         overflow: TextOverflow.ellipsis,
+  //                       ),
+  //                     ),
+  //                   ),
+  //                   IconButton(
+  //                     icon: const Icon(Icons.close, size: 20, color: Colors.red),
+  //                     onPressed: () => Navigator.pop(context),
+  //                     tooltip: "Close",
+  //                   ),
+  //                 ],
+  //               ),
+  //               const Divider(),
+  //               /// Scrollable Content
+  //               Expanded(
+  //                 child: SingleChildScrollView(
+  //                   child: SelectableText(
+  //                     fileContent,
+  //                     style: const TextStyle(fontSize: 14),
+  //                   ),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+
+// Show loading dialog
+  void showLoadingDialog(BuildContext context) {
     showDialog(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.3), // slight background dim
-      builder: (context) => Dialog(
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.3),
+      builder: (_) => Dialog(
         backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            3.width,
-            Expanded(
-              child: Text(
-                filename,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.close, size: 18, color: Colors.red),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              tooltip: "Close",
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-            ),
-          ],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text("Loading file...", style: TextStyle(fontSize: 16)),
+            ],
+          ),
         ),
       ),
     );
   }
 
+// Show file content dialog
+  void showViewPopup(
+      BuildContext context,
+      String fileName,
+      String fileContent,
+      ) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.3),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.8,
+            maxWidth: MediaQuery.of(context).size.width * 0.9,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        fileName,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, size: 20, color: Colors.red),
+                      onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+                      tooltip: "Close",
+                    ),
+                  ],
+                ),
+                const Divider(),
+                // File Content
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: SelectableText(
+                      fileContent,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+// Safely load and display file content
+  void loadAndShowFile(BuildContext context, String fileName, File file) async {
+    showLoadingDialog(context); // show loader
+
+    try {
+      final fileContent = await file.readAsString().timeout(
+        const Duration(seconds: 5),
+        onTimeout: () => throw Exception("File read timed out"),
+      );
+
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      Navigator.of(context, rootNavigator: true).pop(); // close loader
+      showViewPopup(context, fileName, fileContent);
+    } catch (e) {
+      Navigator.of(context, rootNavigator: true).pop(); // close loader
+      toast("Failed to read file: $e");
+    }
+  }
   void showReplacePopup(BuildContext context, String filename, VoidCallback onReplace, VoidCallback onRemove) {
     showDialog(
       context: context,

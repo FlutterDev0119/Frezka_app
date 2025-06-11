@@ -136,12 +136,14 @@ class TranslationMemoryController extends BaseController {
   //========================================================================================
   Future<void> fetchData() async {
     log("==================call----------------------------------------");
-    if (isLoading.value) return;
+    // if (isLoading.value) return;
     setLoading(true);
     try {
       final result = await TranslationMemoryServiceApis.fetchTranslationMemoryList();
       allFiles.clear();
       allFiles.assignAll(result);
+
+      log("---------------------------------------");
     } catch (e) {
       print('Error fetching Translation Memory list: $e');
     } finally {
@@ -175,9 +177,8 @@ class TranslationMemoryController extends BaseController {
 
       if (response['success'] != null) {
         toast(response['success'].toString());
-        await fetchData();
       }
-
+      await fetchData();
       Get.back();
     } catch (e) {
       Get.snackbar('Error', 'Failed to update translation');

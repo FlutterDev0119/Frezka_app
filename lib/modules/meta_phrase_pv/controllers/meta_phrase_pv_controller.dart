@@ -44,6 +44,7 @@ class MetaPhraseController extends BaseController {
 
   RxString reverseTranslatedText = ''.obs;
   var isEditing = false.obs;
+  var isReject = false.obs;
   late TextEditingController translatedTextController;
 
   RxBool isPersonalSelected = false.obs;
@@ -52,6 +53,7 @@ class MetaPhraseController extends BaseController {
   var isScoreHighlightMode = false.obs;
   var selected = 'Review'.obs;
   RxBool isShowDowanlaodButton = false.obs;
+  RxBool isFinalizeDownloadshow= false.obs;
 
   ///Return
   var returnReson = [
@@ -93,6 +95,9 @@ class MetaPhraseController extends BaseController {
     translatedScrollController1 = ScrollController();
     translatedTextController = TextEditingController();
     fetchData();
+    isCredentialsConfirm.value = false;
+    isFinalizeDownloadshow.value = false;
+    hasShownPeerReviewDialog.value = false;
     filteredReasons.assignAll(reasons);
     filteredReturnReasons.assignAll(returnReson);
     isEditing.value = false;
@@ -163,6 +168,9 @@ class MetaPhraseController extends BaseController {
   /// Fetch all MetaPhrase work list
   Future<void> fetchData() async {
     if (isLoading.value) return;
+    isCredentialsConfirm.value = false;
+    isFinalizeDownloadshow.value = false;
+    hasShownPeerReviewDialog.value = false;
     setLoading(true);
     try {
       final result = await MetaPhrasePVServiceApis.fetchMetaPhraseList();
@@ -233,8 +241,7 @@ class MetaPhraseController extends BaseController {
       if (response.message.isNotEmpty) {
         toast(response.message);
         isHideReturnCard.value = true;
-        // selectedMode.value = 'Edit';
-        // selected.value = 'Edit';
+
       }
     } catch (e) {
       print('put Justification Data error: $e');

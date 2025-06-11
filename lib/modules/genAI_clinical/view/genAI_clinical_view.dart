@@ -1277,7 +1277,9 @@ class GenAIClinicalScreen extends StatelessWidget {
 
                                 controller
                                     .additionalNarrative(
-                                        query: controller.dataLakeInput.value.toString(),
+                                        query: //controller.genAIDropdownValue.value == 'Upload File' ?
+                                        controller.personalizeController.text,
+                                            // : controller.dataLakeInput.value.toString(),
                                         SafetyReport: prettyJson.toList(),
                                         checkbox: controller.selectedTags.toList(),
                                         narrative: "")

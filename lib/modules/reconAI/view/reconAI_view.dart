@@ -1036,10 +1036,16 @@ class ReconAIScreen extends StatelessWidget {
                                                                         .map((message) => Padding(
                                                                       padding: const EdgeInsets.only(bottom: 8),
                                                                       child: Card(
-                                                                        margin: EdgeInsets.all(2),
+                                                                        margin: const EdgeInsets.all(4),
+                                                                        shape: RoundedRectangleBorder(
+                                                                          borderRadius: BorderRadius.circular(8),
+                                                                        ),
                                                                         color: appDashBoardCardColor,
-                                                                        child: Text(message.message).paddingAll(8),
-                                                                      ),
+                                                                        child: Padding(
+                                                                          padding: const EdgeInsets.all(12.0),
+                                                                          child: renderContent(message.message),
+                                                                        ),
+                                                                      )
                                                                     ))
                                                                         .toList(),
                                                                   ),
@@ -1063,19 +1069,27 @@ class ReconAIScreen extends StatelessWidget {
                                       Obx(() => controller.isExpanded.value
                                           ? SingleChildScrollView(
                                         scrollDirection: Axis.vertical,
-                                        child: Text(
-                                          // controller.reconAIRes.value?.response.toString() ?? '',
-                                          // controller.reconAIRes.value?.response ?? '',
-                                          controller.lastMessage.value ?? '',
-                                          style: TextStyle(fontSize: 16),
-                                        ),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(12),
+                                          child: renderContent(controller.lastMessage.value ?? ''),
+                                        )
+                                        // Text(
+                                        //
+                                        //     renderContent(controller.lastMessage.value ?? ''),
+                                        //   style: TextStyle(fontSize: 16),
+                                        // ),
                                       )
-                                          : Text(
-                                        controller.lastMessage.value ?? '',
-                                        style: TextStyle(fontSize: 16),
-                                        maxLines: 5,
-                                        overflow: TextOverflow.ellipsis,
-                                      )),
+                                          :
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        child: renderContent(controller.lastMessage.value ?? ''),
+                                      )
+                                      // Text(
+                                      //   controller.lastMessage.value ?? '',
+                                      //   style: TextStyle(fontSize: 16),
+                                      //   maxLines: 5,
+                                      //   overflow: TextOverflow.ellipsis,
+                                      ),
                                     ],
                                   ),
                                 ),

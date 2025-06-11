@@ -86,6 +86,8 @@ class PromptAdminController extends BaseController {
   RxList<File> imageTempFiles = <File>[].obs;
   RxList<String> fileTempNames = <String>[].obs;
   Map<String, File> selectedFiles = {};
+  final RxString selectedTempFileData = ''.obs;
+  final RxString selectedFileData = ''.obs;
 
   void addItem(String item) {
     if (!selectedItems.contains(item)) {
@@ -269,13 +271,28 @@ class PromptAdminController extends BaseController {
 //   }
   void onSourceSelected(dynamic imageSource, String item) async {
     if (imageSource is File) {
-      String fileName = imageSource.path.split('/').last;
+      String fileName = ' ${imageSource.path.split('/').last}';
       bool isDuplicate = fileNames.contains(fileName);
 
       if (isDuplicate) {
         toast("File already added");
         return;
       }
+      String? fileContent;
+      try {
+        final fileExtension = fileName.split('.').last.toLowerCase();
+        final readableExtensions = ['txt', 'xml', 'csv', 'json', 'html', 'md'];
+
+        if (readableExtensions.contains(fileExtension)) {
+          fileContent = await imageSource.readAsString();
+        } else {
+          fileContent = 'Preview not supported for .$fileExtension files.';
+        }
+      } catch (e) {
+        fileContent = 'Error reading file: $e';
+      }
+      // ✅ Save fileContent into a variable (you can manage it via a controller)
+      selectedFileData.value = fileContent ?? 'No content';
 
       Get.bottomSheet(
         AppDialogueComponent(
@@ -286,6 +303,7 @@ class PromptAdminController extends BaseController {
             fileNames.add(fileName);
             selectedFileNames[item] = fileName;
             selectedFiles[item] = imageSource;
+            log('File Content: $fileContent');
           },
         ),
         isScrollControlled: true,
@@ -301,7 +319,21 @@ class PromptAdminController extends BaseController {
         toast("File already added");
         return;
       }
+      String? fileContent;
+      try {
+        final fileExtension = fileName.split('.').last.toLowerCase();
+        final readableExtensions = ['txt', 'xml', 'csv', 'json', 'html', 'md'];
 
+        if (readableExtensions.contains(fileExtension)) {
+          fileContent = await imageSource.readAsString();
+        } else {
+          fileContent = 'Preview not supported for .$fileExtension files.';
+        }
+      } catch (e) {
+        fileContent = 'Error reading file: $e';
+      }
+      // ✅ Save fileContent into a variable (you can manage it via a controller)
+      selectedTempFileData.value = fileContent ?? 'No content';
       Get.bottomSheet(
         AppDialogueComponent(
           titleText: "Do you want to upload this attachment?",
@@ -310,6 +342,8 @@ class PromptAdminController extends BaseController {
             imageTempFiles.add(imageSource);
             fileTempNames.add(fileName);
             selectedTemplateFileNames[item] = fileName;
+            // Do something with fileContent if needed
+            log('File Content: $fileContent');
           },
         ),
         isScrollControlled: true,

@@ -420,22 +420,6 @@ class ReconciliationPopup extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Row(
-            //   children: [
-            //
-            //     Text(
-            //       'Reconciliation Results',
-            //       style: TextStyle(
-            //         fontSize: 18,
-            //         fontWeight: FontWeight.bold,
-            //       ),
-            //     ),
-            //     Spacer(),
-            //     IconButton(onPressed: (){Get.back();
-            //     controller. isLastMessageShow.value =true;
-            //       }, icon: Icon(Icons.close))
-            //   ],
-            // ),
             Container(
               color: appBackGroundColor,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -461,10 +445,6 @@ class ReconciliationPopup extends StatelessWidget {
               ),
             ),
             SizedBox(height: 16),
-            // ...messages.map((message) => Padding(
-            //       padding: const EdgeInsets.only(bottom: 8),
-            //       child: Card(margin: EdgeInsets.all(2),color: appDashBoardCardColor, child: Text(message.message).paddingAll(8)),
-            //     )),
             ...messages.map((message) => Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Card(
@@ -482,59 +462,72 @@ class ReconciliationPopup extends StatelessWidget {
       ),
     );
   }
-  Widget renderContent(String data) {
 
-    if (isTableData(data)) {
-      final lines = data.trim().split('\n');
-      final rows = <List<String>>[];
 
-      for (var line in lines) {
-        final cells = line
-            .split('|')
-            .map((e) => e.trim())
-            .where((e) => e.isNotEmpty)
-            .toList();
-        if (cells.isNotEmpty) {
-          rows.add(cells);
-        }
+}
+Widget renderContent(String data) {
+  if (isTableData(data)) {
+    final lines = data.trim().split('\n');
+    final rows = <List<String>>[];
+
+    for (var line in lines) {
+      final cells = line
+          .split('|')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
+      if (cells.isNotEmpty) {
+        rows.add(cells);
       }
+    }
 
-      if (rows.isEmpty) {
-        return Text(data, style: const TextStyle(fontSize: 16));
-      }
-
-      final maxCols = rows.map((r) => r.length).fold<int>(0, (a, b) => a > b ? a : b);
-
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Table(
-          border: TableBorder.all(),
-          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          columnWidths: {
-            for (int i = 0; i < maxCols; i++) i: IntrinsicColumnWidth(),
-          },
-          children: rows.map((row) {
-            final padded = List<String>.from(row);
-            while (padded.length < maxCols) {
-              padded.add('');
-            }
-            return TableRow(
-              children: padded.map((cell) {
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(cell, style: const TextStyle(fontSize: 14)),
-                );
-              }).toList(),
-            );
-          }).toList(),
-        ),
-      );
-    } else {
+    if (rows.isEmpty) {
       return Text(data, style: const TextStyle(fontSize: 16));
     }
-  }
 
-  bool isTableData(String data) {
-    return data.contains('|') && data.contains('\n');
+    final maxCols = rows.map((r) => r.length).fold<int>(0, (a, b) => a > b ? a : b);
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Table(
+        border: TableBorder.all(),
+        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+        columnWidths: {
+          for (int i = 0; i < maxCols; i++) i: IntrinsicColumnWidth(),
+        },
+        children: List.generate(rows.length, (rowIndex) {
+          final row = rows[rowIndex];
+          final padded = List<String>.from(row);
+          while (padded.length < maxCols) {
+            padded.add('');
+          }
+
+          final isHeader = rowIndex == 0;
+          final backgroundColor = isHeader ? appDashBoardCardColor : Colors.white;
+
+          return TableRow(
+            children: padded.map((cell) {
+              return Container(
+                color: backgroundColor,
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  cell,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+              );
+            }).toList(),
+          );
+        }),
+      ),
+    );
+  } else {
+    return Text(data, style: const TextStyle(fontSize: 16));
   }
+}
+
+bool isTableData(String data) {
+  return data.contains('|') && data.contains('\n');
 }

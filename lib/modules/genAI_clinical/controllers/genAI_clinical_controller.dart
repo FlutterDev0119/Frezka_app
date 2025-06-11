@@ -10,6 +10,7 @@ import '../../genAI_pv/model/generate_sql_model.dart';
 import '../model/additional_narrative_model.dart';
 import '../model/execute_prompt_model.dart';
 import '../model/fetch_clinical_data.dart';
+import 'package:open_file/open_file.dart' as ofx;
 
 class GenAIClinicalController extends GetxController {
   RxList<File> imageFiles = <File>[].obs;
@@ -40,6 +41,7 @@ class GenAIClinicalController extends GetxController {
   RxList<SqlDataItem> safetyReports = <SqlDataItem>[].obs;
   RxBool isExpanded = false.obs;
   RxBool fileCopyTap = false.obs;
+  RxString uploadContent = ''.obs;
 
   @override
   void onInit() {
@@ -145,23 +147,31 @@ class GenAIClinicalController extends GetxController {
   Future<void> additionalNarrative({required String query, required List<String> SafetyReport, required List<String> checkbox, required String narrative}) async {
     try {
       isLoading.value = true;
-
+      log("----------------------------");
+log(executePromptRes.value?.output.toString() ?? '');
+      log("----------------------------");
       final request = {
         "query": query,
-        "SafetyReport": SafetyReport,
+        "SafetyReport": genAIDropdownValue.value == 'Upload File' ? [uploadContent.value] :SafetyReport,
         "checkbox": checkbox,
-        "narrative": '',
+        "narrative": executePromptRes.value?.output.toString() ?? '',
       };
 
       final response = await ClinicalPromptServiceApis.fetchAdditionalNarrative(request: request);
       additionalNarrativeRes.value = response;
+      _logLongString(request.toString());
     } catch (e) {
       print('Error fetching Additional Narrative: $e');
     } finally {
       isLoading.value = false;
     }
   }
-
+  void _logLongString(String message, {int chunkSize = 800}) {
+    final pattern = RegExp('.{1,$chunkSize}');
+    for (final match in pattern.allMatches(message)) {
+      log(match.group(0)!);
+    }
+  }
   Future<void> executePrompt({required List<String> studies, required List<String> checkbox}) async {//required String userId,required String user_name
     try {
       isLoading.value = true;
@@ -175,7 +185,7 @@ class GenAIClinicalController extends GetxController {
         id = userModel.id.toString();
       }
       final request = {
-        "studies": studies,
+        "studies":genAIDropdownValue.value == 'Upload File' ? [uploadContent.value] : studies,
         "checkbox": checkbox,
         "userId": id,
         "user_name": Fullname,
@@ -247,9 +257,12 @@ class GenAIClinicalController extends GetxController {
   // }
   void onSourceSelected(dynamic imageSource) async {
     if (imageSource is File) {
-      String fileName = imageSource.path.split('/').last;
-      bool isDuplicate = fileNames.contains(fileName);
-
+      // String fileName = imageSource.path.split('/').last;
+      // bool isDuplicate = fileNames.contains(fileName);
+      final filePath = imageSource.path;
+      final fileName = filePath.split('/').last;
+      final extension = filePath.split('.').last.toLowerCase();
+      final isDuplicate = fileNames.contains(fileName);
       if (isDuplicate) {
         toast("File already added");
         return;
@@ -266,6 +279,20 @@ class GenAIClinicalController extends GetxController {
         ),
         isScrollControlled: true,
       );
+      if (['txt', 'xml', 'csv'].contains(extension)) {
+        final content = await imageSource.readAsString();
+        uploadContent.value = content; // Save the read content
+      } else if (extension == 'pdf') {
+        // Implement PDF reading logic here if needed
+        toast("PDF reading not implemented yet.");
+      } else if (['docx', 'xlsx', 'xls'].contains(extension)) {
+        final result = await ofx.OpenFile.open(filePath);
+        if (result.type != ofx.ResultType.done) {
+          toast("Can't open this file on your device.");
+        }
+      } else {
+        toast("Unsupported file type.");
+      }
     }
   }
 
