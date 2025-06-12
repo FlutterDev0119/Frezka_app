@@ -44,6 +44,7 @@ class MetaPhraseScreen extends StatelessWidget {
                 Expanded(child: _buildFileList()),
               ],
               if (controller.isCardSelected.value && controller.selectedTranslationReport.value != null) ...[
+
                 Expanded(child: _buildSelectedCard(context, controller.selectedTranslationReport.value))
               ],
             ],
@@ -182,11 +183,14 @@ class MetaPhraseScreen extends StatelessWidget {
 
 // Decode and convert to UserModel
     UserModel user = UserModel.fromJson(jsonDecode(userJson));
-
 // Access the fields
     String? firstName = user.firstName;
     String? lastName = user.lastName;
     String? email = user.email;
+
+
+
+
     return   Padding(
       padding: const EdgeInsets.all(8.0),
       child: SingleChildScrollView(
@@ -228,6 +232,7 @@ class MetaPhraseScreen extends StatelessWidget {
                 controller.isCredentialsConfirm.value = false;
                 controller.isFinalizeDownloadshow.value = false;
                 controller.hasShownPeerReviewDialog.value = false;
+                controller.index.value = 0;
               },
               child: Align(
                 alignment: Alignment.centerRight,
@@ -250,9 +255,21 @@ class MetaPhraseScreen extends StatelessWidget {
                       int labelIndex = controller.modes.indexOf(label);
                       log("----currentIndex---$currentIndex");
                       log("----labelIndex---$labelIndex");
+                      if(controller.selectedMode.value == 'Certify' &&
+                      controller.selected.value == 'Certify'){
+                        currentIndex = 2;
+                        if (label == "Peer Review" && controller.isCredentialsConfirm.value == false) {
+                          return appBackGroundColor;};
+                        if(controller.isCredentialsConfirm.value == true){
+                          return appGreenColor;
+                        }
+
+                      }
+                      if(labelIndex==3 && currentIndex==3) {
+                        controller.isIndex3Select.value = true;
+                        return appGreenColor;};
                       if (label == mode) return appBackGroundColor;
                       if (labelIndex < currentIndex) return appGreenColor;
-
                       return appMetaButtonColor;
                     }
 
@@ -271,6 +288,7 @@ class MetaPhraseScreen extends StatelessWidget {
                       }
                     }
 
+
                     List<String> displayModes = mode == 'Review' ? ['Review'] : controller.modes;
                     return Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -286,7 +304,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Icon(getIcon(label),
-                                          color: controller.modes.indexOf(label) == controller.modes.indexOf(mode) ? appWhiteColor : appTextColor),
+                                          color:  controller.isIndex3Select.value ==  true ? Colors.black : controller.modes.indexOf(label) == controller.modes.indexOf(mode) ? appWhiteColor : appTextColor),
                                       const SizedBox(height: 4),
                                       Marquee(
                                         child: Text(
@@ -294,7 +312,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                           label,
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
-                                              color: controller.modes.indexOf(label) == controller.modes.indexOf(mode) ? appWhiteColor : appTextColor,
+                                              color:  controller.isIndex3Select.value ==  true ? Colors.black :controller.modes.indexOf(label) == controller.modes.indexOf(mode) ? appWhiteColor : appTextColor,
                                               fontWeight: FontWeight.bold),
                                         ),
                                       ),
@@ -310,6 +328,21 @@ class MetaPhraseScreen extends StatelessWidget {
                   Obx(
                      () {
                        log("---------------------${controller.isCredentialsConfirm.value}-----------------cred");
+                       WidgetsBinding.instance.addPostFrameCallback((_) {
+                         log("---------------------------------------------------------------");
+                         String mode = controller.selectedMode.value;
+                         int currentIndex = controller.modes.indexOf(mode);
+                         int labelIndex = controller.modes.indexOf('Certify');
+                         log("-----------$currentIndex---------$labelIndex-----------");
+                         if(currentIndex == 3) {controller.sameindex3.value = true;
+                         controller.index.value ++;
+                         }
+                         if (currentIndex == 3  && controller.sameindex3.value &&  controller.index.value == 1) {
+                           controller.labelIndexGloble.value = labelIndex;
+                           controller.currentIndexGloble.value = currentIndex;
+                             showCredentialsDialog(context, controller);
+                         }
+                       });
                       return controller.isCredentialsConfirm.value == false
                           ? Column(
                               children: [
@@ -390,12 +423,13 @@ class MetaPhraseScreen extends StatelessWidget {
                                                       padding: EdgeInsets.zero,
                                                       icon: Icon(Icons.score_outlined),
                                                       onPressed: () {
-                                                        controller.isScoreHighlightMode.value = !controller.isScoreHighlightMode.value;
+                                                        controller.isScoreHighlightMode.toggle();
+                                                        // controller.isScoreHighlightMode.value = !controller.isScoreHighlightMode.value;
                                                         controller.selectedTranslationReport.value = controller.selectedTranslationReport.value;
                                                       },
                                                     )
                                                   : SizedBox(),
-                                              (controller.selectedMode.value == "Edit" && controller.isReverse.value == false)|| controller.selectedMode.value == "Certify"
+                                                  (controller.selectedMode.value == "Edit" && controller.isReverse.value == false)  || controller.selectedMode.value == "Certify"
                                                   ? IconButton(
                                                       iconSize: 20,
                                                       visualDensity: VisualDensity.compact,
@@ -404,7 +438,16 @@ class MetaPhraseScreen extends StatelessWidget {
                                                       onPressed: () {},
                                                     )
                                                   : SizedBox(),
-                                              (controller.selectedMode.value == "Review" || controller.selectedMode.value == "Edit" || controller.selectedMode.value == "Peer Review" ||controller.selectedMode.value == "Certify")
+                                                   ( controller.selectedMode.value == "Peer Review" )
+                                                   ? IconButton(
+                                                   iconSize: 20,
+                                                   visualDensity: VisualDensity.compact,
+                                                   padding: EdgeInsets.zero,
+                                                   icon: Icon(Icons.laptop_windows_rounded),
+                                                   onPressed: () {},
+                                                   )
+                                                       : SizedBox(),
+                                                    (controller.selectedMode.value == "Review" || controller.selectedMode.value == "Edit" || controller.selectedMode.value == "Peer Review" || controller.selectedMode.value == "Certify")
                                                   ? IconButton(
                                                       iconSize: 20,
                                                       visualDensity: VisualDensity.compact,
@@ -438,7 +481,7 @@ class MetaPhraseScreen extends StatelessWidget {
 
                                               )
                                                   : SizedBox(),
-                                              (controller.selectedMode.value == "Review" || controller.selectedMode.value == "Edit" || controller.selectedMode.value == "Peer Review" || controller.selectedMode.value == "Certify")
+                                                  (controller.selectedMode.value == "Review" || controller.selectedMode.value == "Edit" || controller.selectedMode.value == "Peer Review" || controller.selectedMode.value == "Certify")
                                                   ? IconButton(
                                                       iconSize: 20,
                                                       visualDensity: VisualDensity.compact,
@@ -540,116 +583,164 @@ class MetaPhraseScreen extends StatelessWidget {
                                             child: Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                               Obx(() {
-                                                  final isScoreHighlight = controller.isScoreHighlightMode.value;
-                                                  log("--------------changedData--------------${controller.changedData.value}");
+                                               // Obx(() {
+                                               //    final isScoreHighlight = controller.isScoreHighlightMode.value;
+                                               //    log("--------------changedData--------------${controller.changedData.value}");
+                                               //
+                                               //    // If score highlight is ON and changedData is not empty, use changedData for coloring
+                                               //    if (isScoreHighlight) {
+                                               //      // Use changedData if available, else fallback to original sentences
+                                               //      final changedText = controller.changedData.value;
+                                               //      final scoredTexts = controller.selectedTranslationReport.value?.sentenceScore ?? [];
+                                               //
+                                               //      // If changedData is not empty, split it into sentences and pair with scores
+                                               //      if (changedText.isNotEmpty && scoredTexts.isNotEmpty) {
+                                               //        // Split changedText into sentences (assuming \n or . as separator)
+                                               //        // You may want to use a more robust sentence splitter for production
+                                               //        final changedSentences = changedText.split(RegExp(r'(?<=[.!?])\s+'));
+                                               //        return Wrap(
+                                               //          spacing: 4,
+                                               //          runSpacing: 4,
+                                               //          alignment: WrapAlignment.start,
+                                               //          children: List.generate(changedSentences.length, (i) {
+                                               //            final sentence = changedSentences[i];
+                                               //            // Use score from scoredTexts if available, else default to 0
+                                               //            final score = i < scoredTexts.length ? scoredTexts[i].score : 0;
+                                               //            Color color;
+                                               //            if (score >= 0 && score <= 39) {
+                                               //              color = appScore0To39Color;
+                                               //            } else if (score >= 40 && score <= 64) {
+                                               //              color = appScore40To64Color;
+                                               //            } else if (score >= 65 && score <= 100) {
+                                               //              color = appScore65To100Color;
+                                               //            } else {
+                                               //              color = appBackGroundColor;
+                                               //            }
+                                               //            return Tooltip(
+                                               //              message: 'Score: $score',
+                                               //              decoration: BoxDecoration(
+                                               //                color: appDashBoardCardColor,
+                                               //                borderRadius: BorderRadius.circular(4),
+                                               //              ),
+                                               //              textStyle: TextStyle(color: appBackGroundColor),
+                                               //              waitDuration: Duration(milliseconds: 500),
+                                               //              showDuration: Duration(seconds: 2),
+                                               //              child: Container(
+                                               //                padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                               //                color: color,
+                                               //                child: Text(
+                                               //                  sentence,
+                                               //                  style: TextStyle(fontSize: 16, color: appTextColor),
+                                               //                ),
+                                               //              ),
+                                               //            );
+                                               //          }),
+                                               //        );
+                                               //      }
+                                               //
+                                               //      // Fallback: use original scoredTexts if changedData is empty
+                                               //      if (scoredTexts.isEmpty) {
+                                               //        return Center(child: Text("No sentences available"));
+                                               //      }
+                                               //      return Wrap(
+                                               //        spacing: 4,
+                                               //        runSpacing: 4,
+                                               //        alignment: WrapAlignment.start,
+                                               //        children: scoredTexts.map<Widget>((sentenceScore) {
+                                               //          final sentence = sentenceScore.sentence;
+                                               //          final score = sentenceScore.score;
+                                               //          Color color;
+                                               //          if (score >= 0 && score <= 39) {
+                                               //            color = appScore0To39Color;
+                                               //          } else if (score >= 40 && score <= 64) {
+                                               //            color = appScore40To64Color;
+                                               //          } else if (score >= 65 && score <= 100) {
+                                               //            color = appScore65To100Color;
+                                               //          } else {
+                                               //            color = appBackGroundColor;
+                                               //          }
+                                               //          return Tooltip(
+                                               //            message: 'Score: $score',
+                                               //            decoration: BoxDecoration(
+                                               //              color: appDashBoardCardColor,
+                                               //              borderRadius: BorderRadius.circular(4),
+                                               //            ),
+                                               //            textStyle: TextStyle(color: appBackGroundColor),
+                                               //            waitDuration: Duration(milliseconds: 500),
+                                               //            showDuration: Duration(seconds: 2),
+                                               //            child: Container(
+                                               //              padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                               //              color: color,
+                                               //              child: Text(
+                                               //                sentence,
+                                               //                style: TextStyle(fontSize: 16, color: appTextColor),
+                                               //              ),
+                                               //            ),
+                                               //          );
+                                               //        }).toList(),
+                                               //      );
+                                               //    }
+                                               //
+                                               //    // Default behavior if isScoreHighlight is false
+                                               //    final displayText = controller.isReverse.value
+                                               //        ? controller.reverseTranslatedText.value
+                                               //        : controller.selectedTranslationReport.value?.translatedFile ?? '';
+                                               //
+                                               //    // Check if we are in "Edit" mode
+                                               //    final isEditingTranslatedFile =
+                                               //        controller.selectedMode.value == "Edit" && controller.isReverse.value == false;
+                                               //    if (isEditingTranslatedFile && controller.isEditing.value) {
+                                               //      return
+                                               //        TextField(
+                                               //        controller: controller.translatedTextController,
+                                               //        autofocus: true,
+                                               //        maxLines: null,
+                                               //        style: const TextStyle(fontSize: 16),
+                                               //        decoration: const InputDecoration.collapsed(hintText: ''),
+                                               //        onEditingComplete: () {
+                                               //          controller.exitEditMode();
+                                               //          FocusScope.of(Get.context!).unfocus();
+                                               //        },
+                                               //        onSubmitted: (_) {
+                                               //          controller.exitEditMode();
+                                               //          FocusScope.of(Get.context!).unfocus();
+                                               //        },
+                                               //        onChanged: (val) {
+                                               //          controller.changedData.value = val;
+                                               //        },
+                                               //      );
+                                               //    }
+                                               //
+                                               //    return GestureDetector(
+                                               //      onTap: () {
+                                               //        if (controller.selectedMode.value == "Edit" && !controller.isReverse.value) {
+                                               //          controller.translatedTextController.text = displayText;
+                                               //          log('-----------tap------');
+                                               //          controller.enterEditMode();
+                                               //        }
+                                               //      },
+                                               //      child: Text(
+                                               //        displayText,
+                                               //        style: const TextStyle(fontSize: 16),
+                                               //      ),
+                                               //    );
+                                               //  })
 
-                                                  // If score highlight is ON and changedData is not empty, use changedData for coloring
-                                                  if (isScoreHighlight) {
-                                                    // Use changedData if available, else fallback to original sentences
-                                                    final changedText = controller.changedData.value;
-                                                    final scoredTexts = controller.selectedTranslationReport.value?.sentenceScore ?? [];
-
-                                                    // If changedData is not empty, split it into sentences and pair with scores
-                                                    if (changedText.isNotEmpty && scoredTexts.isNotEmpty) {
-                                                      // Split changedText into sentences (assuming \n or . as separator)
-                                                      // You may want to use a more robust sentence splitter for production
-                                                      final changedSentences = changedText.split(RegExp(r'(?<=[.!?])\s+'));
-                                                      return Wrap(
-                                                        spacing: 4,
-                                                        runSpacing: 4,
-                                                        alignment: WrapAlignment.start,
-                                                        children: List.generate(changedSentences.length, (i) {
-                                                          final sentence = changedSentences[i];
-                                                          // Use score from scoredTexts if available, else default to 0
-                                                          final score = i < scoredTexts.length ? scoredTexts[i].score : 0;
-                                                          Color color;
-                                                          if (score >= 0 && score <= 39) {
-                                                            color = appScore0To39Color;
-                                                          } else if (score >= 40 && score <= 64) {
-                                                            color = appScore40To64Color;
-                                                          } else if (score >= 65 && score <= 100) {
-                                                            color = appScore65To100Color;
-                                                          } else {
-                                                            color = appBackGroundColor;
-                                                          }
-                                                          return Tooltip(
-                                                            message: 'Score: $score',
-                                                            decoration: BoxDecoration(
-                                                              color: appDashBoardCardColor,
-                                                              borderRadius: BorderRadius.circular(4),
-                                                            ),
-                                                            textStyle: TextStyle(color: appBackGroundColor),
-                                                            waitDuration: Duration(milliseconds: 500),
-                                                            showDuration: Duration(seconds: 2),
-                                                            child: Container(
-                                                              padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                                              color: color,
-                                                              child: Text(
-                                                                sentence,
-                                                                style: TextStyle(fontSize: 16, color: appTextColor),
-                                                              ),
-                                                            ),
-                                                          );
-                                                        }),
-                                                      );
-                                                    }
-
-                                                    // Fallback: use original scoredTexts if changedData is empty
-                                                    if (scoredTexts.isEmpty) {
-                                                      return Center(child: Text("No sentences available"));
-                                                    }
-                                                    return Wrap(
-                                                      spacing: 4,
-                                                      runSpacing: 4,
-                                                      alignment: WrapAlignment.start,
-                                                      children: scoredTexts.map<Widget>((sentenceScore) {
-                                                        final sentence = sentenceScore.sentence;
-                                                        final score = sentenceScore.score;
-                                                        Color color;
-                                                        if (score >= 0 && score <= 39) {
-                                                          color = appScore0To39Color;
-                                                        } else if (score >= 40 && score <= 64) {
-                                                          color = appScore40To64Color;
-                                                        } else if (score >= 65 && score <= 100) {
-                                                          color = appScore65To100Color;
-                                                        } else {
-                                                          color = appBackGroundColor;
-                                                        }
-                                                        return Tooltip(
-                                                          message: 'Score: $score',
-                                                          decoration: BoxDecoration(
-                                                            color: appDashBoardCardColor,
-                                                            borderRadius: BorderRadius.circular(4),
-                                                          ),
-                                                          textStyle: TextStyle(color: appBackGroundColor),
-                                                          waitDuration: Duration(milliseconds: 500),
-                                                          showDuration: Duration(seconds: 2),
-                                                          child: Container(
-                                                            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                                            color: color,
-                                                            child: Text(
-                                                              sentence,
-                                                              style: TextStyle(fontSize: 16, color: appTextColor),
-                                                            ),
-                                                          ),
-                                                        );
-                                                      }).toList(),
-                                                    );
+                                                Obx(() {
+                                                  if( controller.selectedMode.value != "Edit"){
+                                                    controller.isScoreHighlightMode.value = false;
                                                   }
+                                                  final isScoreHighlight = controller.isScoreHighlightMode.value;
+                                                  final original = controller.selectedTranslationReport.value?.translatedFile ?? '';
+                                                  final changed = controller.changedData.value.trim();
+                                                  final isEditing = controller.isEditing.value;
+                                                  final scoredSentences = controller.selectedTranslationReport.value?.sentenceScore ?? [];
 
-                                                  // Default behavior if isScoreHighlight is false
-                                                  final displayText = controller.isReverse.value
-                                                      ? controller.reverseTranslatedText.value
-                                                      : controller.selectedTranslationReport.value?.translatedFile ?? '';
 
-                                                  // Check if we are in "Edit" mode
-                                                  final isEditingTranslatedFile =
-                                                      controller.selectedMode.value == "Edit" && controller.isReverse.value == false;
-                                                  if (isEditingTranslatedFile && controller.isEditing.value) {
-                                                    return
-                                                      TextField(
-                                                      controller: controller.translatedTextController,
+                                                  /// === [1] EDIT MODE === ///
+                                                  if (isEditing) {
+                                                    return TextField(
+                                                      controller: controller.translatedTextControllerCopy,
                                                       autofocus: true,
                                                       maxLines: null,
                                                       style: const TextStyle(fontSize: 16),
@@ -668,15 +759,193 @@ class MetaPhraseScreen extends StatelessWidget {
                                                     );
                                                   }
 
+                                                  // /// === [2] SCORE HIGHLIGHT MODE === ///
+                                                  if (isScoreHighlight ) {
+                                                    final originalWords = original.split(RegExp(r'\s+'));
+                                                    final changedWords = changed.isNotEmpty ? changed.split(RegExp(r'\s+')) : originalWords;
+
+                                                    return Wrap(
+                                                      spacing: 4,
+                                                      runSpacing: 4,
+                                                      children: changedWords.map((word) {
+                                                        final isAdded = !originalWords.contains(word);
+
+                                                        Color color;
+
+                                                        if (isAdded) {
+                                                          color = const Color(0xFF4682B4); // Blue
+                                                        } else {
+                                                          // Match word to sentence for score
+                                                          int score = 0;
+                                                          for (var s in scoredSentences) {
+                                                            if (s.sentence.contains(word)) {
+                                                              score = s.score;
+                                                              break;
+                                                            }
+                                                          }
+
+                                                          if (score <= 39) {
+                                                            color = appScore0To39Color;
+                                                          } else if (score <= 64) {
+                                                            color = appScore40To64Color;
+                                                          } else {
+                                                            color = appScore65To100Color;
+                                                          }
+                                                        }
+
+                                                        return Container(
+                                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                                          color: color,
+                                                          child: Text(
+                                                            word,
+                                                            style: const TextStyle(fontSize: 16, color: Colors.black),
+                                                          ),
+                                                        );
+                                                      }).toList(),
+                                                    );
+                                                  }
+
+
+                                                  // if (isScoreHighlight) {
+                                                  //   final scoredSentences = controller.selectedTranslationReport.value?.sentenceScore ?? [];
+                                                  //   final changedText = controller.changedData.value;
+                                                  //   final changedSentences = changedText.split(RegExp(r'(?<=[.!?])\\s+'));
+                                                  //
+                                                  //   return Padding(
+                                                  //     padding: const EdgeInsets.all(8),
+                                                  //     child: Wrap(
+                                                  //       children: List.generate(scoredSentences.length, (index) {
+                                                  //         final original = scoredSentences[index].sentence.trim();
+                                                  //         final score = scoredSentences[index].score;
+                                                  //         final changed = (index < changedSentences.length)
+                                                  //             ? changedSentences[index].trim()
+                                                  //             : original;
+                                                  //
+                                                  //         // Background color based on score
+                                                  //         Color bgColor;
+                                                  //         if (score <= 39) {
+                                                  //           bgColor = appScore0To39Color;
+                                                  //         } else if (score <= 64) {
+                                                  //           bgColor = appScore40To64Color;
+                                                  //         } else {
+                                                  //           bgColor = appScore65To100Color;
+                                                  //         }
+                                                  //
+                                                  //         final originalWords = original.split(RegExp(r'\\s+')).toSet();
+                                                  //         final changedWords = changed.split(RegExp(r'\\s+'));
+                                                  //
+                                                  //         return Container(
+                                                  //           margin: const EdgeInsets.only(right: 4, bottom: 6),
+                                                  //           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                                                  //           decoration: BoxDecoration(
+                                                  //             color: bgColor,
+                                                  //             borderRadius: BorderRadius.circular(4),
+                                                  //           ),
+                                                  //           child: RichText(
+                                                  //             text: TextSpan(
+                                                  //               children: changedWords.map((word) {
+                                                  //                 final isAdded = !originalWords.contains(word);
+                                                  //                 return TextSpan(
+                                                  //                   text: "$word ",
+                                                  //                   style: TextStyle(
+                                                  //                     fontSize: 15,
+                                                  //                     color: Colors.black,
+                                                  //                     backgroundColor: isAdded ? const Color(0xFF4682B4) : Colors.transparent,
+                                                  //                   ),
+                                                  //                 );
+                                                  //               }).toList(),
+                                                  //             ),
+                                                  //           ),
+                                                  //         );
+                                                  //       }),
+                                                  //     ),
+                                                  //   );
+                                                  // }
+
+                                                  //
+                                                  //
+                                                  // /// === [2] SCORE HIGHLIGHT MODE === ///
+                                                  // if (isScoreHighlight) {
+                                                  //   final scoredSentences = controller.selectedTranslationReport.value?.sentenceScore ?? [];
+                                                  //
+                                                  //   return Wrap(
+                                                  //     spacing: 6,
+                                                  //     runSpacing: 6,
+                                                  //     children: scoredSentences.map((sentenceScore) {
+                                                  //       final sentence = sentenceScore.sentence.trim();
+                                                  //       final score = sentenceScore.score;
+                                                  //
+                                                  //       Color bgColor;
+                                                  //       if (score <= 39) {
+                                                  //         bgColor = appScore0To39Color;
+                                                  //       } else if (score <= 64) {
+                                                  //         bgColor = appScore40To64Color;
+                                                  //       } else {
+                                                  //         bgColor = appScore65To100Color;
+                                                  //       }
+                                                  //
+                                                  //       return GestureDetector(
+                                                  //         onTapDown: (TapDownDetails details) {
+                                                  //           final tapPosition = details.globalPosition;
+                                                  //
+                                                  //           showMenu(
+                                                  //             context: Get.context!,
+                                                  //             position: RelativeRect.fromLTRB(
+                                                  //               tapPosition.dx,
+                                                  //               tapPosition.dy,
+                                                  //               tapPosition.dx + 1,
+                                                  //               tapPosition.dy + 1,
+                                                  //             ),
+                                                  //             items: [
+                                                  //               PopupMenuItem(
+                                                  //                 enabled: false,
+                                                  //                 padding: const EdgeInsets.only(left: 8,right: 8),
+                                                  //                 child: Container(
+                                                  //                   color: appDashBoardCardColor,
+                                                  //                   // decoration: BoxDecoration(
+                                                  //                   //   color: appDashBoardCardColor,
+                                                  //                   //   borderRadius: BorderRadius.circular(6),
+                                                  //                   // ),
+                                                  //                   // padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                                  //                   padding: const EdgeInsets.only(left: 8,right: 8),
+                                                  //                   child: Text('Score: $score', style: const TextStyle(fontSize: 14,color: appBackGroundColor)),
+                                                  //                 ),
+                                                  //               ),
+                                                  //             ],
+                                                  //           );
+                                                  //         },
+                                                  //         child: Container(
+                                                  //           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                                                  //           decoration: BoxDecoration(
+                                                  //             color: bgColor,
+                                                  //             borderRadius: BorderRadius.circular(4),
+                                                  //           ),
+                                                  //           child: Text(
+                                                  //             sentence,
+                                                  //             style: const TextStyle(fontSize: 15, color: Colors.black),
+                                                  //           ),
+                                                  //         ),
+                                                  //       );
+                                                  //     }).toList(),
+                                                  //   );
+                                                  //
+                                                  // }
+
+
+
+
+                                                  /// === [3] DEFAULT VIEW (Tap to Edit) === ///
                                                   return GestureDetector(
                                                     onTap: () {
-                                                      if (controller.selectedMode.value == "Edit" && !controller.isReverse.value) {
+                                                        controller.translatedTextControllerCopy.text =
+                                                        controller.changedData.value.isNotEmpty ? controller.changedData.value : original;
                                                         controller.enterEditMode();
-                                                      }
                                                     },
-                                                    child: Text(
-                                                      displayText,
-                                                      style: const TextStyle(fontSize: 16),
+                                                    child: Obx(
+                                                      () => Text(
+                                                        controller.selectedMode.toString() == 'Edit' ? controller.changedData.value.isNotEmpty ? controller.changedData.value : original :original,
+                                                        style: const TextStyle(fontSize: 16),
+                                                      ),
                                                     ),
                                                   );
                                                 })
@@ -1184,11 +1453,11 @@ class MetaPhraseScreen extends StatelessWidget {
                                                           log(controller.selected.value.toString());
                                                          return Text(
                                                               controller.selected.value.toString() =="Certify" ? "Finalize" : controller.selected.value,
-                                                              style: const TextStyle(color: appWhiteColor, fontSize: 16),
+                                                              style: TextStyle(color:appWhiteColor, fontSize: 16),
                                                                                                        );
                                                        }
                                                      ),
-                                                    const Icon(Icons.arrow_drop_down, color: appWhiteColor),
+                                                     Icon(Icons.arrow_drop_down, color: appWhiteColor),
                                                   ],
                                                 ),
                                               ),
@@ -1267,6 +1536,9 @@ class MetaPhraseScreen extends StatelessWidget {
                                                 controller.selectedMode.value = 'Edit';
                                                 controller.selected.value = 'Edit';
                                                 controller.putJustification();
+                                                controller.index.value = 0;
+
+
                                               },
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: appBackGroundColor,
@@ -1557,7 +1829,7 @@ void showPeerReviewDialog(BuildContext context) {
   );
 }
 
-void showCredentialsDialog(BuildContext context, controller) {
+ showCredentialsDialog(BuildContext context, controller) {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final ValueNotifier<bool> obscurePassword = ValueNotifier<bool>(true);
@@ -1668,6 +1940,8 @@ void showCredentialsDialog(BuildContext context, controller) {
                         errorMessage.value = null;
                         controller.isCredentialsConfirm.value = true;
                         controller.isFinalizeDownloadshow.value = true;
+                        controller.sameindex3.value = false;
+                        controller.isIndex3Select.value =  true;
                         Get.back();
                       }
                     },

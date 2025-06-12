@@ -46,6 +46,7 @@ class MetaPhraseController extends BaseController {
   var isEditing = false.obs;
   var isReject = false.obs;
   late TextEditingController translatedTextController;
+  late TextEditingController translatedTextControllerCopy;
 
   RxBool isPersonalSelected = false.obs;
   RxBool isWorkGroupSelected = false.obs;
@@ -87,6 +88,12 @@ class MetaPhraseController extends BaseController {
   RxString changedData = ''.obs;
   String Fullname = '';
   String id = '';
+  var currentIndexGloble = 0.obs;
+  var labelIndexGloble = 0.obs;
+  var index = 0.obs;
+  var isCredentialsDialogShown = false.obs;
+  var sameindex3 = false.obs;
+  var isIndex3Select = false.obs;
 
   @override
   void onInit() {
@@ -94,14 +101,18 @@ class MetaPhraseController extends BaseController {
     translatedScrollController = ScrollController();
     translatedScrollController1 = ScrollController();
     translatedTextController = TextEditingController();
+    translatedTextControllerCopy = TextEditingController();
     fetchData();
     isCredentialsConfirm.value = false;
     isFinalizeDownloadshow.value = false;
     hasShownPeerReviewDialog.value = false;
+    index.value=0;
     filteredReasons.assignAll(reasons);
     filteredReturnReasons.assignAll(returnReson);
     isEditing.value = false;
     isShowDowanlaodButton.value = false;
+    isIndex3Select.value = false;
+
     String? userJson = getStringAsync(AppSharedPreferenceKeys.userModel);
 
     if (userJson.isNotEmpty) {
@@ -146,8 +157,8 @@ class MetaPhraseController extends BaseController {
 
   void enterEditMode() {
     // Get the current value from wherever necessary
-    translatedTextController.text =
-        reverseTranslatedText.value.isNotEmpty ? reverseTranslatedText.value : selectedTranslationReport.value?.translatedFile ?? '';
+    // translatedTextController.text =translatedTextController.text;
+      //  reverseTranslatedText.value.isNotEmpty ? reverseTranslatedText.value : selectedTranslationReport.value?.translatedFile ?? '';
     isEditing.value = true;
   }
 
@@ -171,6 +182,9 @@ class MetaPhraseController extends BaseController {
     isCredentialsConfirm.value = false;
     isFinalizeDownloadshow.value = false;
     hasShownPeerReviewDialog.value = false;
+    selected.value = 'Review';
+    index.value = 0;
+    isIndex3Select.value= false;
     setLoading(true);
     try {
       final result = await MetaPhrasePVServiceApis.fetchMetaPhraseList();
