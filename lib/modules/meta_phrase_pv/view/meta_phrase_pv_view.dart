@@ -1069,176 +1069,511 @@ class MetaPhraseScreen extends StatelessWidget {
                                                 //     }).toList(),
                                                 //   );
                                                 // }
-                                                if (isScoreHighlight) {
-                                                  final changedText = controller.changedData.value;
-                                                  final scoredTexts = controller.selectedTranslationReport.value?.sentenceScore ?? [];
+                                                // if (isScoreHighlight) {
+                                                //   final changedText = controller.changedData.value;
+                                                //   final scoredTexts = controller.selectedTranslationReport.value?.sentenceScore ?? [];
+                                                //
+                                                //   if (changedText.isNotEmpty && scoredTexts.isNotEmpty) {
+                                                //     List<InlineSpan> spans = [];
+                                                //     int currentIndex = 0;
+                                                //     final usedRanges = <int>{};
+                                                //
+                                                //     bool isIndexUsed(int index, int length) {
+                                                //       for (int i = index; i < index + length; i++) {
+                                                //         if (usedRanges.contains(i)) return true;
+                                                //       }
+                                                //       return false;
+                                                //     }
+                                                //
+                                                //     void markIndexUsed(int index, int length) {
+                                                //       for (int i = index; i < index + length; i++) {
+                                                //         usedRanges.add(i);
+                                                //       }
+                                                //     }
+                                                //
+                                                //     Widget buildTooltipBox({
+                                                //       required String text,
+                                                //       required String tooltip,
+                                                //       required Color color,
+                                                //     }) {
+                                                //       return Tooltip(
+                                                //         message: tooltip,
+                                                //         decoration: BoxDecoration(
+                                                //           color: appDashBoardCardColor,
+                                                //           borderRadius: BorderRadius.circular(4),
+                                                //         ),
+                                                //         textStyle: TextStyle(color: appBackGroundColor),
+                                                //         waitDuration: Duration(milliseconds: 500),
+                                                //         showDuration: Duration(seconds: 2),
+                                                //         child: Container(
+                                                //           margin: EdgeInsets.symmetric(horizontal: 1, vertical: 2),
+                                                //           padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                                //           decoration: BoxDecoration(
+                                                //             color: color,
+                                                //             borderRadius: BorderRadius.circular(4),
+                                                //           ),
+                                                //           child: Text(
+                                                //             text,
+                                                //             style: TextStyle(fontSize: 16, color: appTextColor),
+                                                //           ),
+                                                //         ),
+                                                //       );
+                                                //     }
+                                                //
+                                                //     for (final sentenceScore in scoredTexts) {
+                                                //       final originalSentence = sentenceScore.sentence.trim();
+                                                //       final score = sentenceScore.score;
+                                                //
+                                                //       final matchIndex = changedText.indexOf(originalSentence, currentIndex);
+                                                //
+                                                //       if (matchIndex == -1 || isIndexUsed(matchIndex, originalSentence.length)) {
+                                                //         continue;
+                                                //       }
+                                                //
+                                                //       // Handle extra (added) text before matched sentence
+                                                //       if (matchIndex > currentIndex) {
+                                                //         final extra = changedText.substring(currentIndex, matchIndex);
+                                                //         final wordRegex = RegExp(r'(\s+|\S+)');
+                                                //         final matches = wordRegex.allMatches(extra);
+                                                //
+                                                //         for (final match in matches) {
+                                                //           final segment = match.group(0)!;
+                                                //           spans.add(WidgetSpan(
+                                                //             child: buildTooltipBox(
+                                                //               text: segment,
+                                                //               tooltip: segment.trim().isEmpty ? '' : 'Added',
+                                                //               color: segment.trim().isEmpty ? Colors.transparent : Colors.blueAccent,
+                                                //             ),
+                                                //           ));
+                                                //         }
+                                                //       }
+                                                //
+                                                //       // Score-based color
+                                                //       Color scoreColor;
+                                                //       if (score >= 0 && score <= 39) {
+                                                //         scoreColor = appScore0To39Color;
+                                                //       } else if (score >= 40 && score <= 64) {
+                                                //         scoreColor = appScore40To64Color;
+                                                //       } else if (score >= 65 && score <= 100) {
+                                                //         scoreColor = appScore65To100Color;
+                                                //       } else {
+                                                //         scoreColor = appBackGroundColor;
+                                                //       }
+                                                //
+                                                //       final matchedText = changedText.substring(matchIndex, matchIndex + originalSentence.length);
+                                                //       spans.add(WidgetSpan(
+                                                //         child: buildTooltipBox(
+                                                //           text: matchedText,
+                                                //           tooltip: 'Score: $score',
+                                                //           color: scoreColor,
+                                                //         ),
+                                                //       ));
+                                                //
+                                                //       markIndexUsed(matchIndex, originalSentence.length);
+                                                //       currentIndex = matchIndex + originalSentence.length;
+                                                //     }
+                                                //
+                                                //     // Remaining trailing text
+                                                //     if (currentIndex < changedText.length) {
+                                                //       final remaining = changedText.substring(currentIndex);
+                                                //       for (final char in remaining.characters) {
+                                                //         spans.add(WidgetSpan(
+                                                //           child: buildTooltipBox(
+                                                //             text: char,
+                                                //             tooltip: char.trim().isEmpty ? '' : 'Added',
+                                                //             color: char.trim().isEmpty ? Colors.transparent : Colors.blueAccent,
+                                                //           ),
+                                                //         ));
+                                                //       }
+                                                //     }
+                                                //
+                                                //     return Padding(
+                                                //       padding: const EdgeInsets.all(8.0),
+                                                //       child: RichText(text: TextSpan(children: spans)),
+                                                //     );
+                                                //   }
+                                                //
+                                                //   // fallback if no scores
+                                                //   if (scoredTexts.isEmpty) {
+                                                //     return Center(child: Text("No sentences available"));
+                                                //   }
+                                                //
+                                                //   // fallback UI with just sentence boxes
+                                                //   return Wrap(
+                                                //     spacing: 4,
+                                                //     runSpacing: 4,
+                                                //     alignment: WrapAlignment.start,
+                                                //     children: scoredTexts.map<Widget>((sentenceScore) {
+                                                //       final sentence = sentenceScore.sentence;
+                                                //       final score = sentenceScore.score;
+                                                //
+                                                //       Color color;
+                                                //       if (score >= 0 && score <= 39) {
+                                                //         color = appScore0To39Color;
+                                                //       } else if (score >= 40 && score <= 64) {
+                                                //         color = appScore40To64Color;
+                                                //       } else if (score >= 65 && score <= 100) {
+                                                //         color = appScore65To100Color;
+                                                //       } else {
+                                                //         color = appBackGroundColor;
+                                                //       }
+                                                //
+                                                //       return Tooltip(
+                                                //         message: 'Score: $score',
+                                                //         decoration: BoxDecoration(
+                                                //           color: appDashBoardCardColor,
+                                                //           borderRadius: BorderRadius.circular(4),
+                                                //         ),
+                                                //         textStyle: TextStyle(color: appBackGroundColor),
+                                                //         waitDuration: Duration(milliseconds: 500),
+                                                //         showDuration: Duration(seconds: 2),
+                                                //         child: Container(
+                                                //           padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                                //           color: color,
+                                                //           child: Text(
+                                                //             sentence,
+                                                //             style: TextStyle(fontSize: 16, color: appTextColor),
+                                                //           ),
+                                                //         ),
+                                                //       );
+                                                //     }).toList(),
+                                                //   );
+                                                // }
 
-                                                  if (changedText.isNotEmpty && scoredTexts.isNotEmpty) {
-                                                    List<InlineSpan> spans = [];
-                                                    int currentIndex = 0;
-                                                    final usedRanges = <int>{};
 
-                                                    bool isIndexUsed(int index, int length) {
-                                                      for (int i = index; i < index + length; i++) {
-                                                        if (usedRanges.contains(i)) return true;
-                                                      }
-                                                      return false;
-                                                    }
+                                                /// code work for sentense
+                                                // if (isScoreHighlight) {
+                                                //   final changedText = controller.changedData.value;
+                                                //   final scoredTexts = controller.selectedTranslationReport.value?.sentenceScore ?? [];
+                                                //
+                                                //   if (changedText.isNotEmpty && scoredTexts.isNotEmpty) {
+                                                //     List<InlineSpan> spans = [];
+                                                //     int currentIndex = 0;
+                                                //     final usedRanges = <int>{};
+                                                //
+                                                //     bool isRangeUsed(int index, int length) {
+                                                //       for (int i = index; i < index + length; i++) {
+                                                //         if (usedRanges.contains(i)) return true;
+                                                //       }
+                                                //       return false;
+                                                //     }
+                                                //
+                                                //     void markRangeUsed(int index, int length) {
+                                                //       for (int i = index; i < index + length; i++) {
+                                                //         usedRanges.add(i);
+                                                //       }
+                                                //     }
+                                                //
+                                                //     Widget buildTooltipBox({
+                                                //       required String text,
+                                                //       required String tooltip,
+                                                //       required Color color,
+                                                //     }) {
+                                                //       return Tooltip(
+                                                //         message: tooltip,
+                                                //         decoration: BoxDecoration(
+                                                //           color: appDashBoardCardColor,
+                                                //           borderRadius: BorderRadius.circular(4),
+                                                //         ),
+                                                //         textStyle: TextStyle(color: appBackGroundColor),
+                                                //         waitDuration: Duration(milliseconds: 500),
+                                                //         showDuration: Duration(seconds: 2),
+                                                //         child: Container(
+                                                //           margin: EdgeInsets.symmetric(horizontal: 1, vertical: 2),
+                                                //           padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                                //           decoration: BoxDecoration(
+                                                //             color: color,
+                                                //             borderRadius: BorderRadius.circular(4),
+                                                //           ),
+                                                //           child: Text(
+                                                //             text,
+                                                //             style: TextStyle(fontSize: 16, color: appTextColor),
+                                                //           ),
+                                                //         ),
+                                                //       );
+                                                //     }
+                                                //
+                                                //     for (final sentenceScore in scoredTexts) {
+                                                //       final sentence = sentenceScore.sentence.trim();
+                                                //       final score = sentenceScore.score;
+                                                //
+                                                //       final matchIndex = changedText.indexOf(sentence, currentIndex);
+                                                //       if (matchIndex == -1 || isRangeUsed(matchIndex, sentence.length)) {
+                                                //         continue;
+                                                //       }
+                                                //
+                                                //       // Extra content before this sentence
+                                                //       if (matchIndex > currentIndex) {
+                                                //         final extraText = changedText.substring(currentIndex, matchIndex);
+                                                //         spans.add(WidgetSpan(
+                                                //           child: buildTooltipBox(
+                                                //             text: extraText,
+                                                //             tooltip: 'Added',
+                                                //             color: Colors.blueAccent,
+                                                //           ),
+                                                //         ));
+                                                //       }
+                                                //
+                                                //       // Score-based coloring
+                                                //       Color bgColor;
+                                                //       if (score >= 0 && score <= 39) {
+                                                //         bgColor = appScore0To39Color;
+                                                //       } else if (score >= 40 && score <= 64) {
+                                                //         bgColor = appScore40To64Color;
+                                                //       } else if (score >= 65 && score <= 100) {
+                                                //         bgColor = appScore65To100Color;
+                                                //       } else {
+                                                //         bgColor = appBackGroundColor;
+                                                //       }
+                                                //
+                                                //       spans.add(WidgetSpan(
+                                                //         child: buildTooltipBox(
+                                                //           text: sentence,
+                                                //           tooltip: 'Score: $score',
+                                                //           color: bgColor,
+                                                //         ),
+                                                //       ));
+                                                //
+                                                //       markRangeUsed(matchIndex, sentence.length);
+                                                //       currentIndex = matchIndex + sentence.length;
+                                                //     }
+                                                //
+                                                //     // Handle any remaining trailing additions
+                                                //     if (currentIndex < changedText.length) {
+                                                //       final trailing = changedText.substring(currentIndex);
+                                                //       spans.add(WidgetSpan(
+                                                //         child: buildTooltipBox(
+                                                //           text: trailing,
+                                                //           tooltip: 'Added',
+                                                //           color: Colors.blueAccent,
+                                                //         ),
+                                                //       ));
+                                                //     }
+                                                //
+                                                //     return Padding(
+                                                //       padding: const EdgeInsets.all(8.0),
+                                                //       child: RichText(text: TextSpan(children: spans)),
+                                                //     );
+                                                //   }
+                                                //
+                                                //   // fallback if no sentences available
+                                                //   if (scoredTexts.isEmpty) {
+                                                //     return Center(child: Text("No sentences available"));
+                                                //   }
+                                                //
+                                                //   // fallback display: sentence blocks with score color
+                                                //   return Wrap(
+                                                //     spacing: 4,
+                                                //     runSpacing: 4,
+                                                //     alignment: WrapAlignment.start,
+                                                //     children: scoredTexts.map<Widget>((sentenceScore) {
+                                                //       final sentence = sentenceScore.sentence;
+                                                //       final score = sentenceScore.score;
+                                                //
+                                                //       Color color;
+                                                //       if (score >= 0 && score <= 39) {
+                                                //         color = appScore0To39Color;
+                                                //       } else if (score >= 40 && score <= 64) {
+                                                //         color = appScore40To64Color;
+                                                //       } else if (score >= 65 && score <= 100) {
+                                                //         color = appScore65To100Color;
+                                                //       } else {
+                                                //         color = appBackGroundColor;
+                                                //       }
+                                                //
+                                                //       return Tooltip(
+                                                //         message: 'Score: $score',
+                                                //         decoration: BoxDecoration(
+                                                //           color: appDashBoardCardColor,
+                                                //           borderRadius: BorderRadius.circular(4),
+                                                //         ),
+                                                //         textStyle: TextStyle(color: appBackGroundColor),
+                                                //         waitDuration: Duration(milliseconds: 500),
+                                                //         showDuration: Duration(seconds: 2),
+                                                //         child: Container(
+                                                //           padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                                //           color: color,
+                                                //           child: Text(
+                                                //             sentence,
+                                                //             style: TextStyle(fontSize: 16, color: appTextColor),
+                                                //           ),
+                                                //         ),
+                                                //       );
+                                                //     }).toList(),
+                                                //   );
+                                                // }
+                                                /// remove spcae blue
+                                                // if (isScoreHighlight) {
+                                                //   final changedText = controller.changedData.value;
+                                                //   final scoredTexts = controller.selectedTranslationReport.value?.sentenceScore ?? [];
+                                                //
+                                                //   if (changedText.isNotEmpty && scoredTexts.isNotEmpty) {
+                                                //     List<InlineSpan> spans = [];
+                                                //     int currentIndex = 0;
+                                                //     final usedRanges = <int>{};
+                                                //
+                                                //     bool isRangeUsed(int index, int length) {
+                                                //       for (int i = index; i < index + length; i++) {
+                                                //         if (usedRanges.contains(i)) return true;
+                                                //       }
+                                                //       return false;
+                                                //     }
+                                                //
+                                                //     void markRangeUsed(int index, int length) {
+                                                //       for (int i = index; i < index + length; i++) {
+                                                //         usedRanges.add(i);
+                                                //       }
+                                                //     }
+                                                //
+                                                //     Widget buildTooltipBox({
+                                                //       required String text,
+                                                //       required String tooltip,
+                                                //       required Color color,
+                                                //     }) {
+                                                //       return Tooltip(
+                                                //         message: tooltip,
+                                                //         decoration: BoxDecoration(
+                                                //           color: appDashBoardCardColor,
+                                                //           borderRadius: BorderRadius.circular(4),
+                                                //         ),
+                                                //         textStyle: TextStyle(color: appBackGroundColor),
+                                                //         waitDuration: Duration(milliseconds: 500),
+                                                //         showDuration: Duration(seconds: 2),
+                                                //         child: Container(
+                                                //           margin: EdgeInsets.symmetric(horizontal: 1, vertical: 2),
+                                                //           padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                                //           decoration: BoxDecoration(
+                                                //             color: color,
+                                                //             borderRadius: BorderRadius.circular(4),
+                                                //           ),
+                                                //           child: Text(
+                                                //             text,
+                                                //             style: TextStyle(fontSize: 16, color: appTextColor),
+                                                //           ),
+                                                //         ),
+                                                //       );
+                                                //     }
+                                                //
+                                                //     for (final sentenceScore in scoredTexts) {
+                                                //       final sentence = sentenceScore.sentence.trim();
+                                                //       final score = sentenceScore.score;
+                                                //
+                                                //       final matchIndex = changedText.indexOf(sentence, currentIndex);
+                                                //       if (matchIndex == -1 || isRangeUsed(matchIndex, sentence.length)) {
+                                                //         continue;
+                                                //       }
+                                                //
+                                                //       // Handle extra text before matched sentence
+                                                //       if (matchIndex > currentIndex) {
+                                                //         final extraText = changedText.substring(currentIndex, matchIndex);
+                                                //         if (extraText.trim().isNotEmpty) {
+                                                //           spans.add(WidgetSpan(
+                                                //             child: buildTooltipBox(
+                                                //               text: extraText,
+                                                //               tooltip: 'Added',
+                                                //               color: Colors.blueAccent,
+                                                //             ),
+                                                //           ));
+                                                //         } else {
+                                                //           // Add plain whitespace with no background
+                                                //           spans.add(TextSpan(text: extraText));
+                                                //         }
+                                                //       }
+                                                //
+                                                //       // Determine background color from score
+                                                //       Color bgColor;
+                                                //       if (score >= 0 && score <= 39) {
+                                                //         bgColor = appScore0To39Color;
+                                                //       } else if (score >= 40 && score <= 64) {
+                                                //         bgColor = appScore40To64Color;
+                                                //       } else if (score >= 65 && score <= 100) {
+                                                //         bgColor = appScore65To100Color;
+                                                //       } else {
+                                                //         bgColor = appBackGroundColor;
+                                                //       }
+                                                //
+                                                //       spans.add(WidgetSpan(
+                                                //         child: buildTooltipBox(
+                                                //           text: sentence,
+                                                //           tooltip: 'Score: $score',
+                                                //           color: bgColor,
+                                                //         ),
+                                                //       ));
+                                                //
+                                                //       markRangeUsed(matchIndex, sentence.length);
+                                                //       currentIndex = matchIndex + sentence.length;
+                                                //     }
+                                                //
+                                                //     // Handle trailing text
+                                                //     if (currentIndex < changedText.length) {
+                                                //       final trailing = changedText.substring(currentIndex);
+                                                //       if (trailing.trim().isNotEmpty) {
+                                                //         spans.add(WidgetSpan(
+                                                //           child: buildTooltipBox(
+                                                //             text: trailing,
+                                                //             tooltip: 'Added',
+                                                //             color: Colors.blueAccent,
+                                                //           ),
+                                                //         ));
+                                                //       } else {
+                                                //         spans.add(TextSpan(text: trailing));
+                                                //       }
+                                                //     }
+                                                //
+                                                //     return Padding(
+                                                //       padding: const EdgeInsets.all(8.0),
+                                                //       child: RichText(text: TextSpan(children: spans)),
+                                                //     );
+                                                //   }
+                                                //
+                                                //   // fallback if no sentences available
+                                                //   if (scoredTexts.isEmpty) {
+                                                //     return Center(child: Text("No sentences available"));
+                                                //   }
+                                                //
+                                                //   // fallback sentence blocks with score-based coloring
+                                                //   return Wrap(
+                                                //     spacing: 4,
+                                                //     runSpacing: 4,
+                                                //     alignment: WrapAlignment.start,
+                                                //     children: scoredTexts.map<Widget>((sentenceScore) {
+                                                //       final sentence = sentenceScore.sentence;
+                                                //       final score = sentenceScore.score;
+                                                //
+                                                //       Color color;
+                                                //       if (score >= 0 && score <= 39) {
+                                                //         color = appScore0To39Color;
+                                                //       } else if (score >= 40 && score <= 64) {
+                                                //         color = appScore40To64Color;
+                                                //       } else if (score >= 65 && score <= 100) {
+                                                //         color = appScore65To100Color;
+                                                //       } else {
+                                                //         color = appBackGroundColor;
+                                                //       }
+                                                //
+                                                //       return Tooltip(
+                                                //         message: 'Score: $score',
+                                                //         decoration: BoxDecoration(
+                                                //           color: appDashBoardCardColor,
+                                                //           borderRadius: BorderRadius.circular(4),
+                                                //         ),
+                                                //         textStyle: TextStyle(color: appBackGroundColor),
+                                                //         waitDuration: Duration(milliseconds: 500),
+                                                //         showDuration: Duration(seconds: 2),
+                                                //         child: Container(
+                                                //           padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                                //           color: color,
+                                                //           child: Text(
+                                                //             sentence,
+                                                //             style: TextStyle(fontSize: 16, color: appTextColor),
+                                                //           ),
+                                                //         ),
+                                                //       );
+                                                //     }).toList(),
+                                                //   );
+                                                // }
 
-                                                    void markIndexUsed(int index, int length) {
-                                                      for (int i = index; i < index + length; i++) {
-                                                        usedRanges.add(i);
-                                                      }
-                                                    }
 
-                                                    Widget buildTooltipBox({
-                                                      required String text,
-                                                      required String tooltip,
-                                                      required Color color,
-                                                    }) {
-                                                      return Tooltip(
-                                                        message: tooltip,
-                                                        decoration: BoxDecoration(
-                                                          color: appDashBoardCardColor,
-                                                          borderRadius: BorderRadius.circular(4),
-                                                        ),
-                                                        textStyle: TextStyle(color: appBackGroundColor),
-                                                        waitDuration: Duration(milliseconds: 500),
-                                                        showDuration: Duration(seconds: 2),
-                                                        child: Container(
-                                                          margin: EdgeInsets.symmetric(horizontal: 1, vertical: 2),
-                                                          padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                                          decoration: BoxDecoration(
-                                                            color: color,
-                                                            borderRadius: BorderRadius.circular(4),
-                                                          ),
-                                                          child: Text(
-                                                            text,
-                                                            style: TextStyle(fontSize: 16, color: appTextColor),
-                                                          ),
-                                                        ),
-                                                      );
-                                                    }
-
-                                                    for (final sentenceScore in scoredTexts) {
-                                                      final originalSentence = sentenceScore.sentence.trim();
-                                                      final score = sentenceScore.score;
-
-                                                      final matchIndex = changedText.indexOf(originalSentence, currentIndex);
-
-                                                      if (matchIndex == -1 || isIndexUsed(matchIndex, originalSentence.length)) {
-                                                        continue;
-                                                      }
-
-                                                      // Handle extra (added) text before matched sentence
-                                                      if (matchIndex > currentIndex) {
-                                                        final extra = changedText.substring(currentIndex, matchIndex);
-                                                        final wordRegex = RegExp(r'(\s+|\S+)');
-                                                        final matches = wordRegex.allMatches(extra);
-
-                                                        for (final match in matches) {
-                                                          final segment = match.group(0)!;
-                                                          spans.add(WidgetSpan(
-                                                            child: buildTooltipBox(
-                                                              text: segment,
-                                                              tooltip: segment.trim().isEmpty ? '' : 'Added',
-                                                              color: segment.trim().isEmpty ? Colors.transparent : Colors.blueAccent,
-                                                            ),
-                                                          ));
-                                                        }
-                                                      }
-
-                                                      // Score-based color
-                                                      Color scoreColor;
-                                                      if (score >= 0 && score <= 39) {
-                                                        scoreColor = appScore0To39Color;
-                                                      } else if (score >= 40 && score <= 64) {
-                                                        scoreColor = appScore40To64Color;
-                                                      } else if (score >= 65 && score <= 100) {
-                                                        scoreColor = appScore65To100Color;
-                                                      } else {
-                                                        scoreColor = appBackGroundColor;
-                                                      }
-
-                                                      final matchedText = changedText.substring(matchIndex, matchIndex + originalSentence.length);
-                                                      spans.add(WidgetSpan(
-                                                        child: buildTooltipBox(
-                                                          text: matchedText,
-                                                          tooltip: 'Score: $score',
-                                                          color: scoreColor,
-                                                        ),
-                                                      ));
-
-                                                      markIndexUsed(matchIndex, originalSentence.length);
-                                                      currentIndex = matchIndex + originalSentence.length;
-                                                    }
-
-                                                    // Remaining trailing text
-                                                    if (currentIndex < changedText.length) {
-                                                      final remaining = changedText.substring(currentIndex);
-                                                      for (final char in remaining.characters) {
-                                                        spans.add(WidgetSpan(
-                                                          child: buildTooltipBox(
-                                                            text: char,
-                                                            tooltip: char.trim().isEmpty ? '' : 'Added',
-                                                            color: char.trim().isEmpty ? Colors.transparent : Colors.blueAccent,
-                                                          ),
-                                                        ));
-                                                      }
-                                                    }
-
-                                                    return Padding(
-                                                      padding: const EdgeInsets.all(8.0),
-                                                      child: RichText(text: TextSpan(children: spans)),
-                                                    );
-                                                  }
-
-                                                  // fallback if no scores
-                                                  if (scoredTexts.isEmpty) {
-                                                    return Center(child: Text("No sentences available"));
-                                                  }
-
-                                                  // fallback UI with just sentence boxes
-                                                  return Wrap(
-                                                    spacing: 4,
-                                                    runSpacing: 4,
-                                                    alignment: WrapAlignment.start,
-                                                    children: scoredTexts.map<Widget>((sentenceScore) {
-                                                      final sentence = sentenceScore.sentence;
-                                                      final score = sentenceScore.score;
-
-                                                      Color color;
-                                                      if (score >= 0 && score <= 39) {
-                                                        color = appScore0To39Color;
-                                                      } else if (score >= 40 && score <= 64) {
-                                                        color = appScore40To64Color;
-                                                      } else if (score >= 65 && score <= 100) {
-                                                        color = appScore65To100Color;
-                                                      } else {
-                                                        color = appBackGroundColor;
-                                                      }
-
-                                                      return Tooltip(
-                                                        message: 'Score: $score',
-                                                        decoration: BoxDecoration(
-                                                          color: appDashBoardCardColor,
-                                                          borderRadius: BorderRadius.circular(4),
-                                                        ),
-                                                        textStyle: TextStyle(color: appBackGroundColor),
-                                                        waitDuration: Duration(milliseconds: 500),
-                                                        showDuration: Duration(seconds: 2),
-                                                        child: Container(
-                                                          padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                                          color: color,
-                                                          child: Text(
-                                                            sentence,
-                                                            style: TextStyle(fontSize: 16, color: appTextColor),
-                                                          ),
-                                                        ),
-                                                      );
-                                                    }).toList(),
-                                                  );
-                                                }
 
                                                 // if (isScoreHighlight) {
                                                 //   // Use changedData if available, else fallback to original sentences
@@ -1338,6 +1673,187 @@ class MetaPhraseScreen extends StatelessWidget {
                                                 // }
 
                                                 // Default behavior if isScoreHighlight is false
+                                                if (isScoreHighlight) {
+                                                  final changedText = controller.changedData.value;
+                                                  final scoredTexts = controller.selectedTranslationReport.value?.sentenceScore ?? [];
+
+                                                  if (changedText.isNotEmpty && scoredTexts.isNotEmpty) {
+                                                    List<InlineSpan> spans = [];
+                                                    int currentIndex = 0;
+                                                    final usedRanges = <int>{};
+
+                                                    bool isIndexUsed(int index, int length) {
+                                                      for (int i = index; i < index + length; i++) {
+                                                        if (usedRanges.contains(i)) return true;
+                                                      }
+                                                      return false;
+                                                    }
+
+                                                    void markIndexUsed(int index, int length) {
+                                                      for (int i = index; i < index + length; i++) {
+                                                        usedRanges.add(i);
+                                                      }
+                                                    }
+
+                                                    List<String> tokenizeWords(String text) {
+                                                      final wordRegex = RegExp(r'(\s+|\S+)');
+                                                      return wordRegex.allMatches(text).map((e) => e.group(0)!).toList();
+                                                    }
+
+                                                    Widget buildTooltipBox({
+                                                      required String text,
+                                                      required String tooltip,
+                                                      required Color color,
+                                                    }) {
+                                                      return Tooltip(
+                                                        message: tooltip,
+                                                        decoration: BoxDecoration(
+                                                          color: appDashBoardCardColor,
+                                                          borderRadius: BorderRadius.circular(4),
+                                                        ),
+                                                        textStyle: TextStyle(color: appBackGroundColor),
+                                                        waitDuration: Duration(milliseconds: 500),
+                                                        showDuration: Duration(seconds: 2),
+                                                        child: Container(
+                                                          margin: EdgeInsets.symmetric(horizontal: 1, vertical: 2),
+                                                          padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                                          decoration: BoxDecoration(
+                                                            color: color,
+                                                            borderRadius: BorderRadius.circular(4),
+                                                          ),
+                                                          child: Text(
+                                                            text,
+                                                            style: TextStyle(fontSize: 16, color: appTextColor),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }
+
+                                                    for (final sentenceScore in scoredTexts) {
+                                                      final sentence = sentenceScore.sentence.trim();
+                                                      final score = sentenceScore.score;
+
+                                                      final matchIndex = changedText.indexOf(sentence, currentIndex);
+
+                                                      if (matchIndex == -1 || isIndexUsed(matchIndex, sentence.length)) {
+                                                        continue;
+                                                      }
+
+                                                      // Handle unmatched text before current matched sentence
+                                                      if (matchIndex > currentIndex) {
+                                                        final extra = changedText.substring(currentIndex, matchIndex);
+                                                        final words = tokenizeWords(extra);
+                                                        for (final word in words) {
+                                                          spans.add(TextSpan(
+                                                            text: word,
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                              color: appTextColor,
+                                                              backgroundColor: word.trim().isEmpty ? Colors.transparent : Colors.blueAccent,
+                                                            ),
+                                                          ));
+                                                        }
+                                                      }
+
+                                                      // Match score-based sentence
+                                                      Color scoreColor;
+                                                      if (score >= 0 && score <= 39) {
+                                                        scoreColor = appScore0To39Color;
+                                                      } else if (score >= 40 && score <= 64) {
+                                                        scoreColor = appScore40To64Color;
+                                                      } else if (score >= 65 && score <= 100) {
+                                                        scoreColor = appScore65To100Color;
+                                                      } else {
+                                                        scoreColor = appBackGroundColor;
+                                                      }
+
+                                                      final matchedText = changedText.substring(matchIndex, matchIndex + sentence.length);
+
+                                                      // Tokenize and highlight sentence with score color
+                                                      final sentenceWords = tokenizeWords(matchedText);
+                                                      for (final word in sentenceWords) {
+                                                        spans.add(TextSpan(
+                                                          text: word,
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            color: appTextColor,
+                                                            backgroundColor: scoreColor,
+                                                          ),
+                                                        ));
+                                                      }
+
+                                                      markIndexUsed(matchIndex, sentence.length);
+                                                      currentIndex = matchIndex + sentence.length;
+                                                    }
+
+                                                    // Handle trailing unmatched text
+                                                    if (currentIndex < changedText.length) {
+                                                      final trailing = changedText.substring(currentIndex);
+                                                      final words = tokenizeWords(trailing);
+                                                      for (final word in words) {
+                                                        spans.add(TextSpan(
+                                                          text: word,
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            color: appTextColor,
+                                                            backgroundColor: word.trim().isEmpty ? Colors.transparent : Colors.blueAccent,
+                                                          ),
+                                                        ));
+                                                      }
+                                                    }
+
+                                                    return Padding(
+                                                      padding: const EdgeInsets.all(8.0),
+                                                      child: RichText(text: TextSpan(children: spans)),
+                                                    );
+                                                  }
+
+                                                  // Fallback if no sentenceScore
+                                                  if (scoredTexts.isEmpty) {
+                                                    return Center(child: Text("No sentences available"));
+                                                  }
+
+                                                  return Wrap(
+                                                    spacing: 4,
+                                                    runSpacing: 4,
+                                                    alignment: WrapAlignment.start,
+                                                    children: scoredTexts.map<Widget>((sentenceScore) {
+                                                      final sentence = sentenceScore.sentence;
+                                                      final score = sentenceScore.score;
+
+                                                      Color color;
+                                                      if (score >= 0 && score <= 39) {
+                                                        color = appScore0To39Color;
+                                                      } else if (score >= 40 && score <= 64) {
+                                                        color = appScore40To64Color;
+                                                      } else if (score >= 65 && score <= 100) {
+                                                        color = appScore65To100Color;
+                                                      } else {
+                                                        color = appBackGroundColor;
+                                                      }
+
+                                                      return Tooltip(
+                                                        message: 'Score: $score',
+                                                        decoration: BoxDecoration(
+                                                          color: appDashBoardCardColor,
+                                                          borderRadius: BorderRadius.circular(4),
+                                                        ),
+                                                        textStyle: TextStyle(color: appBackGroundColor),
+                                                        waitDuration: Duration(milliseconds: 500),
+                                                        showDuration: Duration(seconds: 2),
+                                                        child: Container(
+                                                          padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                                          color: color,
+                                                          child: Text(
+                                                            sentence,
+                                                            style: TextStyle(fontSize: 16, color: appTextColor),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }).toList(),
+                                                  );
+                                                }
+
                                                 final displayText = controller.isReverse.value
                                                     ? controller.reverseTranslatedText.value
                                                     : controller.selectedTranslationReport.value?.translatedFile ?? '';
