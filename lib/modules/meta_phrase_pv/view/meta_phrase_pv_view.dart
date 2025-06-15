@@ -1673,6 +1673,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                                 // }
 
                                                 // Default behavior if isScoreHighlight is false
+                                                ///test
                                                 if (isScoreHighlight) {
                                                   final changedText = controller.changedData.value;
                                                   final scoredTexts = controller.selectedTranslationReport.value?.sentenceScore ?? [];
@@ -1700,46 +1701,16 @@ class MetaPhraseScreen extends StatelessWidget {
                                                       return wordRegex.allMatches(text).map((e) => e.group(0)!).toList();
                                                     }
 
-                                                    Widget buildTooltipBox({
-                                                      required String text,
-                                                      required String tooltip,
-                                                      required Color color,
-                                                    }) {
-                                                      return Tooltip(
-                                                        message: tooltip,
-                                                        decoration: BoxDecoration(
-                                                          color: appDashBoardCardColor,
-                                                          borderRadius: BorderRadius.circular(4),
-                                                        ),
-                                                        textStyle: TextStyle(color: appBackGroundColor),
-                                                        waitDuration: Duration(milliseconds: 500),
-                                                        showDuration: Duration(seconds: 2),
-                                                        child: Container(
-                                                          margin: EdgeInsets.symmetric(horizontal: 1, vertical: 2),
-                                                          padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                                          decoration: BoxDecoration(
-                                                            color: color,
-                                                            borderRadius: BorderRadius.circular(4),
-                                                          ),
-                                                          child: Text(
-                                                            text,
-                                                            style: TextStyle(fontSize: 16, color: appTextColor),
-                                                          ),
-                                                        ),
-                                                      );
-                                                    }
-
                                                     for (final sentenceScore in scoredTexts) {
                                                       final sentence = sentenceScore.sentence.trim();
                                                       final score = sentenceScore.score;
 
                                                       final matchIndex = changedText.indexOf(sentence, currentIndex);
-
                                                       if (matchIndex == -1 || isIndexUsed(matchIndex, sentence.length)) {
                                                         continue;
                                                       }
 
-                                                      // Handle unmatched text before current matched sentence
+                                                      // Handle unmatched text before current matched sentence (inserted words)
                                                       if (matchIndex > currentIndex) {
                                                         final extra = changedText.substring(currentIndex, matchIndex);
                                                         final words = tokenizeWords(extra);
@@ -1755,7 +1726,11 @@ class MetaPhraseScreen extends StatelessWidget {
                                                         }
                                                       }
 
-                                                      // Match score-based sentence
+                                                      // Now compare original sentence vs matchedText to detect inserted words manually
+                                                      final matchedText = changedText.substring(matchIndex, matchIndex + sentence.length);
+                                                      final originalWords = tokenizeWords(sentence);
+                                                      final editedWords = tokenizeWords(matchedText);
+
                                                       Color scoreColor;
                                                       if (score >= 0 && score <= 39) {
                                                         scoreColor = appScore0To39Color;
@@ -1767,26 +1742,37 @@ class MetaPhraseScreen extends StatelessWidget {
                                                         scoreColor = appBackGroundColor;
                                                       }
 
-                                                      final matchedText = changedText.substring(matchIndex, matchIndex + sentence.length);
-
-                                                      // Tokenize and highlight sentence with score color
-                                                      final sentenceWords = tokenizeWords(matchedText);
-                                                      for (final word in sentenceWords) {
-                                                        spans.add(TextSpan(
-                                                          text: word,
-                                                          style: TextStyle(
-                                                            fontSize: 16,
-                                                            color: appTextColor,
-                                                            backgroundColor: scoreColor,
-                                                          ),
-                                                        ));
+                                                      int i = 0, j = 0;
+                                                      while (j < editedWords.length) {
+                                                        if (i < originalWords.length && originalWords[i] == editedWords[j]) {
+                                                          spans.add(TextSpan(
+                                                            text: editedWords[j],
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                              color: appTextColor,
+                                                              backgroundColor: scoreColor,
+                                                            ),
+                                                          ));
+                                                          i++;
+                                                          j++;
+                                                        } else {
+                                                          spans.add(TextSpan(
+                                                            text: editedWords[j],
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                              color: appTextColor,
+                                                              backgroundColor: editedWords[j].trim().isEmpty ? Colors.transparent : Colors.blueAccent,
+                                                            ),
+                                                          ));
+                                                          j++;
+                                                        }
                                                       }
 
                                                       markIndexUsed(matchIndex, sentence.length);
                                                       currentIndex = matchIndex + sentence.length;
                                                     }
 
-                                                    // Handle trailing unmatched text
+                                                    // Handle any trailing text
                                                     if (currentIndex < changedText.length) {
                                                       final trailing = changedText.substring(currentIndex);
                                                       final words = tokenizeWords(trailing);
@@ -1835,7 +1821,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                                       return Tooltip(
                                                         message: 'Score: $score',
                                                         decoration: BoxDecoration(
-                                                          color: appDashBoardCardColor,
+                                                          color:   appDashBoardCardColor,
                                                           borderRadius: BorderRadius.circular(4),
                                                         ),
                                                         textStyle: TextStyle(color: appBackGroundColor),
@@ -1854,6 +1840,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                                   );
                                                 }
 
+                                                ///
                                                 final displayText = controller.isReverse.value
                                                     ? controller.reverseTranslatedText.value
                                                     : controller.selectedTranslationReport.value?.translatedFile ?? '';
