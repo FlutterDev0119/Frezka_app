@@ -229,6 +229,11 @@ class MetaPhraseScreen extends StatelessWidget {
                 controller.isFinalizeDownloadshow.value = false;
                 controller.hasShownPeerReviewDialog.value = false;
                 controller.index.value = 0;
+                controller.addedWords.clear();
+                controller.translatedText.value ='';
+                controller.changedData.value = '';
+                // controller.selectedTranslationReport.value?.sentenceScore;
+
               },
               child: Align(
                 alignment: Alignment.centerRight,
@@ -441,7 +446,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                                     visualDensity: VisualDensity.compact,
                                                     padding: EdgeInsets.zero,
                                                     icon: Icon(Icons.screenshot_monitor_sharp),
-                                                    onPressed: () {},
+                                                    onPressed: () { showTranslatedMemoryDialog(context, controller.addedWords, appBackGroundColor);},
                                                   )
                                                 : SizedBox(),
                                             (controller.selectedMode.value == "Peer Review")
@@ -450,7 +455,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                                     visualDensity: VisualDensity.compact,
                                                     padding: EdgeInsets.zero,
                                                     icon: Icon(Icons.laptop_windows_rounded),
-                                                    onPressed: () {},
+                                                    onPressed: () {showTranslatedMemoryDialog(context, controller.addedWords, appBackGroundColor);},
                                                   )
                                                 : SizedBox(),
                                             (controller.selectedMode.value == "Review" ||
@@ -1675,116 +1680,110 @@ class MetaPhraseScreen extends StatelessWidget {
                                                 // Default behavior if isScoreHighlight is false
                                                 ///test
                                                 if (isScoreHighlight) {
+                                                  final originalText = controller.translatedText;
                                                   final changedText = controller.changedData.value;
                                                   final scoredTexts = controller.selectedTranslationReport.value?.sentenceScore ?? [];
 
-                                                  if (changedText.isNotEmpty && scoredTexts.isNotEmpty) {
+                                                  log("--------------translatedText----------------$originalText");
+                                                  log("--------------changedText----------------$changedText");
+
+                                                  if (changedText.isNotEmpty && originalText.isNotEmpty && scoredTexts.isNotEmpty) {
                                                     List<InlineSpan> spans = [];
-                                                    int currentIndex = 0;
-                                                    final usedRanges = <int>{};
-
-                                                    bool isIndexUsed(int index, int length) {
-                                                      for (int i = index; i < index + length; i++) {
-                                                        if (usedRanges.contains(i)) return true;
-                                                      }
-                                                      return false;
-                                                    }
-
-                                                    void markIndexUsed(int index, int length) {
-                                                      for (int i = index; i < index + length; i++) {
-                                                        usedRanges.add(i);
-                                                      }
-                                                    }
-
                                                     List<String> tokenizeWords(String text) {
-                                                      final wordRegex = RegExp(r'(\s+|\S+)');
+                                                      final wordRegex = RegExp(r'(\s+|\S+)'); // captures words + spaces
                                                       return wordRegex.allMatches(text).map((e) => e.group(0)!).toList();
                                                     }
+                                                    // Tokenize both original and changed text
+                                                    List<String> originalWords = tokenizeWords(originalText.value);
+                                                    List<String> changedWords = tokenizeWords(changedText);
 
-                                                    for (final sentenceScore in scoredTexts) {
-                                                      final sentence = sentenceScore.sentence.trim();
-                                                      final score = sentenceScore.score;
-
-                                                      final matchIndex = changedText.indexOf(sentence, currentIndex);
-                                                      if (matchIndex == -1 || isIndexUsed(matchIndex, sentence.length)) {
-                                                        continue;
-                                                      }
-
-                                                      // Handle unmatched text before current matched sentence (inserted words)
-                                                      if (matchIndex > currentIndex) {
-                                                        final extra = changedText.substring(currentIndex, matchIndex);
-                                                        final words = tokenizeWords(extra);
-                                                        for (final word in words) {
-                                                          spans.add(TextSpan(
-                                                            text: word,
-                                                            style: TextStyle(
-                                                              fontSize: 16,
-                                                              color: appTextColor,
-                                                              backgroundColor: word.trim().isEmpty ? Colors.transparent : Colors.blueAccent,
-                                                            ),
-                                                          ));
+// Build word-to-score map from sentence scores
+                                                    final Map<String, double> wordScoreMap = {};
+                                                    for (var s in scoredTexts) {
+                                                      final words = tokenizeWords(s.sentence.trim());
+                                                      for (var word in words) {
+                                                        final w = word.trim();
+                                                        if (w.isNotEmpty) {
+                                                          wordScoreMap[w] = s.score.toDouble();
                                                         }
                                                       }
-
-                                                      // Now compare original sentence vs matchedText to detect inserted words manually
-                                                      final matchedText = changedText.substring(matchIndex, matchIndex + sentence.length);
-                                                      final originalWords = tokenizeWords(sentence);
-                                                      final editedWords = tokenizeWords(matchedText);
-
-                                                      Color scoreColor;
-                                                      if (score >= 0 && score <= 39) {
-                                                        scoreColor = appScore0To39Color;
-                                                      } else if (score >= 40 && score <= 64) {
-                                                        scoreColor = appScore40To64Color;
-                                                      } else if (score >= 65 && score <= 100) {
-                                                        scoreColor = appScore65To100Color;
-                                                      } else {
-                                                        scoreColor = appBackGroundColor;
-                                                      }
-
-                                                      int i = 0, j = 0;
-                                                      while (j < editedWords.length) {
-                                                        if (i < originalWords.length && originalWords[i] == editedWords[j]) {
-                                                          spans.add(TextSpan(
-                                                            text: editedWords[j],
-                                                            style: TextStyle(
-                                                              fontSize: 16,
-                                                              color: appTextColor,
-                                                              backgroundColor: scoreColor,
-                                                            ),
-                                                          ));
-                                                          i++;
-                                                          j++;
-                                                        } else {
-                                                          spans.add(TextSpan(
-                                                            text: editedWords[j],
-                                                            style: TextStyle(
-                                                              fontSize: 16,
-                                                              color: appTextColor,
-                                                              backgroundColor: editedWords[j].trim().isEmpty ? Colors.transparent : Colors.blueAccent,
-                                                            ),
-                                                          ));
-                                                          j++;
-                                                        }
-                                                      }
-
-                                                      markIndexUsed(matchIndex, sentence.length);
-                                                      currentIndex = matchIndex + sentence.length;
                                                     }
 
-                                                    // Handle any trailing text
-                                                    if (currentIndex < changedText.length) {
-                                                      final trailing = changedText.substring(currentIndex);
-                                                      final words = tokenizeWords(trailing);
-                                                      for (final word in words) {
+
+                                                    int i = 0, j = 0;
+                                                    while (j < changedWords.length) {
+                                                      if (i < originalWords.length && originalWords[i] == changedWords[j]) {
+                                                        // Find the score this word might belong to
+                                                        double? wordScore;
+                                                        final Map<String, double> scoreMap = {
+                                                          for (var s in scoredTexts) s.sentence.trim(): s.score.toDouble(),
+                                                        };
+                                                        for (var entry in scoreMap.entries) {
+                                                          if (entry.key.contains(originalWords[i].trim())) {
+                                                            wordScore = entry.value;
+                                                            break;
+                                                          }
+                                                        }
+
+
+                                                        Color bgColor;
+                                                        if (wordScore != null) {
+                                                          if (wordScore <= 39) {
+                                                            bgColor = appScore0To39Color;
+                                                          } else if (wordScore <= 64) {
+                                                            bgColor = appScore40To64Color;
+                                                          } else if (wordScore <= 100) {
+                                                            bgColor = appScore65To100Color;
+                                                          } else {
+                                                            bgColor = appBackGroundColor;
+                                                          }
+                                                        } else {
+                                                          bgColor = Colors.transparent;
+                                                        }
+                                                        spans.add(WidgetSpan(
+                                                          child: Tooltip(
+                                                            message: wordScore != null ? 'Score: ${wordScore.toInt()}' : 'New/Edited Word',
+                                                            decoration: BoxDecoration(
+                                                              color: appDashBoardCardColor,
+                                                              borderRadius: BorderRadius.circular(4),
+                                                            ),
+                                                            textStyle: TextStyle(color: appBackGroundColor),
+                                                            waitDuration: Duration(milliseconds: 500),
+                                                            showDuration: Duration(seconds: 2),
+                                                            child: Text(
+                                                              changedWords[j],
+                                                              style: TextStyle(
+                                                                fontSize: 16,
+                                                                color: appTextColor,
+                                                                backgroundColor: changedWords[j].trim().isEmpty ? Colors.transparent : bgColor,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ));
+
+                                                        i++;
+                                                        j++;
+                                                      } else {
+                                                        final word = changedWords[j];
+                                                        // Add only non-empty and not in original text
+                                                        log("-----------word------------------${word}");
+                                                        if (word.trim().isNotEmpty && !originalWords.contains(word)) {
+                                                          if (!controller.addedWords.contains(word)) {
+                                                            controller.addedWords.add(word);
+                                                          }
+                                                        }
+
+                                                        log("------------edited word ------------------${controller.addedWords}");
+                                                        // Inserted or edited word
                                                         spans.add(TextSpan(
-                                                          text: word,
+                                                          text: changedWords[j],
                                                           style: TextStyle(
                                                             fontSize: 16,
                                                             color: appTextColor,
-                                                            backgroundColor: word.trim().isEmpty ? Colors.transparent : Colors.blueAccent,
+                                                            backgroundColor: changedWords[j].trim().isEmpty ? Colors.transparent : appBackGroundColor,
                                                           ),
                                                         ));
+                                                        j++;
                                                       }
                                                     }
 
@@ -1794,7 +1793,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                                     );
                                                   }
 
-                                                  // Fallback if no sentenceScore
+                                                  // Fallback if no scoredTexts
                                                   if (scoredTexts.isEmpty) {
                                                     return Center(child: Text("No sentences available"));
                                                   }
@@ -1821,7 +1820,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                                       return Tooltip(
                                                         message: 'Score: $score',
                                                         decoration: BoxDecoration(
-                                                          color:   appDashBoardCardColor,
+                                                          color: appDashBoardCardColor,
                                                           borderRadius: BorderRadius.circular(4),
                                                         ),
                                                         textStyle: TextStyle(color: appBackGroundColor),
@@ -1839,6 +1838,13 @@ class MetaPhraseScreen extends StatelessWidget {
                                                     }).toList(),
                                                   );
                                                 }
+
+// Tokenize function (outside or top of widget)
+                                                List<String> tokenizeWords(String text) {
+                                                  final wordRegex = RegExp(r'(\s+|\S+)'); // match spaces and non-spaces
+                                                  return wordRegex.allMatches(text).map((e) => e.group(0)!).toList();
+                                                }
+
 
                                                 ///
                                                 final displayText = controller.isReverse.value
@@ -1884,232 +1890,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                                 );
                                               })
 
-                                              // Obx(() {
-                                              //   if( controller.selectedMode.value != "Edit"){
-                                              //     controller.isScoreHighlightMode.value = false;
-                                              //   }else{
-                                              //     controller.isScoreHighlightMode.value = false;
-                                              //   }
-                                              //
-                                              //   final isScoreHighlight = controller.isScoreHighlightMode.value;
-                                              //   final original = controller.selectedTranslationReport.value?.translatedFile ?? '';
-                                              //   final changed = controller.changedData.value.trim();
-                                              //   final isEditing = controller.isEditing.value;
-                                              //   final scoredSentences = controller.selectedTranslationReport.value?.sentenceScore ?? [];
-                                              //
-                                              //
-                                              //   /// === [1] EDIT MODE === ///
-                                              //   if (isEditing) {
-                                              //     return TextField(
-                                              //       controller: controller.translatedTextControllerCopy,
-                                              //       autofocus: true,
-                                              //       maxLines: null,
-                                              //       style: const TextStyle(fontSize: 16),
-                                              //       decoration: const InputDecoration.collapsed(hintText: ''),
-                                              //       onEditingComplete: () {
-                                              //         controller.exitEditMode();
-                                              //         FocusScope.of(Get.context!).unfocus();
-                                              //       },
-                                              //       onSubmitted: (_) {
-                                              //         controller.exitEditMode();
-                                              //         FocusScope.of(Get.context!).unfocus();
-                                              //       },
-                                              //       onChanged: (val) {
-                                              //         controller.changedData.value = val;
-                                              //       },
-                                              //     );
-                                              //   }
-                                              //
-                                              //   // /// === [2] SCORE HIGHLIGHT MODE === ///
-                                              //   if (isScoreHighlight ) {
-                                              //     final originalWords = original.split(RegExp(r'\s+'));
-                                              //     final changedWords = changed.isNotEmpty ? changed.split(RegExp(r'\s+')) : originalWords;
-                                              //
-                                              //     return Wrap(
-                                              //       spacing: 4,
-                                              //       runSpacing: 4,
-                                              //       children: changedWords.map((word) {
-                                              //         final isAdded = !originalWords.contains(word);
-                                              //
-                                              //         Color color;
-                                              //
-                                              //         if (isAdded) {
-                                              //           color = const Color(0xFF4682B4); // Blue
-                                              //         } else {
-                                              //           // Match word to sentence for score
-                                              //           int score = 0;
-                                              //           for (var s in scoredSentences) {
-                                              //             if (s.sentence.contains(word)) {
-                                              //               score = s.score;
-                                              //               break;
-                                              //             }
-                                              //           }
-                                              //
-                                              //           if (score <= 39) {
-                                              //             color = appScore0To39Color;
-                                              //           } else if (score <= 64) {
-                                              //             color = appScore40To64Color;
-                                              //           } else {
-                                              //             color = appScore65To100Color;
-                                              //           }
-                                              //         }
-                                              //
-                                              //         return Container(
-                                              //           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                              //           color: color,
-                                              //           child: Text(
-                                              //             word,
-                                              //             style: const TextStyle(fontSize: 16, color: Colors.black),
-                                              //           ),
-                                              //         );
-                                              //       }).toList(),
-                                              //     );
-                                              //   }
-                                              //
-                                              //
-                                              //   // if (isScoreHighlight) {
-                                              //   //   final scoredSentences = controller.selectedTranslationReport.value?.sentenceScore ?? [];
-                                              //   //   final changedText = controller.changedData.value;
-                                              //   //   final changedSentences = changedText.split(RegExp(r'(?<=[.!?])\\s+'));
-                                              //   //
-                                              //   //   return Padding(
-                                              //   //     padding: const EdgeInsets.all(8),
-                                              //   //     child: Wrap(
-                                              //   //       children: List.generate(scoredSentences.length, (index) {
-                                              //   //         final original = scoredSentences[index].sentence.trim();
-                                              //   //         final score = scoredSentences[index].score;
-                                              //   //         final changed = (index < changedSentences.length)
-                                              //   //             ? changedSentences[index].trim()
-                                              //   //             : original;
-                                              //   //
-                                              //   //         // Background color based on score
-                                              //   //         Color bgColor;
-                                              //   //         if (score <= 39) {
-                                              //   //           bgColor = appScore0To39Color;
-                                              //   //         } else if (score <= 64) {
-                                              //   //           bgColor = appScore40To64Color;
-                                              //   //         } else {
-                                              //   //           bgColor = appScore65To100Color;
-                                              //   //         }
-                                              //   //
-                                              //   //         final originalWords = original.split(RegExp(r'\\s+')).toSet();
-                                              //   //         final changedWords = changed.split(RegExp(r'\\s+'));
-                                              //   //
-                                              //   //         return Container(
-                                              //   //           margin: const EdgeInsets.only(right: 4, bottom: 6),
-                                              //   //           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                                              //   //           decoration: BoxDecoration(
-                                              //   //             color: bgColor,
-                                              //   //             borderRadius: BorderRadius.circular(4),
-                                              //   //           ),
-                                              //   //           child: RichText(
-                                              //   //             text: TextSpan(
-                                              //   //               children: changedWords.map((word) {
-                                              //   //                 final isAdded = !originalWords.contains(word);
-                                              //   //                 return TextSpan(
-                                              //   //                   text: "$word ",
-                                              //   //                   style: TextStyle(
-                                              //   //                     fontSize: 15,
-                                              //   //                     color: Colors.black,
-                                              //   //                     backgroundColor: isAdded ? const Color(0xFF4682B4) : Colors.transparent,
-                                              //   //                   ),
-                                              //   //                 );
-                                              //   //               }).toList(),
-                                              //   //             ),
-                                              //   //           ),
-                                              //   //         );
-                                              //   //       }),
-                                              //   //     ),
-                                              //   //   );
-                                              //   // }
-                                              //
-                                              //   //
-                                              //   //
-                                              //   // /// === [2] SCORE HIGHLIGHT MODE === ///
-                                              //   // if (isScoreHighlight) {
-                                              //   //   final scoredSentences = controller.selectedTranslationReport.value?.sentenceScore ?? [];
-                                              //   //
-                                              //   //   return Wrap(
-                                              //   //     spacing: 6,
-                                              //   //     runSpacing: 6,
-                                              //   //     children: scoredSentences.map((sentenceScore) {
-                                              //   //       final sentence = sentenceScore.sentence.trim();
-                                              //   //       final score = sentenceScore.score;
-                                              //   //
-                                              //   //       Color bgColor;
-                                              //   //       if (score <= 39) {
-                                              //   //         bgColor = appScore0To39Color;
-                                              //   //       } else if (score <= 64) {
-                                              //   //         bgColor = appScore40To64Color;
-                                              //   //       } else {
-                                              //   //         bgColor = appScore65To100Color;
-                                              //   //       }
-                                              //   //
-                                              //   //       return GestureDetector(
-                                              //   //         onTapDown: (TapDownDetails details) {
-                                              //   //           final tapPosition = details.globalPosition;
-                                              //   //
-                                              //   //           showMenu(
-                                              //   //             context: Get.context!,
-                                              //   //             position: RelativeRect.fromLTRB(
-                                              //   //               tapPosition.dx,
-                                              //   //               tapPosition.dy,
-                                              //   //               tapPosition.dx + 1,
-                                              //   //               tapPosition.dy + 1,
-                                              //   //             ),
-                                              //   //             items: [
-                                              //   //               PopupMenuItem(
-                                              //   //                 enabled: false,
-                                              //   //                 padding: const EdgeInsets.only(left: 8,right: 8),
-                                              //   //                 child: Container(
-                                              //   //                   color: appDashBoardCardColor,
-                                              //   //                   // decoration: BoxDecoration(
-                                              //   //                   //   color: appDashBoardCardColor,
-                                              //   //                   //   borderRadius: BorderRadius.circular(6),
-                                              //   //                   // ),
-                                              //   //                   // padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                              //   //                   padding: const EdgeInsets.only(left: 8,right: 8),
-                                              //   //                   child: Text('Score: $score', style: const TextStyle(fontSize: 14,color: appBackGroundColor)),
-                                              //   //                 ),
-                                              //   //               ),
-                                              //   //             ],
-                                              //   //           );
-                                              //   //         },
-                                              //   //         child: Container(
-                                              //   //           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                                              //   //           decoration: BoxDecoration(
-                                              //   //             color: bgColor,
-                                              //   //             borderRadius: BorderRadius.circular(4),
-                                              //   //           ),
-                                              //   //           child: Text(
-                                              //   //             sentence,
-                                              //   //             style: const TextStyle(fontSize: 15, color: Colors.black),
-                                              //   //           ),
-                                              //   //         ),
-                                              //   //       );
-                                              //   //     }).toList(),
-                                              //   //   );
-                                              //   //
-                                              //   // }
-                                              //
-                                              //
-                                              //
-                                              //
-                                              //   /// === [3] DEFAULT VIEW (Tap to Edit) === ///
-                                              //   return GestureDetector(
-                                              //     onTap: () {
-                                              //         controller.translatedTextControllerCopy.text =
-                                              //         controller.changedData.value.isNotEmpty ? controller.changedData.value : original;
-                                              //         controller.enterEditMode();
-                                              //     },
-                                              //     child: Obx(
-                                              //       () => Text(
-                                              //         controller.selectedMode.toString() == 'Edit' ? controller.changedData.value.isNotEmpty ? controller.changedData.value : original :original,
-                                              //         style: const TextStyle(fontSize: 16),
-                                              //       ),
-                                              //     ),
-                                              //   );
-                                              // })
+
                                             ],
                                           ),
                                         ),
@@ -3329,4 +3110,107 @@ Future<void> generateAndDownloadCertificate(String firstName, String email, Stri
   } catch (e) {
     print('Error generating certificate: $e');
   }
+}
+void showTranslatedMemoryDialog(BuildContext context, List<String> editedWords, Color appBackGroundColor) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text("Translated Memory"),
+        content: SizedBox(
+          width: 500,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header with border
+              Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: translatedTitle,
+                        border: Border.all(color: Colors.grey),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Text(
+                        "Translation Edits",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 2),
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: translatedTitle,
+                        border: Border.all(color: Colors.grey),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Text(
+                        "Source Phrase",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+
+              // Data rows
+              ...editedWords.map((word) {
+                final sourceController = TextEditingController();
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 1,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: translatedEdit,
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                          child: Text(word),
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      Expanded(
+                        flex: 1,
+                        child: TextField(
+                          controller: sourceController,
+                          decoration: InputDecoration(
+                            hintText: "Enter Value",
+                            filled: true,
+                            fillColor: translatedMemory,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                          ),
+                        ),
+
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ],
+          ),
+        ),
+        actions: [
+          AppButton(
+            onTap: () => Get.back(),
+            child: Text('Close', style: TextStyle(color: appWhiteColor)),
+            color: appBackGroundColor,
+          ),
+        ],
+      );
+    },
+  );
 }

@@ -16,6 +16,9 @@ class AppColors {
 
 /// APP COLOR
 const Color appBackGroundColor = Color(0xFF4682b4);
+const Color translatedMemory = Color(0xFFdbeafe);
+const Color translatedEdit = Color(0xFFf3f4f6);
+const Color translatedTitle = Color(0xFFd1d5db);
 const Color appButtonColor = Color(0xFF0e6a90);
 
 const Color appDashBoardCardColor = Color(0xFFEAF1FB);

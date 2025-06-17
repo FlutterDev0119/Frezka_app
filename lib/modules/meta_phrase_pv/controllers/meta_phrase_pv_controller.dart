@@ -86,6 +86,7 @@ class MetaPhraseController extends BaseController {
   RxBool isReturnSelected = false.obs;
   RxBool isHideReturnCard = false.obs;
   RxString changedData = ''.obs;
+  RxString translatedText = ''.obs;
   String Fullname = '';
   String id = '';
   var currentIndexGloble = 0.obs;
@@ -94,6 +95,8 @@ class MetaPhraseController extends BaseController {
   var isCredentialsDialogShown = false.obs;
   var sameindex3 = false.obs;
   var isIndex3Select = false.obs;
+  List<String> addedWords = [];
+
 
   @override
   void onInit() {
@@ -112,6 +115,7 @@ class MetaPhraseController extends BaseController {
     isEditing.value = false;
     isShowDowanlaodButton.value = false;
     isIndex3Select.value = false;
+    addedWords.clear();
 
     String? userJson = getStringAsync(AppSharedPreferenceKeys.userModel);
 
@@ -209,7 +213,8 @@ class MetaPhraseController extends BaseController {
 
       if (result != null && result.isNotEmpty) {
         var fileData = result.first;
-
+        translatedText.value =  result.first.translatedFile.toString();
+        log("fileData--------------------------${result.first.translatedFile.toString()}");
         selectedTranslationReport.value = fileData;
       } else {
         errorMessage.value = 'No data found for this file.';
