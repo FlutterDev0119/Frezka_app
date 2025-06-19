@@ -1724,8 +1724,6 @@ class MetaPhraseScreen extends StatelessWidget {
                                                             break;
                                                           }
                                                         }
-
-
                                                         Color bgColor;
                                                         if (wordScore != null) {
                                                           if (wordScore <= 39) {
@@ -3111,7 +3109,111 @@ Future<void> generateAndDownloadCertificate(String firstName, String email, Stri
     print('Error generating certificate: $e');
   }
 }
-void showTranslatedMemoryDialog(BuildContext context, List<String> editedWords, Color appBackGroundColor) {
+// void showTranslatedMemoryDialog(BuildContext context, List<String> editedWords, Color appBackGroundColor) {
+//   showDialog(
+//     context: context,
+//     builder: (context) {
+//       return AlertDialog(
+//         title: const Text("Translated Memory"),
+//         content: SizedBox(
+//           width: 500,
+//           child: Column(
+//             mainAxisSize: MainAxisSize.min,
+//             children: [
+//               // Header with border
+//               Row(
+//                 children: [
+//                   Expanded(
+//                     flex: 1,
+//                     child: Container(
+//                       padding: const EdgeInsets.symmetric(vertical: 8),
+//                       decoration: BoxDecoration(
+//                         color: translatedTitle,
+//                         border: Border.all(color: Colors.grey),
+//                       ),
+//                       alignment: Alignment.center,
+//                       child: const Text(
+//                         "Translation Edits",
+//                         style: TextStyle(fontWeight: FontWeight.bold),
+//                       ),
+//                     ),
+//                   ),
+//                   const SizedBox(width: 2),
+//                   Expanded(
+//                     flex: 1,
+//                     child: Container(
+//                       padding: const EdgeInsets.symmetric(vertical: 8),
+//                       decoration: BoxDecoration(
+//                         color: translatedTitle,
+//                         border: Border.all(color: Colors.grey),
+//                       ),
+//                       alignment: Alignment.center,
+//                       child: const Text(
+//                         "Source Phrase",
+//                         style: TextStyle(fontWeight: FontWeight.bold),
+//                       ),
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//               const SizedBox(height: 6),
+//
+//               // Data rows
+//               ...editedWords.map((word) {
+//                 final sourceController = TextEditingController();
+//                 return Padding(
+//                   padding: const EdgeInsets.symmetric(vertical: 4),
+//                   child: Row(
+//                     children: [
+//                       Expanded(
+//                         flex: 1,
+//                         child: Container(
+//                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+//                           decoration: BoxDecoration(
+//                             color: translatedEdit,
+//                             borderRadius: BorderRadius.circular(4),
+//                             border: Border.all(color: Colors.grey.shade300),
+//                           ),
+//                           child: Text(word),
+//                         ),
+//                       ),
+//                       const SizedBox(width: 2),
+//                       Expanded(
+//                         flex: 1,
+//                         child: TextField(
+//                           controller: sourceController,
+//                           decoration: InputDecoration(
+//                             hintText: "Enter Value",
+//                             filled: true,
+//                             fillColor: translatedMemory,
+//                             contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+//                             border: InputBorder.none,
+//                             enabledBorder: InputBorder.none,
+//                             focusedBorder: InputBorder.none,
+//                           ),
+//                         ),
+//
+//                       ),
+//                     ],
+//                   ),
+//                 );
+//               }).toList(),
+//             ],
+//           ),
+//         ),
+//         actions: [
+//           AppButton(
+//             onTap: () => Get.back(),
+//             child: Text('Close', style: TextStyle(color: appWhiteColor)),
+//             color: appBackGroundColor,
+//           ),
+//         ],
+//       );
+//     },
+//   );
+// }
+void showTranslatedMemoryDialog(
+    BuildContext context, List<String> editedWords, Color appBackGroundColor) {
   showDialog(
     context: context,
     builder: (context) {
@@ -3122,11 +3224,10 @@ void showTranslatedMemoryDialog(BuildContext context, List<String> editedWords, 
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header with border
+              // Header
               Row(
                 children: [
                   Expanded(
-                    flex: 1,
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
@@ -3142,7 +3243,6 @@ void showTranslatedMemoryDialog(BuildContext context, List<String> editedWords, 
                   ),
                   const SizedBox(width: 2),
                   Expanded(
-                    flex: 1,
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
@@ -3160,46 +3260,51 @@ void showTranslatedMemoryDialog(BuildContext context, List<String> editedWords, 
               ),
               const SizedBox(height: 6),
 
-              // Data rows
-              ...editedWords.map((word) {
-                final sourceController = TextEditingController();
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: translatedEdit,
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: Colors.grey.shade300),
+              // Scrollable list of edits
+              SizedBox(
+                height: 300, // Set max height for scroll area
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: editedWords.length,
+                  itemBuilder: (context, index) {
+                    final word = editedWords[index];
+                    final sourceController = TextEditingController();
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: translatedEdit,
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(color: Colors.grey.shade300),
+                              ),
+                              child: Text(word),
+                            ),
                           ),
-                          child: Text(word),
-                        ),
-                      ),
-                      const SizedBox(width: 2),
-                      Expanded(
-                        flex: 1,
-                        child: TextField(
-                          controller: sourceController,
-                          decoration: InputDecoration(
-                            hintText: "Enter Value",
-                            filled: true,
-                            fillColor: translatedMemory,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
+                          const SizedBox(width: 2),
+                          Expanded(
+                            child: TextField(
+                              controller: sourceController,
+                              decoration: InputDecoration(
+                                hintText: "Enter Value",
+                                filled: true,
+                                fillColor: translatedMemory,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                              ),
+                            ),
                           ),
-                        ),
-
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              }).toList(),
+                    );
+                  },
+                ),
+              ),
             ],
           ),
         ),
