@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
 import '../../../utils/common/base_controller.dart';
 import 'package:flutter/material.dart';
@@ -70,8 +71,8 @@ class LoginController extends BaseController {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     Map<String, dynamic> request = {
-      ConstantKeys.emailKey: "sandesh.singhal@pvanalytica.com",// emailCont.text.trim(),//"sandesh.singhal@pvanalytica.com",
-      ConstantKeys.passwordKey: "Pvana@123",//passwordCont.text.trim(),//"Pvana@123",
+      ConstantKeys.emailKey:  emailCont.text.trim(),//"sandesh.singhal@pvanalytica.com",
+      ConstantKeys.passwordKey: passwordCont.text.trim(),//"Pvana@123",
     };
     print(request);
     print(request[ConstantKeys.passwordKey]);
@@ -85,8 +86,9 @@ class LoginController extends BaseController {
         Get.offAllNamed(Routes.DASHBOARD);
         await setValue(AppSharedPreferenceKeys.userPassword, request[ConstantKeys.passwordKey]);
         await setValue(AppSharedPreferenceKeys.isUserLoggedIn, true);
-
-        // await setValue(ConstantKeys.passwordKey, "Pvana@123");
+        // Get and store current date and time
+        String currentDateTime = DateFormat('dd/MM/yyyy, HH:mm:ss').format(DateTime.now());
+        await setValue(AppSharedPreferenceKeys.loginDateTime, currentDateTime);
       } else {
         toast("Login failed");
       }

@@ -97,6 +97,7 @@ class MetaPhraseController extends BaseController {
   var isIndex3Select = false.obs;
   List<String> addedWords = [];
 
+  Map<String, String> wordValueMap = {};
 
   @override
   void onInit() {
@@ -116,6 +117,7 @@ class MetaPhraseController extends BaseController {
     isShowDowanlaodButton.value = false;
     isIndex3Select.value = false;
     addedWords.clear();
+    wordValueMap.clear();
 
     String? userJson = getStringAsync(AppSharedPreferenceKeys.userModel);
 

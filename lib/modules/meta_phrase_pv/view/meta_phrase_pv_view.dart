@@ -230,6 +230,8 @@ class MetaPhraseScreen extends StatelessWidget {
                 controller.addedWords.clear();
                 controller.translatedText.value ='';
                 controller.changedData.value = '';
+                controller.addedWords.clear();
+                controller.wordValueMap.clear();
                 // controller.selectedTranslationReport.value?.sentenceScore;
 
               },
@@ -432,28 +434,43 @@ class MetaPhraseScreen extends StatelessWidget {
                                                     icon: Icon(Icons.score_outlined),
                                                     onPressed: () {
                                                       // controller.isScoreHighlightMode.toggle();
+                                                      if(!controller.isScoreHighlightMode.value) {
+                                                        log("-----------------------added words clear ------------------");
+                                                        controller.addedWords.clear();
+                                                      }
                                                       controller.isScoreHighlightMode.value = !controller.isScoreHighlightMode.value;
                                                       controller.selectedTranslationReport.value = controller.selectedTranslationReport.value;
+                                                      log("-----------------------10-----${controller.addedWords}----------------");
                                                     },
                                                   )
                                                 : SizedBox(),
-                                            (controller.selectedMode.value == "Edit" && controller.isReverse.value == false) ||
-                                                    controller.selectedMode.value == "Certify"
+                                            (controller.selectedMode.value == "Edit" && controller.isReverse.value == false)
                                                 ? IconButton(
                                                     iconSize: 20,
                                                     visualDensity: VisualDensity.compact,
                                                     padding: EdgeInsets.zero,
                                                     icon: Icon(Icons.screenshot_monitor_sharp),
-                                                    onPressed: () { showTranslatedMemoryDialog(context, controller.addedWords, appBackGroundColor);},
+                                                    onPressed: () async {
+                                                      await showTranslatedMemoryDialog(
+                                                          context, controller.addedWords, appBackGroundColor, false, controller.wordValueMap,controller);
+                                                     log("----------------controller.addedWords.length-------${controller.addedWords.length}-----------------");
+                                                      if (controller.addedWords.length != 0) {
+                                                        controller.wordValueMap.forEach((key, value) {
+                                                          setValue(key, value);
+                                                          print("Saved Key: $key Value: $value");
+                                                        });
+                                                      }
+                                              },
                                                   )
                                                 : SizedBox(),
-                                            (controller.selectedMode.value == "Peer Review")
+                                            (controller.selectedMode.value == "Certify" || controller.selectedMode.value == "Peer Review")
                                                 ? IconButton(
                                                     iconSize: 20,
                                                     visualDensity: VisualDensity.compact,
                                                     padding: EdgeInsets.zero,
                                                     icon: Icon(Icons.laptop_windows_rounded),
-                                                    onPressed: () {showTranslatedMemoryDialog(context, controller.addedWords, appBackGroundColor);},
+                                                    onPressed: () async {await showTranslatedMemoryDialog(context, controller.addedWords, appBackGroundColor,true,controller.wordValueMap,controller);
+                                                      },
                                                   )
                                                 : SizedBox(),
                                             (controller.selectedMode.value == "Review" ||
@@ -603,8 +620,7 @@ class MetaPhraseScreen extends StatelessWidget {
                                                 final isScoreHighlight = controller.isScoreHighlightMode.value;
                                                 log("--------------changedData--------------${controller.changedData.value}");
 
-                                                ///test
-                                                if (isScoreHighlight) {
+                                                  if (isScoreHighlight) {
                                                   final originalText = controller.translatedText;
                                                   final changedText = controller.changedData.value;
                                                   final scoredTexts = controller.selectedTranslationReport.value?.sentenceScore ?? [];
@@ -614,41 +630,30 @@ class MetaPhraseScreen extends StatelessWidget {
 
                                                   if (changedText.isNotEmpty && originalText.isNotEmpty && scoredTexts.isNotEmpty) {
                                                     List<InlineSpan> spans = [];
-                                                    List<String> tokenizeWords(String text) {
-                                                      final wordRegex = RegExp(r'(\s+|\S+)'); // captures words + spaces
-                                                      return wordRegex.allMatches(text).map((e) => e.group(0)!).toList();
-                                                    }
-                                                    // Tokenize both original and changed text
-                                                    List<String> originalWords = tokenizeWords(originalText.value);
-                                                    List<String> changedWords = tokenizeWords(changedText);
 
-// Build word-to-score map from sentence scores
-                                                    final Map<String, double> wordScoreMap = {};
-                                                    for (var s in scoredTexts) {
-                                                      final words = tokenizeWords(s.sentence.trim());
-                                                      for (var word in words) {
-                                                        final w = word.trim();
-                                                        if (w.isNotEmpty) {
-                                                          wordScoreMap[w] = s.score.toDouble();
-                                                        }
-                                                      }
-                                                    }
+                                                    final originalWords = originalText.value.split(RegExp(r'\s+'));
+                                                    final changedWords = changedText.split(RegExp(r'\s+'));
 
+                                                    int originalIndex = 0;
 
-                                                    int i = 0, j = 0;
-                                                    while (j < changedWords.length) {
-                                                      if (i < originalWords.length && originalWords[i] == changedWords[j]) {
-                                                        // Find the score this word might belong to
+                                                    for (int j = 0; j < changedWords.length; j++) {
+                                                      final changedWord = changedWords[j];
+                                                      final cleanedChanged = changedWord.replaceAll(RegExp(r'[.,]'), '').trim();
+
+                                                      if (originalIndex < originalWords.length &&
+                                                          cleanedChanged ==
+                                                              originalWords[originalIndex]
+                                                                  .replaceAll(RegExp(r'[.,]'), '')
+                                                                  .trim()) {
+                                                        // Matched word: get score
                                                         double? wordScore;
-                                                        final Map<String, double> scoreMap = {
-                                                          for (var s in scoredTexts) s.sentence.trim(): s.score.toDouble(),
-                                                        };
-                                                        for (var entry in scoreMap.entries) {
-                                                          if (entry.key.contains(originalWords[i].trim())) {
-                                                            wordScore = entry.value;
+                                                        for (var s in scoredTexts) {
+                                                          if (s.sentence.contains(cleanedChanged)) {
+                                                            wordScore = s.score.toDouble();
                                                             break;
                                                           }
                                                         }
+
                                                         Color bgColor;
                                                         if (wordScore != null) {
                                                           if (wordScore <= 39) {
@@ -663,9 +668,12 @@ class MetaPhraseScreen extends StatelessWidget {
                                                         } else {
                                                           bgColor = Colors.transparent;
                                                         }
+
                                                         spans.add(WidgetSpan(
                                                           child: Tooltip(
-                                                            message: wordScore != null ? 'Score: ${wordScore.toInt()}' : 'New/Edited Word',
+                                                            message: wordScore != null
+                                                                ? 'Score: ${wordScore.toInt()}'
+                                                                : 'New/Edited Word',
                                                             decoration: BoxDecoration(
                                                               color: appDashBoardCardColor,
                                                               borderRadius: BorderRadius.circular(4),
@@ -674,40 +682,143 @@ class MetaPhraseScreen extends StatelessWidget {
                                                             waitDuration: Duration(milliseconds: 500),
                                                             showDuration: Duration(seconds: 2),
                                                             child: Text(
-                                                              changedWords[j],
+                                                              "$changedWord ",
                                                               style: TextStyle(
                                                                 fontSize: 16,
                                                                 color: appTextColor,
-                                                                backgroundColor: changedWords[j].trim().isEmpty ? Colors.transparent : bgColor,
+                                                                backgroundColor:
+                                                                changedWord.trim().isEmpty ? Colors.transparent : bgColor,
                                                               ),
                                                             ),
                                                           ),
                                                         ));
 
-                                                        i++;
-                                                        j++;
+                                                        originalIndex++;
                                                       } else {
-                                                        final word = changedWords[j];
-                                                        // Add only non-empty and not in original text
-                                                        log("-----------word------------------${word}");
-                                                        if (word.trim().isNotEmpty && !originalWords.contains(word)) {
-                                                          if (!controller.addedWords.contains(word)) {
-                                                            controller.addedWords.add(word);
+                                                        // Lookahead to re-sync
+                                                        bool foundAhead = false;
+                                                        for (int k = 1; k <= 2 && originalIndex + k < originalWords.length; k++) {
+                                                          final aheadWord = originalWords[originalIndex + k].replaceAll(RegExp(r'[.,]'), '').trim();
+                                                          if (cleanedChanged == aheadWord) {
+                                                            originalIndex += k + 1;
+
+                                                            double? wordScore;
+                                                            for (var s in scoredTexts) {
+                                                              final sentenceWords = s.sentence
+                                                                  .split(RegExp(r'\s+'))
+                                                                  .map((w) => w.replaceAll(RegExp(r'[^\w]'), '').toLowerCase());
+
+                                                              if (sentenceWords.contains(cleanedChanged.toLowerCase())) {
+                                                                wordScore = s.score.toDouble();
+                                                                break;
+                                                              }
+                                                            }
+
+                                                            Color bgColor;
+                                                            if (wordScore != null) {
+                                                              if (wordScore <= 39) {
+                                                                bgColor = appScore0To39Color;
+                                                              } else if (wordScore <= 64) {
+                                                                bgColor = appScore40To64Color;
+                                                              } else if (wordScore <= 100) {
+                                                                bgColor = appScore65To100Color;
+                                                              } else {
+                                                                bgColor = appBackGroundColor;
+                                                              }
+                                                            } else {
+                                                              bgColor = Colors.transparent;
+                                                            }
+
+                                                            spans.add(WidgetSpan(
+                                                              child: Tooltip(
+                                                                message: wordScore != null ? 'Score: ${wordScore.toInt()}' : 'New/Edited Word',
+                                                                decoration: BoxDecoration(
+                                                                  color: appDashBoardCardColor,
+                                                                  borderRadius: BorderRadius.circular(4),
+                                                                ),
+                                                                textStyle: TextStyle(color: appBackGroundColor),
+                                                                waitDuration: Duration(milliseconds: 500),
+                                                                showDuration: Duration(seconds: 2),
+                                                                child: Text(
+                                                                  "$changedWord ",
+                                                                  style: TextStyle(
+                                                                    fontSize: 16,
+                                                                    color: appTextColor,
+                                                                    backgroundColor: bgColor,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ));
+
+                                                            foundAhead = true;
+                                                            break;
                                                           }
                                                         }
 
-                                                        log("------------edited word ------------------${controller.addedWords}");
-                                                        // Inserted or edited word
-                                                        spans.add(TextSpan(
-                                                          text: changedWords[j],
-                                                          style: TextStyle(
-                                                            fontSize: 16,
-                                                            color: appTextColor,
-                                                            backgroundColor: changedWords[j].trim().isEmpty ? Colors.transparent : appBackGroundColor,
-                                                          ),
-                                                        ));
-                                                        j++;
+                                                        // Not found: it's a new word
+                                                        if (!foundAhead) {
+                                                          log("-----1----$changedWord");
+                                                          log("------1-----${controller.addedWords.toList()}");
+                                                          if (changedWord.trim().isNotEmpty && !controller.addedWords.contains(changedWord)) {
+                                                            controller.addedWords.add(changedWord);
+                                                            log("-----------------------1-----${controller.addedWords}----------------");
+                                                          }
+
+                                                          spans.add(TextSpan(
+                                                            text: "$changedWord ",
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                              color: appTextColor,
+                                                              backgroundColor: appBackGroundColor,
+                                                            ),
+                                                          ));
+                                                        }
                                                       }
+                                                    }
+
+                                                    return Padding(
+                                                      padding: const EdgeInsets.all(8.0),
+                                                      child: RichText(text: TextSpan(children: spans)),
+                                                    );
+                                                  }else{
+                                                    List<InlineSpan> spans = [];
+
+                                                    for (var s in scoredTexts) {
+                                                      final sentence = s.sentence;
+                                                      final score = s.score.toDouble();
+
+                                                      // Determine background color based on score
+                                                      Color bgColor;
+                                                      if (score <= 39) {
+                                                        bgColor = appScore0To39Color;
+                                                      } else if (score <= 64) {
+                                                        bgColor = appScore40To64Color;
+                                                      } else if (score <= 100) {
+                                                        bgColor = appScore65To100Color;
+                                                      } else {
+                                                        bgColor = appBackGroundColor;
+                                                      }
+
+                                                      spans.add(WidgetSpan(
+                                                        child: Tooltip(
+                                                          message: 'Score: ${score.toInt()}',
+                                                          decoration: BoxDecoration(
+                                                            color: appDashBoardCardColor,
+                                                            borderRadius: BorderRadius.circular(4),
+                                                          ),
+                                                          textStyle: TextStyle(color: appBackGroundColor),
+                                                          waitDuration: Duration(milliseconds: 500),
+                                                          showDuration: Duration(seconds: 2),
+                                                          child: Text(
+                                                            "$sentence ",
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                              color: appTextColor,
+                                                              backgroundColor: bgColor,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ));
                                                     }
 
                                                     return Padding(
@@ -716,58 +827,52 @@ class MetaPhraseScreen extends StatelessWidget {
                                                     );
                                                   }
 
-                                                  // Fallback if no scoredTexts
+                                                  // fallback if no data
                                                   if (scoredTexts.isEmpty) {
                                                     return Center(child: Text("No sentences available"));
                                                   }
 
-                                                  return Wrap(
-                                                    spacing: 4,
-                                                    runSpacing: 4,
-                                                    alignment: WrapAlignment.start,
-                                                    children: scoredTexts.map<Widget>((sentenceScore) {
-                                                      final sentence = sentenceScore.sentence;
-                                                      final score = sentenceScore.score;
-
-                                                      Color color;
-                                                      if (score >= 0 && score <= 39) {
-                                                        color = appScore0To39Color;
-                                                      } else if (score >= 40 && score <= 64) {
-                                                        color = appScore40To64Color;
-                                                      } else if (score >= 65 && score <= 100) {
-                                                        color = appScore65To100Color;
-                                                      } else {
-                                                        color = appBackGroundColor;
-                                                      }
-
-                                                      return Tooltip(
-                                                        message: 'Score: $score',
-                                                        decoration: BoxDecoration(
-                                                          color: appDashBoardCardColor,
-                                                          borderRadius: BorderRadius.circular(4),
-                                                        ),
-                                                        textStyle: TextStyle(color: appBackGroundColor),
-                                                        waitDuration: Duration(milliseconds: 500),
-                                                        showDuration: Duration(seconds: 2),
-                                                        child: Container(
-                                                          padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                                          color: color,
-                                                          child: Text(
-                                                            sentence,
-                                                            style: TextStyle(fontSize: 16, color: appTextColor),
-                                                          ),
-                                                        ),
-                                                      );
-                                                    }).toList(),
-                                                  );
+                                                  // fallback display for non-diff view
+                                                  // return Wrap(
+                                                  //   spacing: 4,
+                                                  //   runSpacing: 4,
+                                                  //   alignment: WrapAlignment.start,
+                                                  //   children: scoredTexts.map<Widget>((sentenceScore) {
+                                                  //     final sentence = sentenceScore.sentence;
+                                                  //     final score = sentenceScore.score;
+                                                  //
+                                                  //     Color color;
+                                                  //     if (score >= 0 && score <= 39) {
+                                                  //       color = appScore0To39Color;
+                                                  //     } else if (score >= 40 && score <= 64) {
+                                                  //       color = appScore40To64Color;
+                                                  //     } else if (score >= 65 && score <= 100) {
+                                                  //       color = appScore65To100Color;
+                                                  //     } else {
+                                                  //       color = appBackGroundColor;
+                                                  //     }
+                                                  //
+                                                  //     return Tooltip(
+                                                  //       message: 'Score: $score',
+                                                  //       decoration: BoxDecoration(
+                                                  //         color: appDashBoardCardColor,
+                                                  //         borderRadius: BorderRadius.circular(4),
+                                                  //       ),
+                                                  //       textStyle: TextStyle(color: appBackGroundColor),
+                                                  //       waitDuration: Duration(milliseconds: 500),
+                                                  //       showDuration: Duration(seconds: 2),
+                                                  //       child: Container(
+                                                  //         padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                                  //         color: color,
+                                                  //         child: Text(
+                                                  //           sentence,
+                                                  //           style: TextStyle(fontSize: 16, color: appTextColor),
+                                                  //         ),
+                                                  //       ),
+                                                  //     );
+                                                  //   }).toList(),
+                                                  // );
                                                 }
-
-                                                // Tokenize function (outside or top of widget)
-                                                List<String> tokenizeWords(String text) {
-                                                  final wordRegex = RegExp(r'(\s+|\S+)'); // match spaces and non-spaces
-                                                  return wordRegex.allMatches(text).map((e) => e.group(0)!).toList();
-                                                }
-
 
                                                 ///
                                                 final displayText = controller.isReverse.value
@@ -940,21 +1045,40 @@ class MetaPhraseScreen extends StatelessWidget {
                           log("-------------isshow------------------${controller.isShowDowanlaodButton.value}");
                           log('----------------------${controller.selectedMode.value}------------------------------------');
                           if ('Peer Review' == controller.selectedMode.value) {
-                            controller.selectedMode.value = 'Peer Review';
-                            controller.selected.value = 'Peer Review';
+                            log("--------------in this");
+                            // controller.selectedMode.value = 'Certify';
+                            // controller.selected.value = 'Certify';
+                            // controller.hasShownPeerReviewDialog.value = true;
+                            Future.delayed(Duration.zero, () {
+                              controller.selectedMode.value = 'Peer Review';
+                              controller.selected.value = 'Peer Review';
+                              // Future.delayed(Duration.zero, () {
+                              if ('Peer Review' == controller.selectedMode.value){
+                                showPeerReviewDialog(context);
+                              }
+                              // });
+                            });
+                            // controller.selectedMode.value = 'Peer Review';
+                            // controller.selected.value = 'Peer Review';
                           }
                           if ('Finalize' == controller.selectedMode.value) {
-                            controller.selectedMode.value = 'Finalize';
-                            controller.selected.value = 'Certify';
-                            controller.selected.value == 'Certify';
+
+                            // controller.selectedMode.value = 'Finalize';
+                            // controller.selected.value = 'Certify';
+                            Future.delayed(Duration.zero, () {
+                              controller.selectedMode.value = 'Finalize';
+                              controller.selected.value = 'Certify';
+                              controller.selected.value == 'Certify';
+
+                            });
                           }
                           final selected = controller.selectedMode.value;
                           final certifyOptions = ['Finalize', 'Return', 'Reject'];
-                          if (selected == 'Peer Review' && controller.isEditing.value == true && controller.hasShownPeerReviewDialog.isFalse) {
-                            Future.delayed(Duration.zero, () {
-                              showPeerReviewDialog(context);
-                            });
-                          }
+                          // if (selected == 'Peer Review' && controller.isEditing.value == true && controller.hasShownPeerReviewDialog.isFalse) {
+                          //   // Future.delayed(Duration.zero, () {
+                          //     showPeerReviewDialog(context);
+                          //   // });
+                          // }
                           return !controller.isShowDowanlaodButton.value
                               ? Column(
                                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -1652,8 +1776,8 @@ void showPeerReviewDialog(BuildContext context) {
                     onTap: () {
                       // Confirm action
                       Get.back();
+                      Get.back();
                       log('-----------------confirm------------------');
-
                       // controller.selected.value = "Certify";
                       // 'Finalize' == controller.selectedMode.value
                       controller.selectedMode.value = 'Certify';
@@ -2116,9 +2240,16 @@ Future<void> generateAndDownloadCertificate(String firstName, String email, Stri
 //     },
 //   );
 // }
-void showTranslatedMemoryDialog(
-    BuildContext context, List<String> editedWords, Color appBackGroundColor) {
-  showDialog(
+Future<void> showTranslatedMemoryDialog(
+    BuildContext context,
+    List<String> editedWords,
+    Color appBackGroundColor,
+    bool Readonly,
+    Map<String, String> wordValueMap,
+    controller
+    ) async {
+  log("--------Readonly-------$Readonly");
+  await showDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
@@ -2164,62 +2295,209 @@ void showTranslatedMemoryDialog(
               ),
               const SizedBox(height: 6),
 
-              // Scrollable list of edits
-              SizedBox(
-                height: 300, // Set max height for scroll area
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: editedWords.length,
-                  itemBuilder: (context, index) {
-                    final word = editedWords[index];
-                    final sourceController = TextEditingController();
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: translatedEdit,
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(color: Colors.grey.shade300),
-                              ),
-                              child: Text(word),
+              // List of edits
+              editedWords.isEmpty
+                  ? const Center(child: Text("No Data Available"))
+                  : ListView.builder(
+                shrinkWrap: true,
+                itemCount: editedWords.length,
+                itemBuilder: (context, index) {
+                  final word = editedWords[index];
+                  final sourceController = TextEditingController(
+                      text: wordValueMap[word] ?? "");
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: translatedEdit,
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: Colors.grey.shade300),
+                            ),
+                            child: Text(word),
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        Expanded(
+                          child: TextField(
+                            readOnly: Readonly,
+                            onChanged: (value) {
+                              wordValueMap[word] = value;
+                            },
+                            controller: sourceController,
+                            decoration: InputDecoration(
+                              hintText: "Enter Value",
+                              filled: true,
+                              fillColor: translatedMemory,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
                             ),
                           ),
-                          const SizedBox(width: 2),
-                          Expanded(
-                            child: TextField(
-                              controller: sourceController,
-                              decoration: InputDecoration(
-                                hintText: "Enter Value",
-                                filled: true,
-                                fillColor: translatedMemory,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                                border: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ],
           ),
         ),
         actions: [
+          if (!Readonly)
+            AppButton(
+              onTap: () {
+                // Your Push logic
+                Get.back();
+                //showCredentialsDialog(context, controller);
+              },
+              color: editedWords.isEmpty ? AppColors.greyColor : appBackGroundColor,
+              child: Text('Push to TM', style: TextStyle(color: appWhiteColor)),
+            ),
           AppButton(
             onTap: () => Get.back(),
-            child: Text('Close', style: TextStyle(color: appWhiteColor)),
             color: appBackGroundColor,
+            child: Text('Cancel', style: TextStyle(color: appWhiteColor)),
           ),
         ],
       );
     },
   );
 }
+
+// Future<void> showTranslatedMemoryDialog(
+//     BuildContext context, List<String> editedWords, Color appBackGroundColor,bool Readonly,Map<String, String> wordValueMap)a {
+//   log("--------Readonly-------$Readonly");
+//     log("-------------------------outside----------------");
+//   // if (editedWords.length != 0) {
+//   //   wordValueMap.forEach((key, value) {
+//   //     setValue(key, value);
+//   //     print("Saved Key: $key Value: $value");
+//   //   });
+//   // }
+//   // Get.back();
+//   showDialog(
+//     context: context,
+//     builder: (context) {
+//       return AlertDialog(
+//         title: const Text("Translated Memory"),
+//         content: SizedBox(
+//           width: 500,
+//           child: Column(
+//             mainAxisSize: MainAxisSize.min,
+//             children: [
+//               // Header
+//               Row(
+//                 children: [
+//                   Expanded(
+//                     child: Container(
+//                       padding: const EdgeInsets.symmetric(vertical: 8),
+//                       decoration: BoxDecoration(
+//                         color: translatedTitle,
+//                         border: Border.all(color: Colors.grey),
+//                       ),
+//                       alignment: Alignment.center,
+//                       child: const Text(
+//                         "Translation Edits",
+//                         style: TextStyle(fontWeight: FontWeight.bold),
+//                       ),
+//                     ),
+//                   ),
+//                   const SizedBox(width: 2),
+//                   Expanded(
+//                     child: Container(
+//                       padding: const EdgeInsets.symmetric(vertical: 8),
+//                       decoration: BoxDecoration(
+//                         color: translatedTitle,
+//                         border: Border.all(color: Colors.grey),
+//                       ),
+//                       alignment: Alignment.center,
+//                       child: const Text(
+//                         "Source Phrase",
+//                         style: TextStyle(fontWeight: FontWeight.bold),
+//                       ),
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//               const SizedBox(height: 6),
+//
+//               // Scrollable list of edits
+//               editedWords.length == 0 ? Center(child: Text("No Data Available")): SizedBox(
+//                 // height: Get.height * 0.3, // Set max height for scroll area
+//                 child: ListView.builder(
+//                   shrinkWrap: true,
+//                   itemCount: editedWords.length,
+//                   itemBuilder: (context, index) {
+//                     final word = editedWords[index];
+//                     // prefill value if exists
+//                     final sourceController = TextEditingController(
+//                         text: wordValueMap[word] ?? "");
+//                     // final sourceController = TextEditingController();
+//                     return Padding(
+//                       padding: const EdgeInsets.symmetric(vertical: 4),
+//                       child: Row(
+//                         children: [
+//                           Expanded(
+//                             child: Container(
+//                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+//                               decoration: BoxDecoration(
+//                                 color: translatedEdit,
+//                                 borderRadius: BorderRadius.circular(4),
+//                                 border: Border.all(color: Colors.grey.shade300),
+//                               ),
+//                               child: Text(word),
+//                             ),
+//                           ),
+//                           const SizedBox(width: 2),
+//                           Expanded(
+//                             child: TextField(
+//                               readOnly: Readonly,
+//                               onChanged: (value) {
+//                                 wordValueMap[word] = value;
+//                               },
+//                               controller: sourceController,
+//                               decoration: InputDecoration(
+//                                 hintText: "Enter Value",
+//                                 filled: true,
+//                                 fillColor: translatedMemory,
+//                                 contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+//                                 border: InputBorder.none,
+//                                 enabledBorder: InputBorder.none,
+//                                 focusedBorder: InputBorder.none,
+//                               ),
+//                             ),
+//                           ),
+//                         ],
+//                       ),
+//                     );
+//                   },
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//         actions: [
+//           Readonly == true
+//               ? SizedBox()
+//               : AppButton(
+//                   onTap: () {
+//                   },
+//                   color: editedWords.length == 0 ? AppColors.greyColor : appBackGroundColor,
+//                   child: Text('Push to TM', style: TextStyle(color: appWhiteColor)),
+//                 ),
+//           AppButton(
+//             onTap: () => Get.back(),
+//             color: appBackGroundColor,
+//             child: Text('Cancel', style: TextStyle(color: appWhiteColor)),
+//           ),
+//         ],
+//       );
+//     },
+//   );
+// }

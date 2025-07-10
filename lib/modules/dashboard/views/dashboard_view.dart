@@ -184,6 +184,7 @@ class DashboardScreen extends StatelessWidget {
   }
 
   Widget _buildWelcomeCard(BuildContext context) {
+    String? loginDateTime =  getStringAsync(AppSharedPreferenceKeys.loginDateTime);
     return GestureDetector(
       onTap: () {
         showDialog(
@@ -289,12 +290,18 @@ class DashboardScreen extends StatelessWidget {
               ),
               Center(
                 child: Text(
-                  "22/03/2025, 17:26:45",
+                  loginDateTime,// "22/03/2025, 17:26:45",
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  style: Theme.of(context).textTheme.bodyMedium != null
+                      ? Theme.of(context).textTheme.bodyMedium!.copyWith(
+                    fontSize: 14,
+                    color: appTextColor.withOpacity(0.7),
+                  )
+                      : TextStyle(
                     fontSize: 14,
                     color: appTextColor.withOpacity(0.7),
                   ),
+
                 ),
               ),
             ],

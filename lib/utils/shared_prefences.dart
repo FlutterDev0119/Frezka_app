@@ -24,6 +24,7 @@ class AppSharedPreferenceKeys {
   static const String  userPassword = 'User Password';
   static const String userLoginType = 'Login Type';
   static const  String currentUserData = 'Current User';
+  static const  String loginDateTime = 'loginDateTime';
 
 
 
